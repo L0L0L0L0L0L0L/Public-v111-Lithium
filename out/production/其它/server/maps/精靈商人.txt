@@ -1,0 +1,143 @@
+搜索：
+
+
+        CREATE(6),
+        INVITE_TRADE(11),
+        DENY_TRADE(12),
+        VISIT(9),
+        HIRED_MERCHANT_MAINTENANCE(21),
+        CHAT(14),
+        EXIT(18),
+        OPEN(16),
+        SET_ITEMS(0),
+        SET_MESO(1),
+        CONFIRM_TRADE(2),
+        PLAYER_SHOP_ADD_ITEM(40),
+        BUY_ITEM_PLAYER_SHOP(22),
+        ADD_ITEM(23),
+        BUY_ITEM_STORE(24),
+        BUY_ITEM_HIREDMERCHANT(26),
+        REMOVE_ITEM(30),
+        MAINTANCE_OFF(31), //This is misspelled...
+        MAINTANCE_ORGANISE(32),
+        CLOSE_MERCHANT(33), // + 2
+        TAKE_MESOS(35),
+        ADMIN_STORE_NAMECHANGE(37),
+        VIEW_MERCHANT_VISITOR(38),
+        VIEW_MERCHANT_BLACKLIST(39),
+        MERCHANT_BLACKLIST_ADD(40),
+        MERCHANT_BLACKLIST_REMOVE(41),
+
+
+替換：
+
+        CREATE(6),//創建商店或迷你遊戲
+        INVITE_TRADE(11),//交換申請
+        DENY_TRADE(12),//拒絕交換
+        VISIT(9),//訪問商店
+        HIRED_MERCHANT_MAINTENANCE(21),//商店管理
+        CHAT(14),//留言
+        EXIT(18),//離開商店
+        OPEN(16),//開啟商店
+        SET_ITEMS(0),//移动交換的物品
+        SET_MESO(1),//給予交換的金幣
+        CONFIRM_TRADE(2),//確認交換
+        PLAYER_SHOP_ADD_ITEM(42),
+        BUY_ITEM_PLAYER_SHOP(22),
+        ADD_ITEM(23),//添加商品
+        BUY_ITEM_STORE(24),//購買商品成功
+        BUY_ITEM_HIREDMERCHANT(26),
+        REMOVE_ITEM(30),//移除商品
+        MAINTANCE_OFF(31), //商店管理狀態時離開商店
+        MAINTANCE_ORGANISE(32),//物品整理
+        CLOSE_MERCHANT(33), //關閉商店
+        TAKE_MESOS(35),
+        ADMIN_STORE_NAMECHANGE(37),
+        VIEW_MERCHANT_VISITOR(38),//查看訪問者
+        VIEW_MERCHANT_BLACKLIST(39),//打開黑名單
+        MERCHANT_BLACKLIST_ADD(40),//添加黑名單
+        MERCHANT_BLACKLIST_REMOVE(41),//刪除黑名單
+
+
+
+搜索：
+
+                            if (shop == null || shop.getQuantity() <= 0 || shop.getItemId() != slea.readInt() || c.getPlayer().getMapId() != chr.CMap) {
+                                chr.dropMessage(1, "該區域不能使用商店功能。");
+                                return;
+                            }
+
+
+替換：
+
+                            if (shop == null || shop.getQuantity() <= 0 || shop.getItemId() != slea.readInt() || c.getPlayer().getMapId() < 910000001 || c.getPlayer().getMapId() > 910000022) {
+                                chr.dropMessage(1, "該區域不能使用商店功能。");
+                                return;
+                            }
+
+
+搜索：
+
+            case CLOSE_MERCHANT: {
+                final IMaplePlayerShop merchant = chr.getPlayerShop();
+                if (merchant != null && merchant.getShopType() == 1 && merchant.isOwner(chr) && merchant.isAvailable()) {
+                    c.getSession().write(MaplePacketCreator.serverNotice(1, "Please visit Fredrick for your items."));
+                    c.getSession().write(MaplePacketCreator.enableActions());
+                    merchant.removeAllVisitors(-1, -1);
+                    chr.setPlayerShop(null);
+                    merchant.closeShop(true, true);
+                }
+                break;
+            }
+
+替換：
+
+            case CLOSE_MERCHANT: {
+                final IMaplePlayerShop merchant = chr.getPlayerShop();
+                if (merchant != null && merchant.getShopType() == 1 && merchant.isOwner(chr) && merchant.isAvailable()) {
+                    c.getSession().write(PlayerShopPacket.shopErrorMessage(0x14, 0));// 關閉窗口
+                    c.getSession().write(MaplePacketCreator.serverNotice(1, "請去找富蘭德里領取你的裝備和楓幣。"));
+                    c.getSession().write(MaplePacketCreator.enableActions());
+                    merchant.removeAllVisitors(-1, -1);
+                    chr.setPlayerShop(null);
+                    merchant.closeShop(true, true);
+                }
+                break;
+            }
+
+
+
+搜索：
+
+                if (ob instanceof IMaplePlayerShop && ob instanceof HiredMerchant) {
+                    final IMaplePlayerShop ips = (IMaplePlayerShop) ob;
+                    final HiredMerchant merchant = (HiredMerchant) ips;
+                    if (merchant.isOwner(chr) && merchant.isOpen() && merchant.isAvailable()) {
+                        merchant.setOpen(false);
+                        merchant.removeAllVisitors((byte) 16, (byte) 0);
+                        chr.setPlayerShop(ips);
+                        c.getSession().write(PlayerShopPacket.getHiredMerch(chr, merchant, false));
+                    } else {
+                        c.getSession().write(MaplePacketCreator.enableActions());
+                    }
+                }
+                break;
+            }
+
+
+替換：
+
+                if (ob instanceof IMaplePlayerShop && ob instanceof HiredMerchant) {
+                    final IMaplePlayerShop ips = (IMaplePlayerShop) ob;
+                    final HiredMerchant merchant = (HiredMerchant) ips;
+                    if (merchant.isOwner(chr) && merchant.isOpen() && merchant.isAvailable()) {
+                        merchant.setOpen(false);
+                        merchant.removeAllVisitors((byte) 17, (byte) 1);//發送商店主人正在整理物品提示
+                        chr.setPlayerShop(ips);
+                        c.getSession().write(PlayerShopPacket.getHiredMerch(chr, merchant, false));
+                    } else {
+                        c.getSession().write(MaplePacketCreator.enableActions());
+                    }
+                }
+                break;
+            }

@@ -1,0 +1,55 @@
+搜索：
+
+    public void setChalkboard(String text) {
+        this.chalktext = text;
+        if (map != null) {
+            map.broadcastMessage(MTSCSPacket.useChalkboard(getId(), text, false));
+        }
+    }
+
+替換：
+
+
+    public void setChalkboard(String text) {
+        this.chalktext = text;
+        if (map != null) {
+            map.broadcastMessage(MTSCSPacket.useChalkboard(getId(), text));
+        }
+    }
+
+
+
+搜索：
+
+    public static byte[] useChalkboard(final int charid, final String msg, boolean cl) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.CHALKBOARD.getValue());
+
+        mplew.writeInt(charid);
+        if (cl) {
+            mplew.write(0);
+        } else {
+            mplew.write(1);
+            mplew.writeMapleAsciiString(msg);
+        }
+
+        return mplew.getPacket();
+    }
+
+替換：
+
+
+    public static byte[] useChalkboard(final int charid, final String msg) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.CHALKBOARD.getValue());
+
+        mplew.writeInt(charid);
+        if ((msg == null) || (msg.length() < 1)) {
+            mplew.write(0);
+        } else {
+            mplew.write(1);
+            mplew.writeMapleAsciiString(msg);
+        }
+
+        return mplew.getPacket();
+    }

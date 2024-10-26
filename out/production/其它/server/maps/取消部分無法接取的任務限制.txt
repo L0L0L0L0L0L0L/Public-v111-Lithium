@@ -1,0 +1,15 @@
+搜索：
+
+    public final void startQuest(final MapleClient c, final int npc, final int quest) {      
+        if (!MapleQuest.getInstance(quest).canStart(c.getPlayer(), null)) {
+            return;
+        }
+
+
+替換：
+
+
+    public final void startQuest(final MapleClient c, final int npc, final int quest) {      
+        if (!MapleQuest.getInstance(quest).canStart(c.getPlayer(), null) && quest != 1507 && quest != 26000) {//取消聯盟的誕生，黛依雅的G-藥水任務限制
+            return;
+        }

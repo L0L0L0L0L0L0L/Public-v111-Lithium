@@ -1,0 +1,91 @@
+搜索：
+
+    public static final void DenyPartyRequest(final LittleEndianAccessor slea, final MapleClient c) {
+        final int action = slea.readByte();
+        if (action == 0x32 && GameConstants.GMS) { //TODO JUMP
+            final MapleCharacter chr = c.getPlayer().getMap().getCharacterById(slea.readInt());
+            if (chr != null && chr.getParty() == null && c.getPlayer().getParty() != null && c.getPlayer().getParty().getLeader().getId() == c.getPlayer().getId() && c.getPlayer().getParty().getMembers().size() < 6 && c.getPlayer().getParty().getExpeditionId() <= 0 && chr.getQuestNoAdd(MapleQuest.getInstance(GameConstants.PARTY_INVITE)) == null && c.getPlayer().getQuestNoAdd(MapleQuest.getInstance(GameConstants.PARTY_REQUEST)) == null) {
+                chr.setParty(c.getPlayer().getParty());
+                World.Party.updateParty(c.getPlayer().getParty().getId(), PartyOperation.JOIN, new MaplePartyCharacter(chr));
+                chr.receivePartyMemberHP();
+                chr.updatePartyMemberHP();
+            }
+            return;
+        }
+        final int partyid = slea.readInt();
+        if (c.getPlayer().getParty() == null && c.getPlayer().getQuestNoAdd(MapleQuest.getInstance(GameConstants.PARTY_INVITE)) == null) {
+            MapleParty party = World.Party.getParty(partyid);
+            if (party != null) {
+                if (party.getExpeditionId() > 0) {
+                    c.getPlayer().dropMessage(5, "作為探險隊的成員，暫時不能這樣做。");
+                    return;
+                }
+                if (action == (GameConstants.GMS ? 0x1F : 0x1B)) { //accept
+                    if (party.getMembers().size() < 6) {
+                        c.getPlayer().setParty(party);
+                        World.Party.updateParty(partyid, PartyOperation.JOIN, new MaplePartyCharacter(c.getPlayer()));
+                        c.getPlayer().receivePartyMemberHP();
+                        c.getPlayer().updatePartyMemberHP();
+                    } else {
+                        c.getSession().write(PartyPacket.partyStatusMessage(22, null));
+                    }
+                } else if (action != (GameConstants.GMS ? 0x1E : 0x16)) {
+                    final MapleCharacter cfrom = c.getChannelServer().getPlayerStorage().getCharacterById(party.getLeader().getId());
+                    if (cfrom != null) { // %s has denied the party request.
+                        cfrom.getClient().getSession().write(PartyPacket.partyStatusMessage(23, c.getPlayer().getName()));
+                    }
+                }
+            } else {
+                c.getPlayer().dropMessage(5, "已拒絕了組隊的邀請。");
+            }
+        } else {
+            c.getPlayer().dropMessage(5, "不能加入組隊，因為已經有組隊了。");
+        }
+
+    }
+
+
+替換：
+
+    public static final void DenyPartyRequest(final LittleEndianAccessor slea, final MapleClient c) {
+        final int action = slea.readByte();
+        if (action == 0x32 && GameConstants.GMS) { //TODO JUMP
+            final MapleCharacter chr = c.getPlayer().getMap().getCharacterById(slea.readInt());
+            if (chr != null && chr.getParty() == null && c.getPlayer().getParty() != null && c.getPlayer().getParty().getLeader().getId() == c.getPlayer().getId() && c.getPlayer().getParty().getMembers().size() < 6 && c.getPlayer().getParty().getExpeditionId() <= 0 && chr.getQuestNoAdd(MapleQuest.getInstance(GameConstants.PARTY_INVITE)) == null && c.getPlayer().getQuestNoAdd(MapleQuest.getInstance(GameConstants.PARTY_REQUEST)) == null) {
+                chr.setParty(c.getPlayer().getParty());
+                World.Party.updateParty(c.getPlayer().getParty().getId(), PartyOperation.JOIN, new MaplePartyCharacter(chr));
+                chr.receivePartyMemberHP();
+                chr.updatePartyMemberHP();
+            }
+            return;
+        }
+        final int partyid = slea.readInt();
+        if (c.getPlayer().getParty() == null && c.getPlayer().getQuestNoAdd(MapleQuest.getInstance(GameConstants.PARTY_INVITE)) == null) {
+            MapleParty party = World.Party.getParty(partyid);
+            if (party != null) {
+                if (party.getExpeditionId() > 0) {
+                    c.getPlayer().dropMessage(5, "作為探險隊的成員，暫時不能這樣做。");
+                    return;
+                }
+                if (action == (GameConstants.GMS ? 0x1F : 0x1B)) { //accept
+                    if (party.getMembers().size() < 6) {
+                        c.getPlayer().setParty(party);
+                        World.Party.updateParty(partyid, PartyOperation.JOIN, new MaplePartyCharacter(c.getPlayer()));
+                        c.getPlayer().receivePartyMemberHP();
+                        c.getPlayer().updatePartyMemberHP();
+                    } else {
+                        c.getSession().write(PartyPacket.partyStatusMessage(22, null));
+                    }
+                } else if (action != (GameConstants.GMS ? 0x1E : 0x16)) {
+                    final MapleCharacter cfrom = c.getChannelServer().getPlayerStorage().getCharacterById(party.getLeader().getId());
+                    if (cfrom != null) { // %s has denied the party request.
+                        cfrom.getClient().getSession().write(PartyPacket.partyStatusMessage(23, c.getPlayer().getName()));
+                    }
+                } else {
+                    c.getPlayer().dropMessage(5, "已拒絕了組隊的邀請。");
+                }
+            } else {
+                c.getPlayer().dropMessage(5, "不能加入組隊，因為已經有組隊了。");
+            }
+        }
+    }

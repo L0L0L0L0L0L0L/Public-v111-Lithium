@@ -1,0 +1,394 @@
+搜索：
+
+    public static final void MoveMonster(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
+        if (chr == null || chr.getMap() == null) {
+            return; //?
+        }
+        final int oid = slea.readInt();
+        final MapleMonster monster = chr.getMap().getMonsterByOid(oid);
+
+        if (monster == null) { // movin something which is not a monster
+            return;
+        }
+        if (monster.getLinkCID() > 0) {
+            return;
+        }
+        final short moveid = slea.readShort();
+        final boolean useSkill = slea.readByte() > 0;
+        final byte skill = slea.readByte();
+        final int unk = slea.readInt();
+        int realskill = 0;
+        int level = 0;
+
+        if (useSkill) {// && (skill == -1 || skill == 0)) {
+            final byte size = monster.getNoSkills();
+            boolean used = false;
+
+            if (size > 0) {
+                final Pair<Integer, Integer> skillToUse = monster.getSkills().get((byte) Randomizer.nextInt(size));
+                realskill = skillToUse.getLeft();
+                level = skillToUse.getRight();
+                // Skill ID and Level
+                final MobSkill mobSkill = MobSkillFactory.getMobSkill(realskill, level);
+
+                if (mobSkill != null && !mobSkill.checkCurrentBuff(chr, monster)) {
+                    final long now = System.currentTimeMillis();
+                    final long ls = monster.getLastSkillUsed(realskill);
+
+                    if (ls == 0 || (((now - ls) > mobSkill.getCoolTime()) && !mobSkill.onlyOnce())) {
+                        monster.setLastSkillUsed(realskill, now, mobSkill.getCoolTime());
+
+                        final int reqHp = (int) (((float) monster.getHp() / monster.getMobMaxHp()) * 100); // In case this monster have 2.1b and above HP
+                        if (reqHp <= mobSkill.getHP()) {
+                            used = true;
+                            mobSkill.applyEffect(chr, monster, true);
+                        }
+                    }
+                }
+            }
+            if (!used) {
+                realskill = 0;
+                level = 0;
+            }
+        }
+        final List<Pair<Integer, Integer>> unk3 = new ArrayList<Pair<Integer, Integer>>();
+        final byte size1 = slea.readByte();
+        for (int i = 0; i < size1; i++) {
+            unk3.add(new Pair<Integer, Integer>(Integer.valueOf(slea.readShort()), Integer.valueOf(slea.readShort())));
+        }
+        final List<Integer> unk2 = new ArrayList<Integer>();
+        final byte size = slea.readByte();
+        for (int i = 0; i < size; i++) {
+            unk2.add(Integer.valueOf(slea.readShort()));
+        }
+        slea.skip(1);
+        slea.skip(4); // sometimes 0, 1
+        slea.skip(4); // CC DD FF 00  same for all mobs
+        slea.skip(4); // CC DD FF 00  same for all mobs
+        slea.skip(4); // 9D E1 87 48  same for all mobs
+        slea.skip(1); // 1?
+        slea.skip(4); // original pos
+        slea.skip(4); // all 0
+        final Point startPos = monster.getPosition();
+        List<LifeMovementFragment> res = null;
+        try {
+            res = MovementParse.parseMovement(slea, 2);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            FileoutputUtil.outputFileError(FileoutputUtil.Movement_Log, e);
+            FileoutputUtil.log(FileoutputUtil.Movement_Log, "MOBID " + monster.getId() + ", AIOBE Type2:\n" + slea.toString(true));
+            return;
+        }
+        if (res != null && chr != null && res.size() > 0) {
+            final MapleMap map = chr.getMap();
+            for (final LifeMovementFragment move : res) {
+                if (move instanceof AbsoluteLifeMovement) {
+                    final Point endPos = ((LifeMovement) move).getPosition();
+                    if (endPos.x < (map.getLeft() - 250) || endPos.y < (map.getTop() - 250) || endPos.x > (map.getRight() + 250) || endPos.y > (map.getBottom() + 250)) { //experimental
+                        chr.getCheatTracker().checkMoveMonster(endPos);
+                        return;
+                    }
+                }
+            }
+            c.getSession().write(MobPacket.moveMonsterResponse(monster.getObjectId(), moveid, monster.getMp(), monster.isControllerHasAggro(), realskill, level));
+            if (slea.available() != 35/*slea.available() < 11 || slea.available() > 35*/) {
+                // [byte][int-pos][int-pos][5-same for all mobs][21]
+                //70 F4 81 CE 14 00 00 00 00 00 00 00 CB A2 03 00 05 00 00 00 02
+                FileoutputUtil.log(FileoutputUtil.PacketEx_Log, "slea.available != 35 (movement parsing error)\n" + slea.toString(true));
+                //c.getSession().close();
+                return;
+            }
+            MovementParse.updatePosition(res, monster, -1);
+            final Point endPos = monster.getTruePosition();
+            map.moveMonster(monster, endPos);
+            map.broadcastMessage(chr, MobPacket.moveMonster(useSkill, skill, unk, monster.getObjectId(), startPos, res, unk2, unk3), endPos);
+            chr.getCheatTracker().checkMoveMonster(endPos);
+        }
+    }
+
+
+替换：
+
+
+    public static final void MoveMonster(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
+        if (chr == null || chr.getMap() == null) {
+            return; //?
+        }
+        final int oid = slea.readInt();
+        final MapleMonster monster = chr.getMap().getMonsterByOid(oid);
+
+        if (monster == null) { // movin something which is not a monster
+            return;
+        }
+        if (monster.getLinkCID() > 0) {
+            return;
+        }
+        final short moveid = slea.readShort();
+        final boolean useSkill = slea.readByte() > 0;
+        final byte skill = slea.readByte();
+        final int skill1 = slea.readByte() & 0xFF; // unsigned?
+        final int skill2 = slea.readByte();
+        final int skill3 = slea.readByte();
+        final int skill4 = slea.readByte();//8
+        int realskill = 0;
+        int level = 0;
+
+        if (useSkill) {// && (skill == -1 || skill == 0)) {
+            final byte size = monster.getNoSkills();
+            boolean used = false;
+
+            if (size > 0) {
+                final Pair<Integer, Integer> skillToUse = monster.getSkills().get((byte) Randomizer.nextInt(size));
+                realskill = skillToUse.getLeft();
+                level = skillToUse.getRight();
+                // Skill ID and Level
+                final MobSkill mobSkill = MobSkillFactory.getMobSkill(realskill, level);
+
+                if (mobSkill != null && !mobSkill.checkCurrentBuff(chr, monster)) {
+                    final long now = System.currentTimeMillis();
+                    final long ls = monster.getLastSkillUsed(realskill);
+
+                    if (ls == 0 || (((now - ls) > mobSkill.getCoolTime()) && !mobSkill.onlyOnce())) {
+                        monster.setLastSkillUsed(realskill, now, mobSkill.getCoolTime());
+
+                        final int reqHp = (int) (((float) monster.getHp() / monster.getMobMaxHp()) * 100); // In case this monster have 2.1b and above HP
+                        if (reqHp <= mobSkill.getHP()) {
+                            used = true;
+                            mobSkill.applyEffect(chr, monster, true);
+                        }
+                    }
+                }
+            }
+            if (!used) {
+                realskill = 0;
+                level = 0;
+            }
+        }
+        /*int gg = slea.readInt();
+        boolean skipped = slea.readInt() != 0 && gg > 0;
+        slea.skip(skipped ? 33 : 25); //extra 8 bytes or what
+        if (GameConstants.GMS) {
+            slea.skip(4); //todo jump?
+        }
+        slea.readInt();
+        if (monster.getId() == 9300281 && skipped) {
+            if (slea.readByte() > 10) { //estimate
+                slea.skip(8);
+            } else {
+                slea.seek(slea.getPosition() - 1);
+            }
+        }*/
+        slea.skip(20); //todo jump?
+
+        final Point startPos = slea.readPos();
+        final Point nextPos = slea.readPos();
+        //final Point startPos = monster.getPosition();
+        List<LifeMovementFragment> res = null;
+        try {
+            res = MovementParse.parseMovement(slea, 2);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            //FileoutputUtil.outputFileError(FileoutputUtil.Movement_Log, e);
+            System.out.println("MOBID " + monster.getId() + ", AIOBE Type2:\n" + slea.toString(true));
+            //FileoutputUtil.log(FileoutputUtil.Movement_Log, "MOBID " + monster.getId() + ", AIOBE Type2:\n" + slea.toString(true));
+            return;
+        }
+
+        if (monster.getController() != c.getPlayer()) { //如果怪物不属于当前玩家
+            if (monster.isFirstAttack()) { //但是该玩家是第一个攻击这个怪物的
+                monster.switchController(c.getPlayer(), true);
+                //则设置该怪物属于当前玩家
+                //每次movelife都设置一次是为了保证怪物所有权属于第一个攻击它的人
+            } else {
+                return;
+            }
+        } else {
+            //如果管理的控制者是当前玩家
+            if (skill == -1 && monster.isControllerHasAggro()) {
+                //System.out.println("设置了物理攻击");
+                monster.setControllerHasAggro(false);
+                monster.setControllerHasAggro(false);
+            }
+            if (!monster.isFirstAttack()) {
+                //System.out.println("设置了魔法攻击");
+                monster.setControllerHasAggro(true);
+                monster.setControllerHasAggro(true);
+            }
+        }
+
+        c.getSession().write(MobPacket.moveMonsterResponse(monster.getObjectId(), moveid, monster.getMp(), monster.isControllerHasAggro(), realskill, level));
+
+        if (res != null && chr != null && res.size() > 0 && monster.isAlive()) {
+            final MapleMap map = chr.getMap();
+            /*for (final LifeMovementFragment move : res) {
+                if (move instanceof AbsoluteLifeMovement) {
+                    final Point endPos = ((LifeMovement) move).getPosition();
+                    if (endPos.x < (map.getLeft() - 250) || endPos.y < (map.getTop() - 250) || endPos.x > (map.getRight() + 250) || endPos.y > (map.getBottom() + 250)) { //experimental
+                        chr.getCheatTracker().checkMoveMonster(endPos);
+                        return;
+                    }
+                }
+            }*/
+            
+            /*if (res == null) { //9.. 0 -> endPos? -> endPos again? -> 0 -> 0    slea.available() < 9 || slea.available() > 33
+                //FileoutputUtil.log(FileoutputUtil.PacketEx_Log, "slea.available != 25 (movement parsing error)\n" + slea.toString(true));
+                //c.getSession().close();
+                c.getSession().write(MaplePacketCreator.enableActions());
+                System.out.println(" startPos: "+startPos.x+"/"+startPos.y);
+                return;
+            }*/
+
+
+            
+            final Point endPos = monster.getTruePosition();
+            map.broadcastMessage(chr, MobPacket.moveMonster(useSkill, skill, skill1, skill2, skill3, skill4, monster.getObjectId(), startPos,nextPos, res), endPos);
+            //System.out.println("endPos: "+endPos.x+"/"+endPos.y+" startPos: "+startPos.x+"/"+startPos.y);
+            MovementParse.updatePosition(res, monster, -1);
+            map.moveMonster(monster, endPos);
+            
+            //chr.getCheatTracker().checkMoveMonster(endPos);
+        }
+    }
+
+
+
+搜索：
+
+    public static byte[] moveMonster(boolean useskill, int skill, int unk, int oid, Point startPos, List<LifeMovementFragment> moves) {
+        return moveMonster(useskill, skill, unk, oid, startPos, moves, null, null);
+    }
+
+    public static byte[] moveMonster(boolean useskill, int skill, int unk, int oid, Point startPos, List<LifeMovementFragment> moves, final List<Integer> unk2, final List<Pair<Integer, Integer>> unk3) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+        mplew.writeShort(SendPacketOpcode.MOVE_MONSTER.getValue());
+        mplew.writeInt(oid);
+        mplew.write(useskill ? 1 : 0);
+        mplew.write(skill);
+        mplew.writeInt(unk);
+        mplew.write(unk3 == null ? 0 : unk3.size()); // For each, 2 short
+        if (unk3 != null) {
+            for (final Pair<Integer, Integer> i : unk3) {
+                mplew.writeShort(i.left);
+                mplew.writeShort(i.right);
+            }
+        }
+        mplew.write(unk2 == null ? 0 : unk2.size()); // For each, 1 short
+        if (unk2 != null) {
+            for (final Integer i : unk2) {
+                mplew.writeShort(i);
+            }
+        }
+        mplew.writePos(startPos);
+        mplew.writeShort(8);
+        mplew.writeShort(1);
+        PacketHelper.serializeMovementList(mplew, moves);
+
+        return mplew.getPacket();
+    }
+
+
+替换：
+
+    public static byte[] moveMonster(boolean useskill, int skill, int skill1, int skill2, int skill3, int skill4, int oid, Point startPos, Point nextPos, List<LifeMovementFragment> moves) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+        mplew.writeShort(SendPacketOpcode.MOVE_MONSTER.getValue());
+        mplew.writeInt(oid);
+        mplew.write(useskill ? 1 : 0); //?? I THINK
+        mplew.write(skill);// -1
+        mplew.write(skill1);
+        mplew.write(skill2);
+        mplew.write(skill3);
+        mplew.write(skill4);
+        mplew.writeShort(0);
+        mplew.writePos(startPos);
+        mplew.writePos(nextPos);
+        PacketHelper.serializeMovementList(mplew, moves);
+
+        return mplew.getPacket();
+    }
+
+
+
+搜索：
+
+                                    if (shouldAdd) { //walk up to the required range of the attack
+                                        List<LifeMovementFragment> moves2 = new ArrayList<LifeMovementFragment>();
+                                        maskedPos = new Point(battlers[i == 0 ? 1 : 0].getMonster().getTruePosition().x + (startPos.x < battlers[i == 0 ? 1 : 0].getMonster().getTruePosition().x ? -theAtk.getRange() : theAtk.getRange()), battlers[i == 0 ? 1 : 0].getMonster().getTruePosition().y);
+                                        alm = new AbsoluteLifeMovement(0, maskedPos, WALK_TIME, battlers[i].getMonster().getFacingDirection() + 2);
+                                        alm.defaulted();
+                                        moves2.add(alm); //separate for this movement only, as we must move THEN attack
+                                        map.broadcastMessage(MobPacket.moveMonster(false, (byte) -1, 0, battlers[i].getMonster().getObjectId(), startPos, moves2));
+                                    }
+
+
+替换：
+
+                                    if (shouldAdd) { //walk up to the required range of the attack
+                                        List<LifeMovementFragment> moves2 = new ArrayList<LifeMovementFragment>();
+                                        maskedPos = new Point(battlers[i == 0 ? 1 : 0].getMonster().getTruePosition().x + (startPos.x < battlers[i == 0 ? 1 : 0].getMonster().getTruePosition().x ? -theAtk.getRange() : theAtk.getRange()), battlers[i == 0 ? 1 : 0].getMonster().getTruePosition().y);
+                                        alm = new AbsoluteLifeMovement(0, maskedPos, WALK_TIME, battlers[i].getMonster().getFacingDirection() + 2);
+                                        alm.defaulted();
+                                        moves2.add(alm); //separate for this movement only, as we must move THEN attack
+                                        map.broadcastMessage(MobPacket.moveMonster(false, -1, 0, 0, 0, battlers[i].getMonster().getObjectId(), startPos, moves2));
+                                    }
+
+
+
+搜索：
+
+                                final Point mPos = maskedPos;
+                                if (mPos == null) {
+                                    map.broadcastMessage(MobPacket.moveMonster(skillByte > 0, skillByte, 0, battlers[i].getMonster().getObjectId(), startPos, moves));
+                                    moves.clear();
+                                }
+
+替换：
+
+                                final Point mPos = maskedPos;
+                                if (mPos == null) {
+                                    map.broadcastMessage(MobPacket.moveMonster(skillByte > 0, skillByte, 0, 0, 0, battlers[i].getMonster().getObjectId(), startPos, moves));
+                                    moves.clear();
+                                }
+
+搜索：
+
+                                    public void run() {
+                                        if (disposed || map == null || battlers[i == 1 ? 0 : 1] == null || battlers[i] == null) {
+                                            return;
+                                        }
+                                        if (mPos != null) {
+                                            map.broadcastMessage(MobPacket.moveMonster(skillByte > 0, skillByte, 0, battlers[i].getMonster().getObjectId(), mPos, moves));
+                                            moves.clear();
+                                        }
+
+替换：
+
+                                    public void run() {
+                                        if (disposed || map == null || battlers[i == 1 ? 0 : 1] == null || battlers[i] == null) {
+                                            return;
+                                        }
+                                        if (mPos != null) {
+                                            map.broadcastMessage(MobPacket.moveMonster(skillByte > 0, skillByte, 0, 0, 0, battlers[i].getMonster().getObjectId(), mPos, moves));
+                                            moves.clear();
+                                        }
+
+
+搜索：
+
+                                            if (basedamage > 1) {
+                                                final byte skillByte2 = (byte) (14 + battlers[i == 1 ? 0 : 1].getMonster().getFacingDirection());
+                                                AbsoluteLifeMovement alm2 = new AbsoluteLifeMovement(0, battlers[i == 1 ? 0 : 1].getMonster().getPosition(), 0, battlers[i == 1 ? 0 : 1].getMonster().getStance());
+                                                alm2.defaulted();
+                                                moves.add(alm2); //"hit" face
+                                                map.broadcastMessage(MobPacket.moveMonster(true, skillByte2, 0, battlers[i == 1 ? 0 : 1].getMonster().getObjectId(), battlers[i == 1 ? 0 : 1].getMonster().getTruePosition(), moves));
+                                            }
+
+替换：
+
+                                            if (basedamage > 1) {
+                                                final byte skillByte2 = (byte) (14 + battlers[i == 1 ? 0 : 1].getMonster().getFacingDirection());
+                                                AbsoluteLifeMovement alm2 = new AbsoluteLifeMovement(0, battlers[i == 1 ? 0 : 1].getMonster().getPosition(), 0, battlers[i == 1 ? 0 : 1].getMonster().getStance());
+                                                alm2.defaulted();
+                                                moves.add(alm2); //"hit" face
+                                                map.broadcastMessage(MobPacket.moveMonster(true, skillByte2, 0, 0, 0, battlers[1].getMonster().getObjectId(), battlers[1].getMonster().getTruePosition(), moves));
+                                            }

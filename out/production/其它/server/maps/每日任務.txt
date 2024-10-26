@@ -1,0 +1,55 @@
+搜索：
+
+    public boolean canStart(MapleCharacter c, Integer npcid) {
+        if (c.getQuest(this).getStatus() != 0 && !(c.getQuest(this).getStatus() == 2 && repeatable)) {
+            return false;
+        }
+        if (blocked && !c.isGM()) {
+            return false;
+        }
+        //if (autoAccept) {
+        //    return true; //need script
+        //}
+        for (MapleQuestRequirement r : startReqs) {
+            if (r.getType() == MapleQuestRequirementType.dayByDay && npcid != null) { //everyday. we don't want ok
+                forceComplete(c, npcid);
+                return false;
+            }
+            if (!r.check(c, npcid)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+替換：
+
+
+    public boolean canStart(MapleCharacter c, Integer npcid) {
+        final int[] ss = {3170, 4576};//每日任務ID
+        for (int i : ss) {
+            if (this.id == i){
+                repeatable = true;
+            }
+        }
+        if (c.getQuest(this).getStatus() != 0 && !(c.getQuest(this).getStatus() == 2 && repeatable)) {
+            return false;
+        }
+        if (blocked && !c.isGM()) {
+            return false;
+        }
+        //if (autoAccept) {
+        //    return true; //need script
+        //}
+        for (MapleQuestRequirement r : startReqs) {
+            //if (r.getType() == MapleQuestRequirementType.dayByDay && npcid != null) { //everyday. we don't want ok
+            //    forceComplete(c, npcid);
+            //    return false;
+           // }
+            if (!r.check(c, npcid)) {
+                return false;
+            }
+        }
+        return true;
+    }

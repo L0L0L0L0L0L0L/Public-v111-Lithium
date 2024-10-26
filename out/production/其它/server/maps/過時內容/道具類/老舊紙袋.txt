@@ -1,0 +1,20 @@
+                case 2430290://老舊紙袋
+                        int deleted = (int) Math.floor(Math.random() * 10);
+                    if (c.getPlayer().getInventory(MapleInventoryType.ETC).getNumFreeSlot() >= 1) {
+                        if (deleted < 2) {
+                            c.getPlayer().getClient().getSession().write(NPCPacket.getEvanTutorial("UI/UIWindow2.img/Picture/0/0"));
+                            MapleInventoryManipulator.addById(c, 4350000, (short) 1, "Scripted item: " + toUse.getItemId() + " on " + FileoutputUtil.CurrentReadable_Date());
+                        } else if (deleted < 4) {
+                            c.getPlayer().getClient().getSession().write(NPCPacket.getEvanTutorial("UI/UIWindow2.img/Picture/1/0"));
+                            MapleInventoryManipulator.addById(c, 4350001, (short) 1, "Scripted item: " + toUse.getItemId() + " on " + FileoutputUtil.CurrentReadable_Date());
+                        } else if (deleted < 6) {
+                            c.getPlayer().getClient().getSession().write(NPCPacket.getEvanTutorial("UI/UIWindow2.img/Picture/2/0"));
+                            MapleInventoryManipulator.addById(c, 4350002, (short) 1, "Scripted item: " + toUse.getItemId() + " on " + FileoutputUtil.CurrentReadable_Date());
+                        } else {
+                            c.getPlayer().dropMessage(5, "紙袋裡居然什麼都沒有！！");
+                        }
+                        MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.USE, slot, (byte) 1, false);
+                    } else {
+                            c.getPlayer().dropMessage(5, "拆開紙袋之前，請預留一定的背包空間。");
+                        }
+                     break;

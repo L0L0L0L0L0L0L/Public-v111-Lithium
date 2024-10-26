@@ -1,0 +1,686 @@
+搜索：
+
+public class MapleMiniGame extends AbstractPlayerStore {
+
+    private final static int slots = 6; //change?!
+
+
+替換：
+
+public class MapleMiniGame extends AbstractPlayerStore {
+
+    private final static int slots = 2; //change?!
+
+
+搜索：
+
+    public static final void addAnnounceBox(final MaplePacketLittleEndianWriter mplew, final MapleCharacter chr) {
+        if (chr.getPlayerShop() != null && chr.getPlayerShop().isOwner(chr) && chr.getPlayerShop().getShopType() != 1 && chr.getPlayerShop().isAvailable()) {
+            addInteraction(mplew, chr.getPlayerShop());
+        } else {
+            mplew.write(0);
+        }
+    }
+
+
+替換：
+
+    public static void addAnnounceBox(final MaplePacketLittleEndianWriter mplew, final MapleCharacter chr) {
+        if (chr.getPlayerShop() != null && chr.getPlayerShop().isOwner(chr) && (chr.getPlayerShop().getShopType() == 3 || chr.getPlayerShop().getShopType() == 4) && chr.getPlayerShop().isAvailable()) {
+            addOmok(mplew, chr.getPlayerShop(), chr);
+        } else if (chr.getPlayerShop() != null && chr.getPlayerShop().isOwner(chr) && chr.getPlayerShop().getShopType() != 1 && chr.getPlayerShop().isAvailable()) {
+            addInteraction(mplew, chr.getPlayerShop());
+        } else {
+            mplew.write(0);
+        }
+    }
+
+    public static void addOmok(final MaplePacketLittleEndianWriter mplew, IMaplePlayerShop shop, MapleCharacter owner) {
+        mplew.write(shop.getGameType()); // 1 = omok, 2 = matchcard
+        mplew.writeInt(((AbstractPlayerStore) shop).getObjectId());
+        mplew.writeMapleAsciiString(shop.getDescription());
+        mplew.write(shop.getPassword().length() > 0 ? 1 : 0); //password = false
+        mplew.write(shop.getPieceType()); //創建房間後的角色頭頂面板顯示
+        mplew.write(shop.getSize());
+        mplew.write(2); 
+        mplew.write(shop.isOpen() ? 0 : 1);
+    }
+
+
+搜索：
+
+    public int getGameType();
+
+    public void update();
+
+    public void setAvailable(boolean b);
+
+    public boolean isAvailable();
+
+    public List<BoughtItem> getBoughtItems();
+}
+
+
+替換：
+
+    public int getGameType();
+
+    public int getPieceType();
+
+    public void update();
+
+    public void setAvailable(boolean b);
+
+    public boolean isAvailable();
+
+    public List<BoughtItem> getBoughtItems();
+}
+
+
+
+搜索：
+
+    @Override
+    public int getGameType() {
+        if (getShopType() == IMaplePlayerShop.HIRED_MERCHANT) { //hiredmerch
+            return 5;
+        } else if (getShopType() == IMaplePlayerShop.PLAYER_SHOP) { //shop lol
+            return 4;
+        } else if (getShopType() == IMaplePlayerShop.OMOK) { //omok
+            return 1;
+        } else if (getShopType() == IMaplePlayerShop.MATCH_CARD) { //matchcard
+            return 2;
+        }
+        return 0;
+    }
+
+替換：
+
+    @Override
+    public int getGameType() {
+        if (getShopType() == IMaplePlayerShop.HIRED_MERCHANT) { //hiredmerch
+            return 5;
+        } else if (getShopType() == IMaplePlayerShop.PLAYER_SHOP) { //shop lol
+            return 4;
+        } else if (getShopType() == IMaplePlayerShop.OMOK) { //omok
+            return 1;
+        } else if (getShopType() == IMaplePlayerShop.MATCH_CARD) { //matchcard
+            return 2;
+        }
+        return 0;
+    }
+
+    @Override
+    public int getPieceType() {
+        return 0;
+    }
+
+
+搜索：
+
+        REQUEST_TIE(51),
+        ANSWER_TIE(52),
+        GIVE_UP(53),
+        REQUEST_REDO(55),
+        ANSWER_REDO(56),
+        EXIT_AFTER_GAME(57),
+        CANCEL_EXIT(58),
+        READY(59),
+        UN_READY(60),
+        EXPEL(61),
+        START(62),
+        SKIP(64),
+        MOVE_OMOK(65),
+        SELECT_CARD(68);
+
+替換：
+
+        REQUEST_TIE(56),
+        ANSWER_TIE(57),
+        GIVE_UP(58),
+        REQUEST_REDO(60),
+        ANSWER_REDO(61),
+        EXIT_AFTER_GAME(62),
+        CANCEL_EXIT(63),
+        READY(64),
+        UN_READY(65),
+        EXPEL(66),
+        START(67),
+        SKIP(69),
+        MOVE_OMOK(70),
+        SELECT_CARD(74);
+
+
+搜索：
+
+                        } else if (createType == 1 || createType == 2) {
+                            if (FieldLimitType.Minigames.check(chr.getMap().getFieldLimit()) || chr.getMap().allowPersonalShop()) {
+                                chr.dropMessage(1, "You may not use minigames here.");
+                                c.getSession().write(MaplePacketCreator.enableActions());
+                                return;
+                            }
+                        }
+                        final String desc = slea.readMapleAsciiString();
+                        String pass = "";
+                        if (slea.readByte() > 0) {
+                            pass = slea.readMapleAsciiString();
+                        }
+                        if (createType == IMaplePlayerShop.MATCH_CARD || createType == IMaplePlayerShop.OMOK) {
+                            final int piece = slea.readByte();
+                            final int itemId = createType == IMaplePlayerShop.OMOK ? (4080000 + piece) : 4080100;
+                            if (!chr.haveItem(itemId) || c.getPlayer().getMapId() == GameConstants.광장 || (c.getPlayer().getMapId() >= 910000001 && c.getPlayer().getMapId() <= 910000022)) {
+                                return;
+                            }
+                            MapleMiniGame game = new MapleMiniGame(chr, itemId, desc, pass, createType, chr.getTruePosition()); //itemid
+                            game.setPieceType(piece);
+                            chr.setPlayerShop(game);
+                            game.setAvailable(true);
+                            game.setOpen(true);
+                            game.send(c);
+                            chr.getMap().addMapObject(game);
+                            game.update();
+
+
+
+替換：
+
+
+                        } else if (createType == 1 || createType == 2) {
+                            if (FieldLimitType.Minigames.check(chr.getMap().getFieldLimit()) || chr.getMap().allowPersonalShop()) {
+                                chr.dropMessage(1, "You may not use minigames here.");
+                                c.getSession().write(MaplePacketCreator.enableActions());
+                                return;
+                            }
+                        }
+                        final String desc = slea.readMapleAsciiString();
+                        String pass = "";
+                        if (slea.readByte() > 0) {
+                            pass = slea.readMapleAsciiString();
+                        }
+                        if (createType == 1 || createType == 2) {
+                            slea.readShort(); //item pos
+                            int piece = slea.readByte();
+                            int itemId = createType == 1 ? (4080000 + piece) : 4080100;
+                            MapleMiniGame game = new MapleMiniGame(chr, itemId, desc, pass, createType, chr.getTruePosition()); //itemid
+                            game.setPieceType(piece);
+                            chr.setPlayerShop(game);
+                            game.setAvailable(true);
+                            game.setOpen(true);
+                            game.send(c);
+                            chr.getMap().addMapObject(game);
+                            game.update();
+
+
+頁首添加：
+
+import client.inventory.MapleInventory;
+
+搜索替換：
+
+
+            case MERCHANT_BLACKLIST_REMOVE: {
+                final IMaplePlayerShop merchant = chr.getPlayerShop();
+                if (merchant != null && merchant.getShopType() == 1 && merchant.isOwner(chr)) {
+                    ((HiredMerchant) merchant).removeBlackList(slea.readMapleAsciiString());
+                }
+                break;
+            }
+            case REQUEST_TIE: {
+                final IMaplePlayerShop ips = chr.getPlayerShop();
+                if (ips == null || !(ips instanceof MapleMiniGame)) {
+                    break;
+                }
+                final MapleMiniGame game2 = (MapleMiniGame)ips;
+                if (game2.isOpen()) {
+                    break;
+                }
+                if (game2.isOwner(chr)) {
+                    game2.broadcastToVisitors(PlayerShopPacket.getMiniGameRequestTie(), false);
+                }
+                else {
+                    game2.getMCOwner().getClient().getSession().write(PlayerShopPacket.getMiniGameRequestTie());
+                }
+                game2.setRequestedTie((int)game2.getVisitorSlot(chr));
+                break;
+            }
+            case ANSWER_TIE: {
+                final IMaplePlayerShop ips = chr.getPlayerShop();
+                if (ips == null || !(ips instanceof MapleMiniGame)) {
+                    break;
+                }
+                final MapleMiniGame game2 = (MapleMiniGame)ips;
+                if (game2.isOpen()) {
+                    break;
+                }
+                if (game2.getRequestedTie() > -1 && game2.getRequestedTie() != game2.getVisitorSlot(chr)) {
+                    if (slea.readByte() > 0) {
+                        game2.broadcastToVisitors(PlayerShopPacket.getMiniGameResult(game2, 1, game2.getRequestedTie()));
+                        game2.nextLoser();
+                        game2.setOpen(true);
+                        game2.update();
+                        game2.checkExitAfterGame();
+                    }
+                    else {
+                        game2.broadcastToVisitors(PlayerShopPacket.getMiniGameDenyTie());
+                    }
+                    game2.setRequestedTie(-1);
+                }
+                break;
+            }
+            case GIVE_UP: {
+                final IMaplePlayerShop ips = chr.getPlayerShop();
+                if (ips == null || !(ips instanceof MapleMiniGame)) {
+                    break;
+                }
+                final MapleMiniGame game2 = (MapleMiniGame)ips;
+                if (game2.isOpen()) {
+                    break;
+                }
+                game2.broadcastToVisitors(PlayerShopPacket.getMiniGameResult(game2, 0, (int)game2.getVisitorSlot(chr)));
+                game2.nextLoser();
+                game2.setOpen(true);
+                game2.update();
+                game2.checkExitAfterGame();
+                break;
+            }
+            case REQUEST_REDO: {
+                final IMaplePlayerShop ips = chr.getPlayerShop();
+                if (ips == null || !(ips instanceof MapleMiniGame)) {
+                    break;
+                }
+                final MapleMiniGame game2 = (MapleMiniGame)ips;
+                if (game2.isOpen()) {
+                    break;
+                }
+                if (game2.isOwner(chr)) {
+                    game2.broadcastToVisitors(PlayerShopPacket.getMiniGameRequestRedo(), false);
+                }
+                else {
+                    game2.getMCOwner().getClient().getSession().write(PlayerShopPacket.getMiniGameRequestRedo());
+                }
+                game2.setRequestedTie((int)game2.getVisitorSlot(chr));
+                break;
+            }
+            case ANSWER_REDO: {
+                final IMaplePlayerShop ips = chr.getPlayerShop();
+                if (ips == null || !(ips instanceof MapleMiniGame)) {
+                    break;
+                }
+                final MapleMiniGame game2 = (MapleMiniGame)ips;
+                if (game2.isOpen()) {
+                    break;
+                }
+                if (slea.readByte() > 0) {
+                    ips.broadcastToVisitors(PlayerShopPacket.getMiniGameAnswerRedo((int)ips.getVisitorSlot(chr)));
+                    game2.nextLoser();
+                }
+                else {
+                    game2.broadcastToVisitors(PlayerShopPacket.getMiniGameDenyTie());
+                }
+                game2.setRequestedTie(-1);
+                break;
+            }
+            case EXIT_AFTER_GAME: {
+                final IMaplePlayerShop ips = chr.getPlayerShop();
+                if (ips != null && ips instanceof MapleMiniGame) {
+                    MapleMiniGame game = (MapleMiniGame) ips;
+                    if (game.isOpen()) {
+                        break;
+                    }
+                    game.setExitAfter(chr);
+                    game.broadcastToVisitors(PlayerShopPacket.getMiniGameExitAfter(game.isExitAfter(chr)));
+                }
+                break;
+            }
+            case CANCEL_EXIT: {
+                final IMaplePlayerShop ips = chr.getPlayerShop();
+                if (ips == null || !(ips instanceof MapleMiniGame)) {
+                    break;
+                }
+                final MapleMiniGame game2 = (MapleMiniGame)ips;
+                if (game2.isOpen()) {
+                    break;
+                }
+                game2.setExitAfter(chr);
+                game2.broadcastToVisitors(PlayerShopPacket.getMiniGameExitAfter(game2.isExitAfter(chr)));
+                break;
+            }
+            case READY:
+            case UN_READY: {
+                final IMaplePlayerShop ips = chr.getPlayerShop();
+                if (ips != null && ips instanceof MapleMiniGame) {
+                    final MapleMiniGame game2 = (MapleMiniGame)ips;
+                    if (!game2.isOwner(chr) && game2.isOpen()) {
+                        game2.setReady((int)game2.getVisitorSlot(chr));
+                        game2.broadcastToVisitors(PlayerShopPacket.getMiniGameReady(game2.isReady((int)game2.getVisitorSlot(chr))));
+                    }
+                    break;
+                }
+                break;
+            }
+            case EXPEL: {
+                final IMaplePlayerShop ips = chr.getPlayerShop();
+                if (ips == null || !(ips instanceof MapleMiniGame)) {
+                    break;
+                }
+                if (!((MapleMiniGame)ips).isOpen()) {
+                    break;
+                }
+                ips.removeAllVisitors(5, 1);
+                break;
+            }
+            case START: {
+                final IMaplePlayerShop ips = chr.getPlayerShop();
+                if (ips != null && ips instanceof MapleMiniGame) {
+                    final MapleMiniGame game2 = (MapleMiniGame)ips;
+                    if (game2.isOwner(chr) && game2.isOpen()) {
+                        for (int k = 1; k < ips.getSize(); ++k) {
+                            if (!game2.isReady(k)) {
+                                return;
+                            }
+                        }
+                        game2.setGameType();
+                        game2.shuffleList();
+                        if (game2.getGameType() == 1) {
+                            game2.broadcastToVisitors(PlayerShopPacket.getMiniGameStart(game2.getLoser()));
+                        }
+                        else {
+                            game2.broadcastToVisitors(PlayerShopPacket.getMatchCardStart(game2, game2.getLoser()));
+                        }
+                        game2.setOpen(false);
+                        game2.update();
+                    }
+                    break;
+                }
+                break;
+            }
+            case SKIP: {
+                final IMaplePlayerShop ips = chr.getPlayerShop();
+                if (ips == null || !(ips instanceof MapleMiniGame)) {
+                    break;
+                }
+                final MapleMiniGame game2 = (MapleMiniGame)ips;
+                if (game2.isOpen()) {
+                    break;
+                }
+                ips.broadcastToVisitors(PlayerShopPacket.getMiniGameSkip((int)ips.getVisitorSlot(chr)));
+                game2.nextLoser();
+                break;
+            }
+            case MOVE_OMOK: {
+                final IMaplePlayerShop ips = chr.getPlayerShop();
+                if (ips == null || !(ips instanceof MapleMiniGame)) {
+                    break;
+                }
+                final MapleMiniGame game2 = (MapleMiniGame)ips;
+                if (game2.isOpen()) {
+                    break;
+                }
+                game2.setPiece(slea.readInt(), slea.readInt(), (int)slea.readByte(), chr);
+                break;
+            }
+            case SELECT_CARD: {
+                final IMaplePlayerShop ips = chr.getPlayerShop();
+                if (ips == null || !(ips instanceof MapleMiniGame)) {
+                    break;
+                }
+                final MapleMiniGame game2 = (MapleMiniGame)ips;
+                if (game2.isOpen()) {
+                    break;
+                }
+                if (slea.readByte() != game2.getTurn()) {
+                    game2.broadcastToVisitors(PlayerShopPacket.shopChat("不能放在通過 " + chr.getName() + ". 失敗者: " + game2.getLoser() + " 遊客: " + (int)game2.getVisitorSlot(chr) + " 是否為真: " + game2.getTurn(), (int)game2.getVisitorSlot(chr)));
+                    return;
+                }
+                final int slot3 = slea.readByte();
+                final int turn = game2.getTurn();
+                final int fs = game2.getFirstSlot();
+                if (turn == 1) {
+                    game2.setFirstSlot(slot3);
+                    if (game2.isOwner(chr)) {
+                        game2.broadcastToVisitors(PlayerShopPacket.getMatchCardSelect(turn, slot3, fs, turn), false);
+                    } else {
+                        game2.getMCOwner().getClient().getSession().write(PlayerShopPacket.getMatchCardSelect(turn, slot3, fs, turn));
+                    }
+                    game2.setTurn(0);
+                    return;
+                }
+                if (fs > 0 && game2.getCardId(fs + 1) == game2.getCardId(slot3 + 1)) {
+                    game2.broadcastToVisitors(PlayerShopPacket.getMatchCardSelect(turn, slot3, fs, game2.isOwner(chr) ? 2 : 3));
+                    game2.setPoints((int)game2.getVisitorSlot(chr));
+                } else {
+                    game2.broadcastToVisitors(PlayerShopPacket.getMatchCardSelect(turn, slot3, fs, (int)(game2.isOwner(chr) ? 0 : 1)));
+                    game2.nextLoser();
+                }
+                game2.setTurn(1);
+                game2.setFirstSlot(0);
+                break;
+            }
+            default: {
+                //some idiots try to send huge amounts of data to this (:
+                //System.out.println("Unhandled interaction action by " + chr.getName() + " : " + action + ", " + slea.toString());
+                //19 (0x13) - 00 OR 01 -> itemid(maple leaf) ? who knows what this is
+                break;
+            }
+        }
+    }
+}
+
+
+
+搜索替換：
+
+
+    public static byte[] getMiniGame(MapleClient c, MapleMiniGame minigame) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
+        mplew.write(10);
+        mplew.write(minigame.getGameType());
+        mplew.write(minigame.getMaxSize());
+        mplew.writeShort(minigame.getVisitorSlot(c.getPlayer()));
+        PacketHelper.addCharLook(mplew, minigame.getMCOwner(), false);
+        mplew.writeMapleAsciiString(minigame.getOwnerName());
+        mplew.writeShort(minigame.getMCOwner().getJob());
+        for (Pair<Byte, MapleCharacter> visitorz : minigame.getVisitors()) {
+            mplew.write(visitorz.getLeft());
+            PacketHelper.addCharLook(mplew, visitorz.getRight(), false);
+            mplew.writeMapleAsciiString(visitorz.getRight().getName());
+            mplew.writeShort(visitorz.getRight().getJob());
+        }
+        mplew.write(-1);
+        mplew.write(0);
+        addGameInfo(mplew, minigame.getMCOwner(), minigame);
+        for (Pair<Byte, MapleCharacter> visitorz : minigame.getVisitors()) {
+            mplew.write(visitorz.getLeft());
+            addGameInfo(mplew, visitorz.getRight(), minigame);
+        }
+        mplew.write(-1);
+        mplew.writeMapleAsciiString(minigame.getDescription());
+        mplew.writeShort(minigame.getPieceType());
+        return mplew.getPacket();
+    }
+
+    public static byte[] getMiniGameRequestTie() {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
+        mplew.write(0x38);
+        return mplew.getPacket();
+    }
+
+    public static byte[] getMiniGameResult(MapleMiniGame game, int type, int x) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
+        mplew.write(0x44);
+        mplew.write(type); //lose = 0, tie = 1, win = 2
+        game.setPoints(x, type);
+        if (type != 0) {
+            game.setPoints(x == 1 ? 0 : 1, type == 2 ? 0 : 1);
+        }
+        if (type != 1) {
+            if (type == 0) {
+                mplew.write(x == 1 ? 0 : 1); //who did it?
+            } else {
+                mplew.write(x);
+            }
+        }
+        addGameInfo(mplew, game.getMCOwner(), game);
+        for (Pair<Byte, MapleCharacter> visitorz : game.getVisitors()) {
+            addGameInfo(mplew, visitorz.right, game);
+        }
+
+        return mplew.getPacket();
+    }
+
+    public static byte[] getMiniGameDenyTie() {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
+        mplew.write(0x39);
+        return mplew.getPacket();
+    }
+
+    public static byte[] getMiniGameRequestRedo() {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
+        mplew.write(0x3C);
+        return mplew.getPacket();
+    }
+
+    public static byte[] getMiniGameAnswerRedo(int slot) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
+        mplew.write(0x45);
+        mplew.write((int)((slot != 1) ? 1 : 0));
+        return mplew.getPacket();
+    }
+
+    public static byte[] getMiniGameExitAfter(boolean ready) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
+        mplew.write(0x3E);
+        return mplew.getPacket();
+    }
+
+    public static byte[] getMiniGameReady(boolean ready) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
+        mplew.write(ready ? 0x40 : 0x41);
+        return mplew.getPacket();
+    }
+
+    public static byte[] getMiniGameStart(int loser) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
+        mplew.write(0x43);
+        mplew.write(loser == 1 ? 0 : 1);
+        return mplew.getPacket();
+    }
+
+    public static byte[] getMatchCardStart(MapleMiniGame game, int loser) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
+        mplew.write(0x43);
+        mplew.write(loser == 1 ? 0 : 1);
+        int times = game.getPieceType() == 1 ? 20 : (game.getPieceType() == 2 ? 30 : 12);
+        mplew.write(times);
+        for (int i = 1; i <= times; i++) {
+            mplew.writeInt(game.getCardId(i));
+        }
+        return mplew.getPacket();
+    }
+
+    public static byte[] getMiniGameSkip(int slot) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
+        mplew.write(0x45);
+        //owner = 1 visitor = 0?
+        mplew.write(slot);
+        return mplew.getPacket();
+    }
+
+    public static byte[] getMatchCardSelect(int turn, int slot, int firstslot, int type) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
+        mplew.write(0x4A); // WAS: 0x49
+        mplew.write(turn);
+        mplew.write(slot);
+        if (turn == 0) {
+            mplew.write(firstslot);
+            mplew.write(type);
+        }
+        return mplew.getPacket();
+    }
+
+
+    public static byte[] getMiniGameFull() {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
+        mplew.writeShort(GameConstants.GMS ? 10 : 5);
+        mplew.write(0);
+        mplew.write(2);
+        return mplew.getPacket();
+    }
+
+    public static byte[] getMiniGameMoveOmok(int move1, int move2, int move3) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
+        mplew.write(0x46);
+        mplew.writeInt(move1);
+        mplew.writeInt(move2);
+        mplew.write(move3);
+        return mplew.getPacket();
+    }
+
+    public static byte[] getMiniGameNewVisitor(MapleCharacter c, int slot, MapleMiniGame game) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
+        mplew.write(GameConstants.GMS ? 9 : 4);
+        mplew.write(slot);
+        PacketHelper.addCharLook(mplew, c, false);
+        mplew.writeMapleAsciiString(c.getName());
+        mplew.writeShort(c.getJob());
+        addGameInfo(mplew, c, game);
+        return mplew.getPacket();
+    }
+
+    public static void addGameInfo(MaplePacketLittleEndianWriter mplew, MapleCharacter chr, MapleMiniGame game) {
+        mplew.writeInt(game.getGameType()); // start of visitor; unknown
+        mplew.writeInt(game.getWins(chr));
+        mplew.writeInt(game.getTies(chr));
+        mplew.writeInt(game.getLosses(chr));
+        mplew.writeInt(game.getScore(chr)); // points
+    }
+
+    public static byte[] getMiniGameClose(byte number) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
+        mplew.write(GameConstants.GMS ? 18 : 0xA);
+        mplew.write(1);
+        mplew.write(number);
+        return mplew.getPacket();
+    }
+
+    public static final byte[] MerchantBlackListView(final List<String> blackList) {
+        final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+        mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
+        mplew.write(39);
+        mplew.writeShort(blackList.size());
+        for (String visit : blackList) {
+            mplew.writeMapleAsciiString(visit);
+        }
+        return mplew.getPacket();
+    }
+
+    public static final byte[] MerchantVisitorView(List<String> visitor) {
+        final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+        mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
+        mplew.write(38);
+        mplew.writeShort(visitor.size());
+        for (String visit : visitor) {
+            mplew.writeMapleAsciiString(visit);
+            mplew.writeInt(1); /////for the lul
+        }
+        return mplew.getPacket();
+    }
+}

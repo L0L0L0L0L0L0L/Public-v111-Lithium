@@ -1,0 +1,11 @@
+搜索：
+
+                case 22141001:
+                case 1211002: // charged blow
+                case 1111008: // shout
+
+
+替換：
+
+                case 22141001:
+                case 1111008: // shout

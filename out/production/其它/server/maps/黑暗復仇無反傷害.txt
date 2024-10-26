@@ -1,0 +1,11 @@
+搜索：
+                case 31101003:
+                    ret.statups.put(MapleBuffStat.PERFECT_ARMOR, ret.y);
+                    break;
+
+
+替換：
+                case 31101003:
+                    ret.statups.put(MapleBuffStat.PERFECT_ARMOR, ret.y);
+                    ret.statups.put(MapleBuffStat.POWERGUARD, ret.x);
+                    break;

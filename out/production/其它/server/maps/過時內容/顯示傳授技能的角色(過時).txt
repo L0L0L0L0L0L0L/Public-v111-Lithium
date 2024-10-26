@@ -1,0 +1,214 @@
+搜索：
+
+            for (final Entry<Skill, SkillEntry> skill : skills.entrySet()) {
+                skillsWithoutMax.put(skill.getKey().getId(), skill.getValue().skillevel);
+                if (skill.getValue().expiration > 0) {
+                    skillsWithExpiration.put(skill.getKey().getId(), skill.getValue().expiration);
+                }
+                if (skill.getKey().isFourthJob()) {
+                    skillsWithMax.put(skill.getKey().getId(), skill.getValue().masterlevel);
+                }
+            }
+
+
+替換：
+
+            for (final Entry<Skill, SkillEntry> skill : skills.entrySet()) {
+                if (skill.getKey().getId() == 80000000 || skill.getKey().getId() == 80000001 || skill.getKey().getId() == 80001040) {//顯示傳授技能的角色
+                    skillsWithoutMax.put(skill.getKey().getId(), skill.getValue().teachId);
+                } else if (skill.getKey().getId() == 110 || skill.getKey().getId() == 20021110 || skill.getKey().getId() == 30010112) {//過濾已傳授技能的角色
+                    skillsWithoutMax.put(skill.getKey().getId(), skill.getValue().teachId > 0 ? skill.getValue().teachId : skill.getValue().skillevel);
+                } else {
+                    skillsWithoutMax.put(skill.getKey().getId(), skill.getValue().skillevel);
+                }
+                if (skill.getValue().expiration > 0) {
+                    skillsWithExpiration.put(skill.getKey().getId(), skill.getValue().expiration);
+                }
+                if (skill.getKey().isFourthJob()) {
+                    skillsWithMax.put(skill.getKey().getId(), skill.getValue().masterlevel);
+                }
+            }
+
+
+
+
+
+添加包頭 recvops
+
+搜索：
+
+# 自動回復HP/MP
+HEAL_OVER_TIME = 0x9C
+
+替換：
+
+# 自動回復HP/MP
+HEAL_OVER_TIME = 0x9C
+
+# 連結技能
+LINKED_SKILL_SELECT = 0x9E
+
+
+
+源碼部分
+
+搜索：
+
+    public static boolean isLinkedAranSkill(final int id) {
+        return getLinkedAranSkill(id) != id;
+    }
+
+替換：
+
+    public static boolean isLinkedAranSkill(final int id) {
+        return getLinkedAranSkill(id) != id;
+    }
+
+    public static boolean isValidLinkSkillForJob(int skillID, short jobID) {
+        switch (jobID) {
+            case 532: //Cannoneer
+            case 531:
+                return skillID == 110;
+            case 2312: //Mercedes
+            case 2311:
+                return skillID == 20021110;
+            case 3112: //Demon Slayer
+            case 3111:
+                return skillID == 30010112;
+        }
+        return false;
+    }
+
+    public static int getRelatedLinkSkill(final int skillID) {
+        switch (skillID) {
+            case 110: //cannon
+                return 80000000;
+            case 20021110: //merc
+                return 80001040;
+            case 30010112://ds
+                return 80000001;
+        }
+        return 0;
+    }
+
+
+搜索：
+
+    USE_SP_RESET_SCROLL,
+    MTS_TAB;
+
+
+替換：
+
+    USE_SP_RESET_SCROLL,
+    LINKED_SKILL_SELECT,
+    MTS_TAB;
+
+
+
+搜索：
+
+            case REPORT:
+                PlayersHandler.Report(slea, c);
+                break;
+
+替換：
+
+            case REPORT:
+                PlayersHandler.Report(slea, c);
+                break;
+            case LINKED_SKILL_SELECT:
+                PlayersHandler.ApplyLinkedSkill(slea, c);
+                break;
+
+
+
+搜索：
+
+    public static boolean inArea(MapleCharacter chr) {
+        for (Rectangle rect : chr.getMap().getAreas()) {
+            if (rect.contains(chr.getTruePosition())) {
+                return true;
+            }
+        }
+        for (MapleMist mist : chr.getMap().getAllMistsThreadsafe()) {
+            if (mist.getOwnerId() == chr.getId() && mist.isPoisonMist() == 2 && mist.getBox().contains(chr.getTruePosition())) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+
+
+替換：
+
+    public static boolean inArea(MapleCharacter chr) {
+        for (Rectangle rect : chr.getMap().getAreas()) {
+            if (rect.contains(chr.getTruePosition())) {
+                return true;
+            }
+        }
+        for (MapleMist mist : chr.getMap().getAllMistsThreadsafe()) {
+            if (mist.getOwnerId() == chr.getId() && mist.isPoisonMist() == 2 && mist.getBox().contains(chr.getTruePosition())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static void ApplyLinkedSkill(LittleEndianAccessor slea, MapleClient c) throws SQLException {
+         final int skillID = slea.readInt();
+         final int characterID = slea.readInt();
+
+         if(!GameConstants.isValidLinkSkillForJob(skillID, c.getPlayer().getJob())){
+             c.getPlayer().dropMessage(5, "You cannot transfer this link skill yet.");
+             c.getSession().write(MaplePacketCreator.enableActions());
+             return;
+         }
+
+         final int addSkillID = GameConstants.getRelatedLinkSkill(skillID);
+         if(addSkillID == 0){
+             c.getSession().write(MaplePacketCreator.enableActions());
+             return;
+         }
+
+         final int accountID = c.getAccID();
+         Connection con = DatabaseConnection.getConnection();
+         PreparedStatement ps = con.prepareStatement("SELECT id FROM characters WHERE id != ? AND accountid = ?");
+         ps.setInt(1, c.getPlayer().getId());
+         ps.setInt(2, accountID);
+         ResultSet rs = ps.executeQuery();
+
+         List<Integer> receivingCharacters = new ArrayList<>();
+         while(rs.next()){
+             receivingCharacters.add(rs.getInt("id"));
+         }
+         ps.close();
+
+         for(Integer receivingChar : receivingCharacters){
+             PreparedStatement deleteSkillQuery = con.prepareStatement("DELETE FROM skills WHERE characterid = ? AND skillid = ?");
+             deleteSkillQuery.setInt(1, receivingChar);
+             deleteSkillQuery.setInt(2, addSkillID);
+             deleteSkillQuery.executeUpdate();
+             deleteSkillQuery.close();
+             PreparedStatement addLinkSkills = 
+             con.prepareStatement("INSERT INTO skills (id, characterid, skillid, skilllevel, masterlevel, expiration) VALUES (NULL, ?, ?, ?, ?, DEFAULT)");
+             addLinkSkills.setInt(1, receivingChar);
+             addLinkSkills.setInt(2, addSkillID);
+             addLinkSkills.setInt(3, 1);
+             addLinkSkills.setInt(4, 1);
+             addLinkSkills.executeUpdate();
+             addLinkSkills.close();
+         }
+         c.getPlayer().dropMessage(1, "The link skill has been given to all characters in the account.");
+    }
+}
+
+頁首添加：
+
+import database.DatabaseConnection;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;

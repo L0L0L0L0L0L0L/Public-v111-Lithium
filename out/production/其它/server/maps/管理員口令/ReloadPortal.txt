@@ -1,0 +1,22 @@
+搜索：
+
+    public static class 포탈리셋 extends CommandExecute {
+
+        @Override
+        public int execute(MapleClient c, String[] splitted) {
+            PortalScriptManager.getInstance().clearScripts();
+            return 1;
+        }
+    }
+
+替換：
+
+    public static class ReloadPortal extends CommandExecute {
+
+        @Override
+        public int execute(MapleClient c, String[] splitted) {
+            PortalScriptManager.getInstance().clearScripts();
+            c.getPlayer().dropMessage(6, "Portal已更新。");
+            return 1;
+        }
+    }

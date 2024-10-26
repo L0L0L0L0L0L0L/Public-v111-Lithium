@@ -1,0 +1,50 @@
+搜索替換：
+
+    public static byte[] applyMonsterStatus(final MapleMonster mons, final List<MonsterStatusEffect> mse) {
+        if (mse.size() <= 0 || mse.get(0) == null) {
+            return MaplePacketCreator.enableActions();
+        }
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+        mplew.writeShort(SendPacketOpcode.APPLY_MONSTER_STATUS.getValue());
+        mplew.writeInt(mons.getObjectId());
+        final MonsterStatusEffect ms = mse.get(0);
+        if (ms.getStati() == MonsterStatus.POISON) { // burn also here
+            PacketHelper.writeSingleMask(mplew, MonsterStatus.EMPTY);
+            mplew.write(mse.size());
+            for (MonsterStatusEffect m : mse) {
+                mplew.writeInt(m.getFromID()); //character ID
+                if (m.isMonsterSkill()) {
+                    mplew.writeShort(m.getMobSkill().getSkillId());
+                    mplew.writeShort(m.getMobSkill().getSkillLevel());
+                } else if (m.getSkill() > 0) {
+                    mplew.writeInt(m.getSkill());
+                }
+                mplew.writeInt(m.getX()); //dmg
+                mplew.writeInt(1000); //delay
+                mplew.writeInt((int) Math.ceil((ms.getCancelTask() - System.currentTimeMillis()) / 1000)); //持續扣血傷害顯示
+                mplew.writeInt(5); //buff time ?
+                mplew.writeInt(0);
+            }
+            mplew.writeShort(300); // delay in ms
+            mplew.write(1); // size
+            mplew.write(1); // ? v97
+        } else {
+            PacketHelper.writeSingleMask(mplew, ms.getStati());
+
+            mplew.writeInt(ms.getX().intValue());
+            if (ms.isMonsterSkill()) {
+                mplew.writeShort(ms.getMobSkill().getSkillId());
+                mplew.writeShort(ms.getMobSkill().getSkillLevel());
+            } else if (ms.getSkill() > 0) {
+                mplew.writeInt(ms.getSkill());
+            }
+            mplew.writeShort(0); // might actually be the buffTime but it's not displayed anywhere
+
+            mplew.writeShort(0); // delay in ms
+            mplew.write(1); // size
+            mplew.write(1); // ? v97
+        }
+
+        return mplew.getPacket();
+    }

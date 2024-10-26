@@ -1,0 +1,114 @@
+搜索：
+
+        switch (jobType) {
+            case Resistance: // 레지스탕스
+                //newchar.setMap(931000000); 
+                //newchar.setJob(3000);
+                newchar.getInventory(MapleInventoryType.ETC).addItem(new Item(4161001, (byte) 0, (short) 1, (byte) 0));
+                final Map<Skill, SkillEntry> ss7 = new HashMap<Skill, SkillEntry>();
+                ss7.put(SkillFactory.getSkill(30001000), new SkillEntry((byte) 3, (byte) 3, -1)); // 크리스탈 스로우 
+                ss7.put(SkillFactory.getSkill(30001001), new SkillEntry((byte) 3, (byte) 3, -1)); // 잠입
+                ss7.put(SkillFactory.getSkill(30000002), new SkillEntry((byte) 3, (byte) 3, -1)); // 이피션시
+                ss7.put(SkillFactory.getSkill(30001024), new SkillEntry((byte) 1, (byte) 1, -1)); // 멀티펫
+                                newchar.changeSkillLevel_Skip(ss7, false);
+                break;
+            case Adventurer: // 모험가
+                //newchar.setMap(10000);
+                newchar.getInventory(MapleInventoryType.ETC).addItem(new Item(4161001, (byte) 0, (short) 1, (byte) 0));
+                final Map<Skill, SkillEntry> ss6 = new HashMap<Skill, SkillEntry>();
+                ss6.put(SkillFactory.getSkill(1000), new SkillEntry((byte) 3, (byte) 3, -1)); // 달팽이 세마리 
+                ss6.put(SkillFactory.getSkill(1001), new SkillEntry((byte) 3, (byte) 3, -1)); // 회복
+                ss6.put(SkillFactory.getSkill(1002), new SkillEntry((byte) 3, (byte) 3, -1)); // 민첩한 몸놀림
+                ss6.put(SkillFactory.getSkill(8), new SkillEntry((byte) 1, (byte) 1, -1));    // 멀티펫
+                                newchar.changeSkillLevel_Skip(ss6, false); 
+                break;
+            case Cygnus: // 시그너스
+                //newchar.setMap(130030000);
+                newchar.getInventory(MapleInventoryType.ETC).addItem(new Item(4161047, (byte) 0, (short) 1, (byte) 0));
+                final Map<Skill, SkillEntry> ss5 = new HashMap<Skill, SkillEntry>();
+                ss5.put(SkillFactory.getSkill(10001000), new SkillEntry((byte) 3, (byte) 3, -1)); // 달팽이 세마리 
+                ss5.put(SkillFactory.getSkill(10001001), new SkillEntry((byte) 3, (byte) 3, -1)); // 회복
+                ss5.put(SkillFactory.getSkill(10001002), new SkillEntry((byte) 3, (byte) 3, -1)); // 민첩한 몸놀림    
+                ss5.put(SkillFactory.getSkill(10000018), new SkillEntry((byte) 1, (byte) 1, -1)); // 멀티펫
+                newchar.setQuestAdd(MapleQuest.getInstance(20022), (byte) 1, "1");
+                newchar.setQuestAdd(MapleQuest.getInstance(20010), (byte) 1, null); //>_>_>_> ugh
+                                newchar.changeSkillLevel_Skip(ss5, false); 
+                break;
+            case Aran: // 아란
+                //newchar.setMap(914000000);
+                newchar.getInventory(MapleInventoryType.ETC).addItem(new Item(4161048, (byte) 0, (short) 1, (byte) 0));
+                final Map<Skill, SkillEntry> ss4 = new HashMap<Skill, SkillEntry>();
+                ss4.put(SkillFactory.getSkill(20001000), new SkillEntry((byte) 3, (byte) 3, -1)); // 달팽이 세마리 
+                ss4.put(SkillFactory.getSkill(20001001), new SkillEntry((byte) 3, (byte) 3, -1)); // 회복
+                ss4.put(SkillFactory.getSkill(20001002), new SkillEntry((byte) 3, (byte) 3, -1)); // 민첩한 몸놀림
+                ss4.put(SkillFactory.getSkill(20000024), new SkillEntry((byte) 1, (byte) 1, -1)); // 멀티펫
+                //newchar.setJob(2000);
+                                newchar.changeSkillLevel_Skip(ss4, false);                
+                break;
+            case Evan: // 에반
+                //newchar.setMap(900010000);
+                newchar.getInventory(MapleInventoryType.ETC).addItem(new Item(4161052, (byte) 0, (short) 1, (byte) 0));
+                final Map<Skill, SkillEntry> ss3 = new HashMap<Skill, SkillEntry>();
+                ss3.put(SkillFactory.getSkill(20011000), new SkillEntry((byte) 3, (byte) 3, -1)); // 달팽이 세마리
+                ss3.put(SkillFactory.getSkill(20011001), new SkillEntry((byte) 3, (byte) 3, -1)); // 회복
+                ss3.put(SkillFactory.getSkill(20011002), new SkillEntry((byte) 3, (byte) 3, -1)); // 민첩한 몸놀림
+                ss3.put(SkillFactory.getSkill(20011024), new SkillEntry((byte) 1, (byte) 1, -1)); // 멀티펫
+                //newchar.setJob(2001);
+                                newchar.changeSkillLevel_Skip(ss3, false);
+                break;
+            case Mercedes: // Mercedes
+                newchar.getInventory(MapleInventoryType.ETC).addItem(new Item(4161079, (byte) 0, (short) 1, (byte) 0));
+                final Map<Skill, SkillEntry> ss = new HashMap<>();
+                ss.put(SkillFactory.getSkill(20021000), new SkillEntry((byte) 0, (byte) 0, -1));
+                ss.put(SkillFactory.getSkill(20021001), new SkillEntry((byte) 0, (byte) 0, -1));
+                ss.put(SkillFactory.getSkill(20020002), new SkillEntry((byte) 0, (byte) 0, -1));	
+                ss.put(SkillFactory.getSkill(20020022), new SkillEntry((byte) 1, (byte) 1, -1));
+                ss.put(SkillFactory.getSkill(20020109), new SkillEntry((byte) 1, (byte) 1, -1));
+                ss.put(SkillFactory.getSkill(20021110), new SkillEntry((byte) 1, (byte) 1, -1));
+                ss.put(SkillFactory.getSkill(20020111), new SkillEntry((byte) 1, (byte) 1, -1));
+                ss.put(SkillFactory.getSkill(20020112), new SkillEntry((byte) 1, (byte) 1, -1));
+                ss.put(SkillFactory.getSkill(20021181), new SkillEntry((byte) -1, (byte) 0, -1));
+                ss.put(SkillFactory.getSkill(20021166), new SkillEntry((byte) -1, (byte) 0, -1));
+                newchar.changeSkillLevel_Skip(ss, false);
+                break;
+            case Demon: // 데몬슬레이어
+                newchar.getInventory(MapleInventoryType.ETC).addItem(new Item(4161054, (byte) 0, (short) 1, (byte) 0));
+                final Map<Skill, SkillEntry> ss2 = new HashMap<Skill, SkillEntry>();
+                ss2.put(SkillFactory.getSkill(30011000), new SkillEntry((byte) 1, (byte) 1, -1)); // 크리스탈 스로우
+                ss2.put(SkillFactory.getSkill(30011001), new SkillEntry((byte) 1, (byte) 1, -1)); // 잠입
+                ss2.put(SkillFactory.getSkill(30010002), new SkillEntry((byte) 1, (byte) 1, -1)); // 이피션시               
+                ss2.put(SkillFactory.getSkill(30011109), new SkillEntry((byte) 1, (byte) 1, -1)); // 데빌 윙즈
+                ss2.put(SkillFactory.getSkill(30010110), new SkillEntry((byte) 1, (byte) 1, -1)); // 데몬 점프
+                ss2.put(SkillFactory.getSkill(30010111), new SkillEntry((byte) 1, (byte) 1, -1)); // 데쓰 커스
+                ss2.put(SkillFactory.getSkill(30010112), new SkillEntry((byte) 1, (byte) 1, -1)); // 데몬스 퓨리
+                ss2.put(SkillFactory.getSkill(30011024), new SkillEntry((byte) 1, (byte) 1, -1)); // 멀티펫
+				newchar.changeSkillLevel_Skip(ss2, false);
+                break;
+        }
+
+
+替換：
+
+        switch (jobType) {
+            case Resistance: // Resistance
+                newchar.getInventory(MapleInventoryType.ETC).addItem(new Item(4161001, (byte) 0, (short) 1, (byte) 0));
+                break;
+            case Adventurer: // Adventurer
+                newchar.getInventory(MapleInventoryType.ETC).addItem(new Item(4161001, (byte) 0, (short) 1, (byte) 0));
+                break;
+            case Cygnus: // Cygnus
+                newchar.getInventory(MapleInventoryType.ETC).addItem(new Item(4161047, (byte) 0, (short) 1, (byte) 0));
+                break;
+            case Aran: // Aran
+                newchar.getInventory(MapleInventoryType.ETC).addItem(new Item(4161048, (byte) 0, (short) 1, (byte) 0));
+                break;
+            case Evan: //Evan
+                newchar.getInventory(MapleInventoryType.ETC).addItem(new Item(4161052, (byte) 0, (short) 1, (byte) 0));
+                break;
+            case Mercedes: // Mercedes
+                newchar.getInventory(MapleInventoryType.ETC).addItem(new Item(4161079, (byte) 0, (short) 1, (byte) 0));
+                break;
+            case Demon: //Demon
+                newchar.getInventory(MapleInventoryType.ETC).addItem(new Item(4161054, (byte) 0, (short) 1, (byte) 0));
+                break;
+        }

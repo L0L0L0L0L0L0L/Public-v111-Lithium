@@ -1,0 +1,14 @@
+搜索：
+
+        c.getSession().write(MaplePacketCreator.finishedSort(pInvType.getType()));
+        c.getSession().write(MaplePacketCreator.enableActions());
+    }
+
+
+替換：
+
+        if (pInvType != MapleInventoryType.CASH && pInvType != MapleInventoryType.ETC) {//CASH防止有寵物時閃退、ETC防止礦物背包刷新
+            c.getSession().write(MaplePacketCreator.finishedSort(pInvType.getType()));
+        }
+        c.getSession().write(MaplePacketCreator.enableActions());
+    }

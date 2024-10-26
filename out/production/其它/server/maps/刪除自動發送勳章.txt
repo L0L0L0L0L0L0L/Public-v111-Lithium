@@ -1,0 +1,142 @@
+搜索刪除：
+
+            if (level == 1) {
+                switch (job) {
+                    case 1000:
+                        gainItem(1142065, (short) 1);
+                        dropMessage(-1, "獲得了貴族勳章。");
+                        break;
+                }
+            }
+            if (level == 10) {
+                switch (job) {
+                    case 1100:
+                    case 1200:
+                    case 1300:
+                    case 1400:
+                    case 1500:
+                        gainItem(1142066, (short) 1);
+                        dropMessage(-1, "훈련기사의 훈장 을(를) 획득하였습니다.");
+                        break;
+                    case 2100:
+                        gainItem(1142129, (short) 1);
+                        dropMessage(-1, "깨어난 아란 을(를) 획득하였습니다.");
+                        break;
+                    case 3100:
+                        gainItem(1142341, (short) 1);
+                        dropMessage(-1, "부활한 마족 을(를) 획득하였습니다.");
+                        break;
+                    case 2300:
+                        gainItem(1142336, (short) 1);
+                        dropMessage(-1, "영웅이었던자 을(를) 획득하였습니다.");
+                        break;
+                }
+            }
+            if (level == 30) {
+                switch (job) {
+                    case 1110:
+                    case 1210:
+                    case 1310:
+                    case 1410:
+                    case 1510:
+                        gainItem(1142067, (short) 1);
+                        dropMessage(-1, "정식기사의 훈장 을(를) 획득하였습니다.");
+                        break;
+                    case 2110:
+                        gainItem(1142130, (short) 1);
+                        dropMessage(-1, "기억속의 아란 을(를) 획득하였습니다.");
+                        break;
+                    case 3110:
+                        gainItem(1142342, (short) 1);
+                        dropMessage(-1, "어둠의 계약자 을(를) 획득하였습니다.");
+                        break;
+                    case 2310:
+                        gainItem(1142337, (short) 1);
+                        gainSP(2);
+                        dropMessage(-1, "에우렐의 엘프 을(를) 획득하였습니다.");
+                        break;
+                }
+            }
+            if (level == 70) {
+                switch (job) {
+                    case 1111:
+                    case 1211:
+                    case 1311:
+                    case 1411:
+                    case 1511:
+                        gainItem(1142068, (short) 1);
+                        dropMessage(-1, "상급기사의 훈장 을(를) 획득하였습니다.");
+                        break;
+                    case 2111:
+                        gainItem(1142131, (short) 1);
+                        dropMessage(-1, "시련속의 아란 을(를) 획득하였습니다.");
+                        break;
+                    case 3111:
+                        gainItem(1142343, (short) 1);
+                        dropMessage(-1, "각성의 마족 을(를) 획득하였습니다.");
+                        break;
+                    case 2311:
+                        gainSP(2);
+                        gainItem(1142338, (short) 1);
+                        dropMessage(-1, "고귀한자의 표식 을(를) 획득하였습니다.");
+                        break;
+                }
+            }
+            if (level == 120) {
+                switch (job) {
+                    case 1111:
+                    case 1211:
+                    case 1311:
+                    case 1411:
+                    case 1511:
+                    case 1112:
+                    case 1212:
+                    case 1312:
+                    case 1412:
+                    case 1512:
+                        gainItem(1142069, (short) 1);
+                        dropMessage(-1, "기사단장의 훈장 을(를) 획득하였습니다.");
+                        break;
+                    case 2112:
+                        gainItem(1142132, (short) 1);
+                        dropMessage(-1, "희망속의 아란 을(를) 획득하였습니다.");
+                        break;
+                    case 3112:
+                        gainItem(1142344, (short) 1);
+                        dropMessage(-1, "어둠의 용사 을(를) 획득하였습니다.");
+                        break;
+                    case 2312:
+                        gainItem(1142339, (short) 1);
+                        dropMessage(-1, "엘프의 영웅 을(를) 획득하였습니다.");
+                        break;
+                }
+            }
+            if (level == 200) {
+                switch (job) {
+                    case 3112:
+                        gainItem(1142345, (short) 1);
+                        dropMessage(-1, "복수의 화신 을(를) 획득하였습니다.");
+                        break;
+                    case 2312:
+                        gainItem(1142340, (short) 1);
+                        dropMessage(-1, "엘프의 왕 을(를) 획득하였습니다.");
+                        break;
+                    case 2218:
+                        gainItem(1142158, (short) 1);
+                        dropMessage(-1, "영웅의 후계자 을(를) 획득하였습니다.");
+                        break;
+                }
+            }
+            if (GameConstants.isEvan(job)) {
+                switch (job) {
+                    case 2200:
+                        gainItem(1142152, (short) 1);
+                        dropMessage(-1, "착한 아이 을(를) 획득하였습니다.");
+                    case 2215:
+                        gainItem(1142156, (short) 1);
+                        dropMessage(-1, "드래곤 마스터 을(를) 획득하였습니다.");
+                    case 2217:
+                        gainItem(1142157, (short) 1);
+                        dropMessage(-1, "드래곤 마스터 을(를) 획득하였습니다.");
+                }
+            }

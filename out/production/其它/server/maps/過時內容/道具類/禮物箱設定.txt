@@ -1,0 +1,89 @@
+搜索：
+
+                   case 2430191: { //후원뽑기 상자
+                    if (c.getPlayer().getInventory(MapleInventoryType.EQUIP).getNumFreeSlot() >= 1 && c.getPlayer().getInventory(MapleInventoryType.USE).getNumFreeSlot() >= 1 && c.getPlayer().getInventory(MapleInventoryType.ETC).getNumFreeSlot() >= 1) {
+                        if (Randomizer.isSuccess(8)) {//성공률
+                            int itemr[] = {1012069, 1112403, 1182010, 1152003, 1122017};//레어 리스트
+                            int qw[] = {1, 1, 1, 1, 1};
+                            int num = Randomizer.rand(0, itemr.length);
+                            MapleInventoryManipulator.addById(c, itemr[num], (short) qw[num], "新手禮物");
+                            chr.dropMessage(5, " [禮品] 獲得了 " + MapleItemInformationProvider.getInstance().getName(itemr[num])+ "。");
+                        } else {
+                            int itemr[] = {1112401, 1012070, 1022118, 1152009, 1132013, 1032094, 1122106, 5062002, 5064000, 5064100, 5064300, 2049300, 2049116, 1112401, 1012070, 1022118, 1152009, 1132013, 1032094, 1122106, 5062002, 5064000, 5064100, 5064300, 2049300, 2049116};//아이템 리스
+                            int qw[] = {1, 1, 1, 1, 1, 1, 1, 300, 50, 50, 50, 10, 20, 1, 1, 1, 1, 1, 1, 1, 300, 50, 50, 50, 10, 20};//갯수
+                            int num = Randomizer.rand(0, itemr.length);
+                            MapleInventoryManipulator.addById(c, itemr[num], (short) qw[num], "新手禮物");
+                            chr.dropMessage(5, " [禮品] 獲得了 " + MapleItemInformationProvider.getInstance().getName(itemr[num])+ "。");
+                    }
+                       MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.USE, slot, (byte) 1, false);
+                    } else {
+                        chr.dropMessage(6, "拆開禮物之前，請預留一定的背包空間。");
+                    }
+                    break;
+                }
+                
+                    case 2430192: { //추억뽑기 상자
+                    if (c.getPlayer().getInventory(MapleInventoryType.EQUIP).getNumFreeSlot() >= 1 && c.getPlayer().getInventory(MapleInventoryType.USE).getNumFreeSlot() >= 1 && c.getPlayer().getInventory(MapleInventoryType.ETC).getNumFreeSlot() >= 1) {
+                        if (Randomizer.isSuccess(6)) {//성공률
+                            int itemr[] = {5064100, 5064300, 5062000, 5062002, 2049301, 2049116};//레어 리스트
+                            int qw[] = {10, 10, 100, 80, 5, 10};
+                            int num = Randomizer.rand(0, itemr.length);
+                            MapleInventoryManipulator.addById(c, itemr[num], (short) qw[num], "成長禮物");
+                            chr.dropMessage(5, " [禮品] 獲得了 " + MapleItemInformationProvider.getInstance().getName(itemr[num])+ "。");
+                        } else {
+                            int itemr[] = {5064100, 5064300, 5062000, 5062002, 2049301, 2049116, 5064100, 5064300, 5062000, 5062002, 2049301, 2049116};//아이템 리스
+                            int qw[] = {3, 3, 30, 20, 1, 2, 2, 2, 20, 12, 1, 2};//갯수
+                            int num = Randomizer.rand(0, itemr.length);
+                            MapleInventoryManipulator.addById(c, itemr[num], (short) qw[num], "成長禮物");
+                            chr.dropMessage(5, " [禮品] 獲得了 " + MapleItemInformationProvider.getInstance().getName(itemr[num])+ "。");
+                        }
+                        MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.USE, slot, (byte) 1, false);
+                    } else {
+                        chr.dropMessage(6, "拆開禮物之前，請預留一定的背包空間。");
+                    }
+                    break;
+                }
+                    
+                  case 2430047: { //핫타임 상자
+                    if (c.getPlayer().getInventory(MapleInventoryType.EQUIP).getNumFreeSlot() >= 1 && c.getPlayer().getInventory(MapleInventoryType.USE).getNumFreeSlot() >= 1 && c.getPlayer().getInventory(MapleInventoryType.ETC).getNumFreeSlot() >= 1) {
+                        if (Randomizer.isSuccess(5)) {//성공률
+                            int itemr[] = {1102095, 1102096, 1102097, 1702118, 1702119, 1702120, 2430191, 5062002};//레어 리스트
+                            int qw[] = {1, 1, 1, 1, 1, 1, 5, 500};
+                            int num = Randomizer.rand(0, itemr.length);
+                            MapleInventoryManipulator.addById(c, itemr[num], (short) qw[num], "禮品箱");
+                            chr.dropMessage(5, "[禮品] 獲得了 " + MapleItemInformationProvider.getInstance().getName(itemr[num])+ "。");
+                        } else {
+                            int itemr[] = {1112401, 1012070, 1022118, 1152009, 1132013, 1032094, 1122106, 1112401, 1012070, 1022118, 1152009, 1132013, 1032094, 1122106, 1112401, 1012070, 1022118, 1152009, 1132013, 1032094, 1122106, 1112401, 1012070, 1022118, 1152009, 1132013, 1032094, 1122106};//아이템 리스
+                            int qw[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};//갯수
+                            int num = Randomizer.rand(0, itemr.length);
+                            MapleInventoryManipulator.addById(c, itemr[num], (short) qw[num], "禮品箱");
+                            chr.dropMessage(5, "[禮品] 獲得了 " + MapleItemInformationProvider.getInstance().getName(itemr[num])+ "。");
+                        }
+                        MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.USE, slot, (byte) 1, false);
+                    } else {
+                        chr.dropMessage(6, "拆開禮物之前，請預留一定的背包空間。");
+                    }
+                    break;
+                }
+                
+                  case 2430193: { //보스 상자
+                    if (c.getPlayer().getInventory(MapleInventoryType.EQUIP).getNumFreeSlot() >= 1 && c.getPlayer().getInventory(MapleInventoryType.USE).getNumFreeSlot() >= 1 && c.getPlayer().getInventory(MapleInventoryType.ETC).getNumFreeSlot() >= 1) {
+                        if (Randomizer.isSuccess(3)) {//성공률
+                            int itemr[] = {4020009, 2049300, 2049116, 5062002, 5062000};//레어 리스트
+                            int qw[] = {10, 5, 5, 40, 60};
+                            int num = Randomizer.rand(0, itemr.length);
+                            MapleInventoryManipulator.addById(c, itemr[num], (short) qw[num], "玩家禮物");
+                            chr.dropMessage(5, "[禮品] 獲得了 " + MapleItemInformationProvider.getInstance().getName(itemr[num])+ "。");
+                        } else {
+                            int itemr[] = {4020009, 2049300, 2049116, 5062002, 5062000, 4310001, 4020009, 2049300, 2049116, 5062002, 5062000, 4310001, 4020009, 2049300, 2049116, 5062002, 5062000, 4310001, 4020009, 2049300, 2049116, 5062002, 5062000, 4310001, 4020009, 2049300, 2049116, 5062002, 5062000, 4310001, 4020009, 2049300, 2049116, 5062002, 5062000, 4310001, 4020009, 2049300, 2049116, 5062002, 5062000, 4310001, 4020009, 2049300, 2049116, 5062002, 5062000, 4310001};//아이템 리스
+                            int qw[] = {1, 1, 1, 5, 10, 1, 1, 1, 1, 5, 10, 1, 1, 1, 1, 5, 10, 1, 1, 1, 1, 5, 10, 1, 1, 1, 1, 5, 10, 1, 1, 1, 1, 5, 10, 1, 1, 1, 1, 5, 10, 1, 1, 1, 1, 5, 10, 1};//갯수
+                            int num = Randomizer.rand(0, itemr.length);
+                            MapleInventoryManipulator.addById(c, itemr[num], (short) qw[num], "玩家禮物");
+                            chr.dropMessage(5, "[禮品] 獲得了 " + MapleItemInformationProvider.getInstance().getName(itemr[num])+ "。");
+                        }
+                        MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.USE, slot, (byte) 1, false);
+                    } else {
+                        chr.dropMessage(6, "拆開禮物之前，請預留一定的背包空間。");
+                    }
+                    break;
+                }

@@ -1,0 +1,15 @@
+搜索：
+
+                case 2221006:
+                case 5310008:
+                    ret.monsterStatus.put(MonsterStatus.STUN, 1);
+                    break;
+
+
+替換：
+
+                case 2221006:
+                case 5310008:
+                case 21100002://狂狼勇士-突刺之矛
+                    ret.monsterStatus.put(MonsterStatus.STUN, 1);
+                    break;

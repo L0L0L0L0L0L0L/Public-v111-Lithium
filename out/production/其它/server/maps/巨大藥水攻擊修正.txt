@@ -1,0 +1,78 @@
+搜索：
+
+    public static boolean isInflationSkill(final int skill) {
+        return isBeginnerJob(skill / 10000) && skill % 10000 == 1092;
+    }
+
+替換：
+
+    public static boolean isInflationSkill(final int skill) {
+        return isBeginnerJob(skill / 10000) && (skill % 10000 == 1092 || skill % 10000 == 1094 || skill % 10000 == 1095);
+    }
+
+
+搜索：
+
+    public static final void closeRangeAttack(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr, final boolean energy) {
+        if (chr == null || (energy && chr.getBuffedValue(MapleBuffStat.ENERGY_CHARGE) == null && chr.getBuffedValue(MapleBuffStat.BODY_PRESSURE) == null && chr.getBuffedValue(MapleBuffStat.DARK_AURA) == null && chr.getBuffedValue(MapleBuffStat.TORNADO) == null && chr.getBuffedValue(MapleBuffStat.SUMMON) == null && chr.getBuffedValue(MapleBuffStat.RAINING_MINES) == null && chr.getBuffedValue(MapleBuffStat.TELEPORT_MASTERY) == null)) {
+            return;
+        }
+
+替換：
+
+    public static final void closeRangeAttack(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr, final boolean energy) {
+        if (chr == null || (energy && chr.getBuffedValue(MapleBuffStat.ENERGY_CHARGE) == null && chr.getBuffedValue(MapleBuffStat.BODY_PRESSURE) == null && chr.getBuffedValue(MapleBuffStat.DARK_AURA) == null && chr.getBuffedValue(MapleBuffStat.TORNADO) == null && chr.getBuffedValue(MapleBuffStat.SUMMON) == null && chr.getBuffedValue(MapleBuffStat.RAINING_MINES) == null && chr.getBuffedValue(MapleBuffStat.TELEPORT_MASTERY) == null && chr.getBuffedValue(MapleBuffStat.GIANT_POTION) == null)) {
+            return;
+        }
+
+
+搜索：
+
+    public static byte[] addAttackInfo(final int type, final int cid, final int tbyte, final int skill, final int level, final int display, final byte speed, final List<AttackPair> damage, final int lvl, final byte mastery, final byte unk, final int charge, final Point pos, final int ultLevel) {
+        final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+        if (type == 0) {
+            mplew.writeShort(SendPacketOpcode.CLOSE_RANGE_ATTACK.getValue());
+        } else if (type == 1 || type == 2) {
+            mplew.writeShort(SendPacketOpcode.RANGED_ATTACK.getValue());
+        } else if (type == 3) {
+            mplew.writeShort(SendPacketOpcode.MAGIC_ATTACK.getValue());
+        } else {
+            mplew.writeShort(SendPacketOpcode.ENERGY_ATTACK.getValue());
+        }
+
+        mplew.writeInt(cid);
+        mplew.write(tbyte);
+        mplew.write(lvl); //?
+        if (skill > 0 || type == 3) { // magic
+            mplew.write(level);
+            mplew.writeInt(skill);
+        } else {
+            mplew.write(0);
+        }
+
+
+替換：
+
+    public static byte[] addAttackInfo(final int type, final int cid, final int tbyte, final int skill, final int level, final int display, final byte speed, final List<AttackPair> damage, final int lvl, final byte mastery, final byte unk, final int charge, final Point pos, final int ultLevel) {
+        final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+        if (type == 0) {
+            mplew.writeShort(SendPacketOpcode.CLOSE_RANGE_ATTACK.getValue());
+        } else if (type == 1 || type == 2) {
+            mplew.writeShort(SendPacketOpcode.RANGED_ATTACK.getValue());
+        } else if (type == 3) {
+            mplew.writeShort(SendPacketOpcode.MAGIC_ATTACK.getValue());
+        } else {
+            mplew.writeShort(SendPacketOpcode.ENERGY_ATTACK.getValue());
+        }
+
+        mplew.writeInt(cid);
+        mplew.write(tbyte);
+        mplew.write(lvl); //?
+        if (skill > 0 || type == 3) { // magic
+            mplew.write(level);
+            mplew.writeInt(skill == 1092 ? 10001092 : skill == 1094 ? 10001094 : skill); //冒險家職業群技能ID長度會導致其他玩家閃退
+        } else {
+            mplew.write(0);
+        }

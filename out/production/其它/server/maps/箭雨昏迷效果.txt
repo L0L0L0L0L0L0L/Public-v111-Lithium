@@ -1,0 +1,15 @@
+搜索：
+
+                case 1211010: //NOT A BUFF - HP Recover
+                    ret.hpR = ret.x / 100.0;
+                    break;
+
+替換：
+
+                case 1211010: //NOT A BUFF - HP Recover
+                    ret.hpR = ret.x / 100.0;
+                    break;
+                case 3111004: //dragon roar
+                case 13111000://箭雨
+                    ret.monsterStatus.put(MonsterStatus.STUN, Integer.valueOf(1));
+                    break;

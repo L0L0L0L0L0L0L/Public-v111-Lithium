@@ -1,0 +1,25 @@
+搜索：
+
+    public static final void EnterMTS(final MapleClient c, final MapleCharacter chr) {
+/*
+        if (chr.hasBlockedInventory() || chr.getMap() == null || chr.getEventInstance() != null || c.getChannelServer() == null) {
+            chr.dropMessage(1, "지금은 이용하실수없습니다.");
+            c.getSession().write(MaplePacketCreator.enableActions());
+            return;
+        }
+        if (chr.getLevel() < 9) {
+            chr.dropMessage(1, "10레벨 이전에는 트레이드 기능을 사용하실수 없습니다.");
+            c.getSession().write(MaplePacketCreator.enableActions());
+            return;
+        }
+        if (chr.getMapId() == GameConstants.STARTMAP) {
+            chr.dropMessage(1, "지금은 이용하실수없습니다.");
+            c.getSession().write(MaplePacketCreator.enableActions());
+            return;
+        }
+*/
+        NPCScriptManager.getInstance().start(c, 9900002);
+        c.getSession().write(MaplePacketCreator.enableActions());
+        //NPCScriptManager.getInstance().start(c, 9900000);
+        //c.getSession().write(MaplePacketCreator.enableActions());
+    }

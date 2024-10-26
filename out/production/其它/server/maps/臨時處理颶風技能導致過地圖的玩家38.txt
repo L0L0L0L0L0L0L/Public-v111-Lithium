@@ -1,0 +1,14 @@
+搜索：
+
+        if (chr.getBuffedValue(MapleBuffStat.TORNADO) != null) {
+            mask[MapleBuffStat.TORNADO.getPosition(true)] |= MapleBuffStat.TORNADO.getValue();
+            buffvalue.add(new Pair<Integer, Integer>(Integer.valueOf(chr.getBuffedValue(MapleBuffStat.TORNADO).intValue()), 2));
+            buffvalue.add(new Pair<Integer, Integer>(Integer.valueOf(chr.getTrueBuffSource(MapleBuffStat.TORNADO)), 3));
+        }
+
+替換：
+
+        if (chr.getBuffedValue(MapleBuffStat.TORNADO) != null) {
+            mask[MapleBuffStat.TORNADO.getPosition(true)] |= MapleBuffStat.TORNADO.getValue();
+            buffvalue.add(new Pair<Integer, Integer>(Integer.valueOf(chr.getBuffedValue(MapleBuffStat.TORNADO).intValue()), 1));
+        }

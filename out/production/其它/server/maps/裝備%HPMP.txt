@@ -1,0 +1,63 @@
+搜索：
+
+            } //slow, poison, darkness, seal, freeze
+            Integer set = ii.getSetItemID(equip.getItemId());
+            if (set != null && set > 0) {
+                int value = 1;
+                if (setHandling.containsKey(set)) {
+                    value += setHandling.get(set).intValue();
+                }
+                setHandling.put(set, value); //id of Set, number of items to go with the set
+            }
+
+
+替換：
+
+            } //slow, poison, darkness, seal, freeze
+            percent_hp += ii.getItemIncMHPr(equip.getItemId()); //裝備%HP
+            percent_mp += ii.getItemIncMMPr(equip.getItemId()); //裝備%MP
+            Integer set = ii.getSetItemID(equip.getItemId());
+            if (set != null && set > 0) {
+                int value = 1;
+                if (setHandling.containsKey(set)) {
+                    value += setHandling.get(set).intValue();
+                }
+                setHandling.put(set, value); //id of Set, number of items to go with the set
+            }
+
+
+
+
+搜索：
+
+    public final int getWatkForProjectile(final int itemId) {
+        final ItemInformation i = getItemInformation(itemId);
+        if (i == null || i.equipStats == null || i.equipStats.get("incPAD") == null) {
+            return 0;
+        }
+        return i.equipStats.get("incPAD");
+    }
+
+替換：
+
+    public final int getWatkForProjectile(final int itemId) {
+        final ItemInformation i = getItemInformation(itemId);
+        if (i == null || i.equipStats == null || i.equipStats.get("incPAD") == null) {
+            return 0;
+        }
+        return i.equipStats.get("incPAD");
+    }
+
+    public int getItemIncMHPr(int itemId) {//裝備%HP
+        if (getEquipStats(itemId) == null || !getEquipStats(itemId).containsKey("MHPr")) {
+            return 0;
+        }
+        return getEquipStats(itemId).get("MHPr");
+    }
+
+    public int getItemIncMMPr(int itemId) {//裝備%MP
+        if (getEquipStats(itemId) == null || !getEquipStats(itemId).containsKey("MMPr")) {
+            return 0;
+        }
+        return getEquipStats(itemId).get("MMPr");
+    }

@@ -1,0 +1,62 @@
+搜索：
+
+                if (f.knockback) {
+                    mons.switchController(chr, true);
+                }
+            }
+        }
+       chr.getSummonedFamiliar().addFatigue(chr, attackPair.size());
+    }
+
+
+替換：
+
+                if (f.knockback) {
+                    mons.switchController(chr, true);
+                }
+            }
+        }
+       //chr.getSummonedFamiliar().addFatigue(chr, attackPair.size());
+    }
+
+
+搜索：
+
+    public void doFamiliarSchedule(long now) {
+        if (familiars == null) {
+            return;
+        }
+        for (MonsterFamiliar mf : familiars.values()) {
+            if (summonedFamiliar != null && summonedFamiliar.getId() == mf.getId()) {
+                mf.addFatigue(this, 5);
+                final MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+                final MapleStatEffect eff = ii.getItemEffect(ii.getFamiliar(summonedFamiliar.getFamiliar()).passive);
+                if (eff != null && eff.getInterval() > 0 && canFamiliarEffect(now, eff) && eff.makeChanceResult()) {
+                    eff.applyTo(this);
+                }
+            } else if (mf.getFatigue() > 0) {
+                mf.setFatigue(Math.max(0, mf.getFatigue() - 5));
+            }
+        }
+    }
+
+
+替換：
+
+    public void doFamiliarSchedule(long now) {
+        if (familiars == null) {
+            return;
+        }
+        for (MonsterFamiliar mf : familiars.values()) {
+            if (summonedFamiliar != null && summonedFamiliar.getId() == mf.getId()) {
+                //mf.addFatigue(this, 5);
+                final MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+                final MapleStatEffect eff = ii.getItemEffect(ii.getFamiliar(summonedFamiliar.getFamiliar()).passive);
+                if (eff != null && eff.getInterval() > 0 && canFamiliarEffect(now, eff) && eff.makeChanceResult()) {
+                    eff.applyTo(this);
+                }
+            } else if (mf.getFatigue() > 0) {
+                mf.setFatigue(Math.max(0, mf.getFatigue() - 5));
+            }
+        }
+    }

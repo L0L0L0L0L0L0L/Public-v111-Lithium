@@ -1,0 +1,20 @@
+搜索：
+
+            @Override
+            public void sendPackets(MapleClient c) {
+                if (c != null && c.getPlayer() != null && (questid <= 0 || c.getPlayer().getQuestStatus(questid) == 1) && (idrop.getItemId() / 10000 != 238 || c.getPlayer().getMonsterBook().getLevelByCard(idrop.getItemId()) >= 2) && mob != null && dropPos != null) {
+                    c.getSession().write(EtcPacket.dropItemFromMapObject(mdrop, mob.getTruePosition(), dropPos, (byte) 1));
+                }
+            }
+        });
+
+替換：
+
+
+            @Override
+            public void sendPackets(MapleClient c) {
+                if (c != null && c.getPlayer() != null && mob != null && dropPos != null && (c.getPlayer().getQuestStatus(questid) == 1 || c.getPlayer().getMonsterBook().getLevelByCard(idrop.getItemId()) < 2)) {
+                    c.getSession().write(EtcPacket.dropItemFromMapObject(mdrop, mob.getTruePosition(), dropPos, (byte) 1));
+                }
+            }
+        });

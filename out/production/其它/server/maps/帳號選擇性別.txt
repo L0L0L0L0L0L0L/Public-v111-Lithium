@@ -1,0 +1,192 @@
+搜索：
+
+    // LOGIN
+    LOGIN_PASSWORD(false),
+    SEND_ENCRYPTED(false),
+    CLIENT_ERROR(false),
+
+替換：
+
+    // LOGIN
+    LOGIN_PASSWORD(false),
+    SEND_ENCRYPTED(false),
+    SET_GENDER(false),//選擇性別
+    CLIENT_ERROR(false),
+
+
+
+搜索：
+
+            case REPORT:
+                PlayersHandler.Report(slea, c);
+                break;
+
+替換：
+
+            case REPORT:
+                PlayersHandler.Report(slea, c);
+                break;
+            case SET_GENDER:
+                CharLoginHandler.SetGenderRequest(slea, c);
+                break;
+
+
+
+
+搜索：
+
+
+    private static final boolean loginFailCount(final MapleClient c) {
+        c.loginAttempt++;
+        if (c.loginAttempt > 5) {
+            return true;
+        }
+        return false;
+    }
+
+
+替換：
+
+    private static final boolean loginFailCount(final MapleClient c) {
+        c.loginAttempt++;
+        if (c.loginAttempt > 5) {
+            return true;
+        }
+        return false;
+    }
+
+    public static final void SetGenderRequest(final LittleEndianAccessor slea, final MapleClient c) {
+            byte type = slea.readByte(); //?
+        if (type == 0x01 && c.getGender() == 10) { //Packet shouldn't come if Gender isn't 10.
+            c.setGender(slea.readByte());
+            c.updateGender();//性別刷新
+            c.getSession().write(LoginPacket.getAuthSuccessRequest(c));
+            c.getSession().write(LoginPacket.getGenderChanged(c));//選擇性別回饋
+            //c.getSession().write(LoginPacket.getLoginFailed(23));//楓之谷協議
+            c.setIdleTask(Timer.PingTimer.getInstance().schedule(new Runnable() {
+               public void run() {
+                    c.getSession().close(true);
+                }
+            }, 10 * 60 * 10000));
+        }
+        if (c.getGender()== 10) {
+            c.updateLoginState(MapleClient.LOGIN_NOTLOGGEDIN, c.getSessionIPAddress());//防止卡帳號
+        }
+    }
+
+
+頁首：
+import server.Timer;
+
+
+
+
+
+搜索：
+
+
+    public boolean CheckSecondPassword(String in) {
+        boolean allow = false;
+
+        // Check if the passwords are correct here. :B
+        if ((secondPassword.equals(in))) {
+            // Check if a password upgrade is needed.
+            allow = true;
+        } else if (salt2 == null && (secondPassword.equals(in))) {
+            allow = true;
+        }
+        return allow;
+    }
+
+
+替換：
+
+    public boolean CheckSecondPassword(String in) {
+        boolean allow = false;
+
+        // Check if the passwords are correct here. :B
+        if ((secondPassword.equals(in))) {
+            // Check if a password upgrade is needed.
+            allow = true;
+        } else if (salt2 == null && (secondPassword.equals(in))) {
+            allow = true;
+        }
+        return allow;
+    }
+
+    public final void updateGender() {
+
+        try (Connection con = DatabaseConnection.getConnection(); PreparedStatement ps = con.prepareStatement("UPDATE `accounts` SET `gender` = ? WHERE id = ?")) {
+            ps.setInt(1, gender);
+            ps.setInt(2, accId);
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            System.err.println("更新性別錯誤" + e);
+            FileoutputUtil.outputFileError("logs/資料庫異常.txt", e);
+        }
+    }
+
+
+搜索：
+
+    PIN_OPERATION,
+    SECONDPW_ERROR,
+
+替換：
+
+    PIN_OPERATION,
+    SECONDPW_ERROR,
+    GENDER_SET,
+
+
+
+
+搜索：
+
+
+    public static final byte[] getTempBan(final long timestampTill, final byte reason) {
+        final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter(17);
+
+        // 99 : You have been blocked for typing in an invalid password or pincode 5 times.
+        // 199 : You have been blocked for typing in an invalid password or pincode 10 times.
+        // 299 : You have been blocked for typing in an invalid password or pincode more than 10 times.			
+        mplew.writeShort(SendPacketOpcode.LOGIN_STATUS.getValue());
+        mplew.write(2);
+        mplew.write(0);
+        mplew.writeInt(0);
+        mplew.write(reason);
+        mplew.writeLong(timestampTill); // Tempban date is handled as a 64-bit long, number of 100NS intervals since 1/1/1601.
+
+        return mplew.getPacket();
+    }
+
+
+替換：
+
+    public static final byte[] getTempBan(final long timestampTill, final byte reason) {
+        final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter(17);
+
+        // 99 : You have been blocked for typing in an invalid password or pincode 5 times.
+        // 199 : You have been blocked for typing in an invalid password or pincode 10 times.
+        // 299 : You have been blocked for typing in an invalid password or pincode more than 10 times.			
+        mplew.writeShort(SendPacketOpcode.LOGIN_STATUS.getValue());
+        mplew.write(2);
+        mplew.write(0);
+        mplew.writeInt(0);
+        mplew.write(reason);
+        mplew.writeLong(timestampTill); // Tempban date is handled as a 64-bit long, number of 100NS intervals since 1/1/1601.
+
+        return mplew.getPacket();
+    }
+
+    public static final byte[] getGenderChanged(final MapleClient client) {
+        final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+        mplew.writeShort(SendPacketOpcode.GENDER_SET.getValue());
+        mplew.write(0);
+        mplew.writeMapleAsciiString(client.getAccountName());
+        mplew.writeMapleAsciiString(String.valueOf(client.getAccID()));
+
+        return mplew.getPacket();
+    }

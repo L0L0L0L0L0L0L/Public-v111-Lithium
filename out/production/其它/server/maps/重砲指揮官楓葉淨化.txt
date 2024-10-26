@@ -1,0 +1,18 @@
+搜索：
+
+            case 5321008:
+            case 23121008:
+            case 24121009:
+                return skill;
+        }
+        return false;
+    }
+
+替換：
+
+            case 5321006://楓葉淨化
+            case 23121008:
+                return skill;
+        }
+        return false;
+    }

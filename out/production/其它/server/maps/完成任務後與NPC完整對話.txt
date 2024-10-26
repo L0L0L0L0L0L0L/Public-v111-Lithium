@@ -1,0 +1,40 @@
+搜索：
+
+    public final void updateQuest(final MapleQuestStatus quest, final boolean update) {
+        quests.put(quest.getQuest(), quest);
+        if (!(quest.isCustom())) {
+            client.getSession().write(InfoPacket.updateQuest(quest));
+            if (quest.getStatus() == 1 && !update) {
+                client.getSession().write(EtcPacket.updateQuestInfo(this, quest.getQuest().getId(), quest.getNpc(), (byte) 10));
+            }
+        }
+    }
+
+
+替換：
+
+
+    public final void updateQuest(final MapleQuestStatus quest, final boolean update) {
+        quests.put(quest.getQuest(), quest);
+        if (!(quest.isCustom())) {
+            client.getSession().write(InfoPacket.updateQuest(quest));
+            if (quest.getStatus() == 1 && !update) {//開始任務後與NPC完整對話
+                client.getSession().write(EtcPacket.updateQuestInfo(this, quest.getQuest().getId(), quest.getNpc(), (byte) 10));
+            }
+            final int[] ss = {3080, 3081, 3334, 3521, 3641, 3926, 4307, 6033, 20300, 1009, 1010, 1011, 1012, 1013, 1014, 1032, 1033, 1041, 1042, 1043, 1600, 1601, 1603, 1604, 1608, 1612, 1614, 1617, 1618, 1619, 1620, 
+1621, 1624, 1626, 1630, 2019, 2020, 2044, 2045, 2177, 2237, 2240, 2272, 2277, 2284, 2288, 2289, 2312, 2313, 2314, 2315, 2316, 2317, 2318, 2321, 2322, 2323, 2325, 2326, 
+2328, 2354, 2356, 2359, 2360, 2361, 2364, 2372, 2373, 2378, 2379, 2381, 2382, 2710, 2712, 2889, 2890, 2891, 3000, 3001, 3002, 3004, 3005, 3006, 3007, 3008, 3009, 3010, 
+3011, 3012, 3013, 3014, 3015, 3016, 3017, 3018, 3019, 3020, 3021, 3022, 3023, 3024, 3025, 3026, 3027, 3028, 3029, 3030, 3031, 3032, 3033, 3036, 3039, 3040, 3041, 3042, 
+3044, 3045, 3048, 3051, 3070, 3075, 3076, 3105, 3107, 3116, 3118, 3123, 3184, 3185, 3186, 3188, 3189, 3190, 3191, 3210, 3211, 3212, 3213, 3214, 3215, 3216, 3217, 3218, 
+3219, 3226, 3227, 3401, 3402, 3403, 3405, 3417, 3423, 3424, 3425, 3427, 3428, 3610, 3715, 3756, 3757, 3758, 3851, 3906, 3910, 8002, 8003, 8007, 8008, 8009, 8010, 8018, 
+8019, 8069, 8072, 8073, 8080, 20532, 21000, 22003, 22005, 22008, 22009, 22403, 22501, 22502, 22503, 22504, 22505, 22508, 22510, 22512, 22513, 22517, 22524, 22540, 22549, 
+22550, 22551, 22560, 22571, 22581, 22583, 22589, 22592, 31101, 31103, 31149, 31150, 31151, 31158, 31159, 31201, 31202, 31203, 31207, 31213, 31219, 31221, 31227};
+            for (int i : ss)
+            if (quest.getQuest().getId() == i) {//限制<int name="state" value="2" />和nextquest的任務
+                return;
+            }
+            if (quest.getStatus() == 2) {//完成任務後與NPC完整對話
+                client.getSession().write(EtcPacket.updateQuestInfo(this, quest.getQuest().getId(), quest.getNpc(), (byte) 10));
+            }
+        }
+    }

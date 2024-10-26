@@ -1,0 +1,12 @@
+搜索：
+
+    public void run() throws InterruptedException {
+        System.out.println("正在删除和初始化未使用的數據。");
+
+
+替換：
+
+    public void run() throws InterruptedException {
+        System.setProperty("net.sf.odinms.wzpath", "wz");
+        System.setProperty("polyglot.js.nashorn-compat", "true");
+        System.out.println("正在删除和初始化未使用的數據。");

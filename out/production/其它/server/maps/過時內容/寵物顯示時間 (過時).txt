@@ -1,0 +1,37 @@
+搜索：
+
+    public static final void addPetItemInfo(final MaplePacketLittleEndianWriter mplew, final Item item, final MaplePet pet, final boolean active) {
+        if (item == null) {
+            mplew.writeLong(PacketHelper.getKoreanTimestamp((long) (System.currentTimeMillis() * 1.5)));
+        } else {
+            PacketHelper.addExpirationTime(mplew, item.getExpiration() <= System.currentTimeMillis() ? -1 : item.getExpiration());
+        }
+        mplew.writeInt(-1);
+        mplew.writeAsciiString(pet.getName(), 13);
+        mplew.write(pet.getLevel());
+        mplew.writeShort(pet.getCloseness());
+        mplew.write(pet.getFullness());
+        if (item == null) {
+            mplew.writeLong(PacketHelper.getKoreanTimestamp((long) (System.currentTimeMillis() * 1.5)));
+        } else {
+            PacketHelper.addExpirationTime(mplew, item.getExpiration() <= System.currentTimeMillis() ? -1 : item.getExpiration());
+        }
+
+替換：
+
+    public static final void addPetItemInfo(final MaplePacketLittleEndianWriter mplew, final Item item, final MaplePet pet, final boolean active) {
+        if (item == null) {
+            mplew.writeLong(PacketHelper.getKoreanTimestamp((long) (System.currentTimeMillis() * 1.5)));
+        } else {
+            PacketHelper.addExpirationTime(mplew, item.getExpiration() <= System.currentTimeMillis() ? -1 : item.getExpiration() + (3600000 * 12));
+        }
+        mplew.writeInt(-1);
+        mplew.writeAsciiString(pet.getName(), 13);
+        mplew.write(pet.getLevel());
+        mplew.writeShort(pet.getCloseness());
+        mplew.write(pet.getFullness());
+        if (item == null) {
+            mplew.writeLong(PacketHelper.getKoreanTimestamp((long) (System.currentTimeMillis() * 1.5)));
+        } else {
+            PacketHelper.addExpirationTime(mplew, item.getExpiration() <= System.currentTimeMillis() ? -1 : item.getExpiration() + (3600000 * 12)); //寵物載入時間
+        }

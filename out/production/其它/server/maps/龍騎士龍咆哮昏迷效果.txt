@@ -1,0 +1,21 @@
+搜索：
+
+                case 21111009: //combo recharge
+                case 1311005: //NOT A BUFF - Sacrifice
+                    ret.hpR = -ret.x / 100.0;
+                    break;
+                case 1311006: //dragon roar
+                    ret.hpR = -ret.x / 100.0;
+                    ret.monsterStatus.put(MonsterStatus.STUN, Integer.valueOf(1));
+                    break;
+
+替換：
+
+                case 21111009: //combo recharge
+                case 1311005: //NOT A BUFF - Sacrifice
+                    ret.hpR = -ret.x / 100.0;
+                    break;
+                case 1311006: //dragon roar
+                    ret.hpR = -ret.x / 100.0;
+                    ret.monsterStatus.put(MonsterStatus.STUN, Integer.valueOf(1));
+                    break;

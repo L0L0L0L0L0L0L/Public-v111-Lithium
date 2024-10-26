@@ -1,0 +1,49 @@
+搜索：
+
+    public boolean isFourthJob() {
+        switch (id) { // I guess imma make an sql table to store these, so that we could max them all out.
+            case 3220010: //10
+            case 3120011: //10
+            case 33120010://10
+            case 5220014:
+            case 23120011://20
+            case 23121008://5
+            case 33121005:
+            //case 32120009://注釋掉，否則無法加點-勁能
+
+
+
+搜索：//導致38掉線
+
+
+                bx = SkillFactory.getSkill(32120001);
+                bof = chra.getTotalSkillLevel(bx);
+                if (bof > 0) {
+                    dodgeChance += bx.getEffect(bof).getER();
+                }
+                bx = SkillFactory.getSkill(32120009);
+                bof = chra.getTotalSkillLevel(bx);
+                if (bof > 0) {
+                    percent_hp += bx.getEffect(bof).getPercentHP();
+                    percent_mp += bx.getEffect(bof).getPercentMP();
+                    percent_wdef += eff.getZ() + eff.getY();
+                    percent_mdef += eff.getZ() + eff.getY();
+                }
+                break;
+
+替換：
+
+                bx = SkillFactory.getSkill(32120001);
+                bof = chra.getTotalSkillLevel(bx);
+                if (bof > 0) {
+                    dodgeChance += bx.getEffect(bof).getER();
+                }
+                bx = SkillFactory.getSkill(32120009);// 勁能
+                bof = chra.getTotalSkillLevel(bx);
+                if (bof > 0) {
+                    percent_hp += bx.getEffect(bof).getPercentHP();
+                    percent_mp += bx.getEffect(bof).getPercentMP();
+                    percent_wdef += bx.getEffect(bof).getWDEFRate();
+                    percent_mdef += bx.getEffect(bof).getMDEFRate();
+                }
+                break;

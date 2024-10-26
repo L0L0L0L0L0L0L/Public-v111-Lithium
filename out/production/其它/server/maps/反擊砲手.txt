@@ -1,0 +1,48 @@
+搜索：
+
+            } else if ((getJob() == 531 || getJob() == 532) && attacke != null) {
+                final Skill divine = SkillFactory.getSkill(5310009); //slea.readInt() = 5310009, then slea.readInt() = damage. (175000)
+                if (getTotalSkillLevel(divine) > 0) {
+                    final MapleStatEffect divineShield = divine.getEffect(getTotalSkillLevel(divine));
+                    if (divineShield.makeChanceResult()) {
+                        if (attacke instanceof MapleMonster) {
+                            final MapleMonster attacker = (MapleMonster) attacke;
+                            final int theDmg = (int) (divineShield.getDamage() * getStat().getCurrentMaxBaseDamage() / 100.0);
+                            attacker.damage(this, theDmg, true);
+                            getMap().broadcastMessage(MobPacket.damageMonster(attacker.getObjectId(), theDmg));
+                        } else {
+                            final MapleCharacter attacker = (MapleCharacter) attacke;
+                            attacker.addHP(-divineShield.getDamage());
+                            attack.add((int) divineShield.getDamage());
+                        }
+                    }
+                }
+            } else if (getJob() == 132 && attacke != null) {
+
+
+替換：
+
+            } else if (getJob() == 132 && attacke != null) {
+
+
+
+搜索：
+
+        if (chr.getStat().dodgeChance > 0 && Randomizer.nextInt(100) < chr.getStat().dodgeChance) {
+            //c.getSession().write(EffectPacket.showForeignEffect(20));
+            return;
+        }
+
+
+替換：
+
+        if (chr.getStat().dodgeChance > 0 && Randomizer.nextInt(100) < chr.getStat().dodgeChance) {
+            //c.getSession().write(EffectPacket.showForeignEffect(20));
+            return;
+        }
+        if (pPhysical && skillid == 5310009) {//反擊砲手
+                final Skill divine = SkillFactory.getSkill(5310009);
+                final MapleStatEffect divineShield = divine.getEffect(chr.getTotalSkillLevel(divine));
+                final int theDmg = (int) (divineShield.getDamage() * chr.getStat().getCurrentMaxBaseDamage() / 100.0);
+                attacker.damage(chr, theDmg, pPhysical, 5310009);
+        }

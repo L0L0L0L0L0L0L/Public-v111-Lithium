@@ -1,0 +1,116 @@
+搜索：
+
+    public static boolean drop(final MapleClient c, MapleInventoryType type, final short src, short quantity, final boolean npcInduced) {
+        final MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        if (src < 0) {
+            type = MapleInventoryType.EQUIPPED;
+        }
+        if (c.getPlayer() == null || c.getPlayer().getMap() == null) {
+            return false;
+        }
+        final Item source = c.getPlayer().getInventory(type).getItem(src);
+        if (quantity < 0 || source == null || (GameConstants.GMS && src == -55) || (!npcInduced && GameConstants.isPet(source.getItemId())) || (quantity == 0 && !GameConstants.isRechargable(source.getItemId())) || c.getPlayer().inPVP()) {
+            c.getSession().write(MaplePacketCreator.enableActions());
+            return false;
+        }
+
+替換：
+
+    public static boolean drop(final MapleClient c, MapleInventoryType type, final short src, short quantity, final boolean npcInduced) {
+        final MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        if (src < 0) {
+            type = MapleInventoryType.EQUIPPED;
+        }
+        if (c.getPlayer() == null || c.getPlayer().getMap() == null) {
+            return false;
+        }
+        final Item source = c.getPlayer().getInventory(type).getItem(src);
+        if (quantity < 0 || source == null || (GameConstants.GMS && src == -55) || (!npcInduced && GameConstants.isPet(source.getItemId())) || (quantity == 0 && !GameConstants.isRechargable(source.getItemId())) || c.getPlayer().inPVP()) {
+            c.getSession().write(MaplePacketCreator.enableActions());
+            return false;
+        }
+        if (src > 100) {//防止從礦物背包內丟道具出來閃退
+            c.getSession().write(MaplePacketCreator.enableActions());
+            return false;
+        }
+
+
+
+搜索：
+
+    public static final void MoveBag(final LittleEndianAccessor slea, final MapleClient c) {
+        if (c.getPlayer().hasBlockedInventory()) { //hack
+            return;
+        }
+        c.getPlayer().setScrolledPosition((short) 0);
+        c.getPlayer().updateTick(slea.readInt());
+        final boolean srcFirst = slea.readInt() > 0;
+        short dst = (short) slea.readInt();                                       //01 00
+        if (slea.readByte() != 4) { //must be etc) {
+            c.getSession().write(MaplePacketCreator.enableActions());
+            return;
+        }
+        short src = slea.readShort();                                            //00 00
+        MapleInventoryManipulator.move(c, MapleInventoryType.ETC, srcFirst ? dst : src, srcFirst ? src : dst);
+    }
+
+
+替換：
+
+    public static final void MoveBag(final LittleEndianAccessor slea, final MapleClient c) {
+        if (c.getPlayer().hasBlockedInventory()) { //hack
+            return;
+        }
+        if (slea.available() == 0) {//礦物背包內按兩下道具防止卡屏
+            c.getSession().write(MaplePacketCreator.enableActions());
+            return;
+        }
+        if (slea.available() == 11) {//擁有礦物背包時，按兩下能放入背包內的物品防止卡屏
+            c.getSession().write(MaplePacketCreator.enableActions());
+            return;
+        }
+        c.getPlayer().setScrolledPosition((short) 0);
+        c.getPlayer().updateTick(slea.readInt());
+        final boolean srcFirst = slea.readInt() > 0;
+        short dst = (short) slea.readInt();                                       //01 00
+        if (slea.readByte() != 4) { //must be etc) {
+            c.getSession().write(MaplePacketCreator.enableActions());
+            return;
+        }
+        short src = slea.readShort();                                            //00 00
+        MapleInventoryManipulator.move(c, MapleInventoryType.ETC, srcFirst ? dst : src, srcFirst ? src : dst);
+    }
+
+
+搜索：
+
+    public boolean isFull() {
+        return inventory.size() >= slotLimit;
+    }
+
+    public boolean isFull(int margin) {
+        return inventory.size() + margin >= slotLimit;
+    }
+
+
+替換：
+
+    public boolean isFull() {
+        short a = 0;
+        for (short i : inventory.keySet()) { //使用小背包時
+            if (i > 100) {
+                a += 1;
+            }
+        }
+        return inventory.size() - a >= slotLimit;
+    }
+
+    public boolean isFull(int margin) {
+        short a = 0;
+        for (short i : inventory.keySet()) { //使用小背包時
+            if (i > 100) {
+                a += 1;
+            }
+        }
+        return inventory.size() - a + margin >= slotLimit;
+    }

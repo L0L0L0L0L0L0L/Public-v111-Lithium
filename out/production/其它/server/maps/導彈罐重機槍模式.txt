@@ -1,0 +1,67 @@
+搜索：
+
+        if (effect.getSourceId() == 35121013) { //when siege 2 deactivates, missile re-activates
+            SkillFactory.getSkill(35121005).getEffect(getTotalSkillLevel(35121005)).applyTo(this);
+        }
+        if (!clonez) {
+            for (WeakReference<MapleCharacter> chr : clones) {
+                if (chr.get() != null) {
+                    chr.get().cancelEffect(effect, overwrite, startTime);
+                }
+            }
+        }
+       // System.out.println("Effect deregistered. Effect: " + effect.getSourceId());
+    }
+
+替換：
+
+        if (effect.getSourceId() == 35121013 && !overwrite) { //when siege 2 deactivates, missile re-activates
+            SkillFactory.getSkill(35121005).getEffect(getTotalSkillLevel(35121005)).applyTo(this);
+        }
+        if (!clonez) {
+            for (WeakReference<MapleCharacter> chr : clones) {
+                if (chr.get() != null) {
+                    chr.get().cancelEffect(effect, overwrite, startTime);
+                }
+            }
+        }
+       // System.out.println("Effect deregistered. Effect: " + effect.getSourceId());
+    }
+
+
+搜索：
+
+            case 35121013:{
+                final EnumMap<MapleBuffStat, Integer> stat = new EnumMap<MapleBuffStat, Integer>(MapleBuffStat.class);
+                SkillFactory.getSkill(35121013).getEffect(applyto.getTotalSkillLevel(35111004)).applyTo(applyto);
+                stat.put(MapleBuffStat.MECH_CHANGE, 1);
+                applyto.getMap().broadcastMessage(applyto, BuffPacket.giveForeignBuff(applyto.getId(), stat, this), false);
+                break;
+            }
+            case 35001001: //flame
+            case 35101009:
+            case 35121005: { //missile
+                if (applyto.isHidden()) {
+                    break;
+                }
+                final EnumMap<MapleBuffStat, Integer> stat = new EnumMap<MapleBuffStat, Integer>(MapleBuffStat.class);
+                stat.put(MapleBuffStat.MECH_CHANGE, 1);
+                applyto.getMap().broadcastMessage(applyto, BuffPacket.giveForeignBuff(applyto.getId(), stat, this), false);
+                break;
+            }
+
+替換：
+
+
+            case 35001001: //flame
+            case 35101009:
+            case 35121013:
+            case 35121005: { //missile
+                if (applyto.isHidden()) {
+                    break;
+                }
+                final EnumMap<MapleBuffStat, Integer> stat = new EnumMap<MapleBuffStat, Integer>(MapleBuffStat.class);
+                stat.put(MapleBuffStat.MECH_CHANGE, 1);
+                applyto.getMap().broadcastMessage(applyto, BuffPacket.giveForeignBuff(applyto.getId(), stat, this), false);
+                break;
+            }

@@ -1,0 +1,22 @@
+搜索：
+
+                case 2430159:
+                    MapleQuest.getInstance(3182).forceComplete(c.getPlayer(), 2161004);
+                    MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.USE, slot, (byte) 1, false);
+                    break;
+
+替換：
+
+                case 2430159:
+                    MapleQuest.getInstance(3182).forceComplete(c.getPlayer(), 2161004);
+                    MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.USE, slot, (byte) 1, false);
+                    break;
+                case 2430564:
+                    if (c.getPlayer().getMapId() == 270000000 && c.getPlayer().getPosition().x > -2154  && c.getPlayer().getPosition().x < -1754 && c.getPlayer().getPosition().y > 78) {
+                        c.getPlayer().getQuestNAdd(MapleQuest.getInstance(20755)).setCustomData("Complete");//給與完成任務條件
+                        c.getPlayer().updateQuest(c.getPlayer().getQuest(MapleQuest.getInstance(20755)), true);//刷新當前任務
+                        MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.USE, slot, (byte) 1, false);
+                    } else {
+                        c.getPlayer().dropMessage(-1, "必須要在秘密通道的傳送點使用此道具");
+                        }
+                     break;

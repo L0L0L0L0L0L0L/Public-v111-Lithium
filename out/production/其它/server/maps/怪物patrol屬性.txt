@@ -1,0 +1,323 @@
+搜索：
+
+            final MapleData banishData = monsterInfoData.getChildByPath("ban");
+            if (banishData != null) {
+                stats.setBanishInfo(new BanishInfo(
+                        MapleDataTool.getString("banMsg", banishData),
+                        MapleDataTool.getInt("banMap/0/field", banishData, -1),
+                        MapleDataTool.getString("banMap/0/portal", banishData, "sp")));
+            }
+
+替換：
+
+            final MapleData banishData = monsterInfoData.getChildByPath("ban");
+            if (banishData != null) {
+                for (MapleData d : banishData.getChildByPath("banMap").getChildren()) {
+                    MapleData banMsgData = banishData.getChildByPath("banMsg");
+                    stats.addBanishInfo(new BanishInfo(
+                    banMsgData == null ? null : MapleDataTool.getString(banMsgData), // banMap 節點中可能沒有 banMsg 導致空值 (9441003)
+                    MapleDataTool.getInt("field", d, -1),
+                    MapleDataTool.getString("portal", d, "sp")));
+                }
+            }
+
+            final MapleData patrol = monsterInfoData.getChildByPath("patrol");
+            if (patrol != null) {
+                stats.setPatrol(true);
+                stats.setPatrolRange(MapleDataTool.getInt("range", patrol, 0));
+                stats.setPatrolDetectX(MapleDataTool.getInt("detectX", patrol, 0));
+                stats.setPatrolSenseX(MapleDataTool.getInt("senseX", patrol, 0));
+            }
+
+搜索：
+
+    private BanishInfo banish;
+
+替換：
+
+    private List<BanishInfo> banish = new ArrayList<>();
+    private boolean patrol;
+    private int patrolRange, patrolDetectX, patrolSenseX;
+
+
+搜索：
+
+    public BanishInfo getBanishInfo() {
+        return banish;
+    }
+
+    public void setBanishInfo(BanishInfo banish) {
+        this.banish = banish;
+    }
+
+
+替換：
+
+    public List<BanishInfo> getBanishInfo() {
+        return banish;
+    }
+
+    public void addBanishInfo(BanishInfo banish) {
+        this.banish.add(banish);
+    }
+
+    public void setPatrol(boolean patrol) {
+        this.patrol = patrol;
+    }
+
+    public boolean isPatrol() {
+        return patrol;
+    }
+
+    public void setPatrolRange(int patrolRange) {
+        this.patrolRange = patrolRange;
+    }
+
+    public int getPatrolRange() {
+        return patrolRange;
+    }
+
+    public void setPatrolDetectX(int patrolDetectX) {
+        this.patrolDetectX = patrolDetectX;
+    }
+
+    public int getPatrolDetectX() {
+        return patrolDetectX;
+    }
+
+    public void setPatrolSenseX(int patrolSenseX) {
+        this.patrolSenseX = patrolSenseX;
+    }
+
+    public int getPatrolSenseX() {
+        return patrolSenseX;
+    }
+
+搜索：
+
+    public static int pcrate = ServerConstants.PCRoomPercent;
+
+
+替換：
+
+
+    public static int pcrate = ServerConstants.PCRoomPercent;
+    private int patrolScopeX1;
+    private int patrolScopeX2;
+
+
+搜索：
+
+    public final boolean dropsDisabled() {
+        return dropsDisabled;
+    }
+
+替換：
+
+    public final boolean dropsDisabled() {
+        return dropsDisabled;
+    }
+
+    public int getPatrolScopeX1() {
+        return patrolScopeX1;
+    }
+
+    public void setPatrolScopeX1(int patrolScopeX1) {
+        this.patrolScopeX1 = patrolScopeX1;
+    }
+
+    public int getPatrolScopeX2() {
+        return patrolScopeX2;
+    }
+
+    public void setPatrolScopeX2(int patrolScopeX2) {
+        this.patrolScopeX2 = patrolScopeX2;
+    }
+
+
+搜索：
+
+    public final void spawnMonster(final MapleMonster monster, final int spawnType, final boolean overwrite) {
+        monster.setMap(this);
+        checkRemoveAfter(monster);
+
+        spawnAndAddRangedMapObject(monster, new DelayedPacketCreation() {
+
+            public final void sendPackets(MapleClient c) {
+                c.getSession().write(MobPacket.spawnMonster(monster, monster.getStats().getSummonType() <= 1 || monster.getStats().getSummonType() == 27 || overwrite ? spawnType : monster.getStats().getSummonType(), 0));
+            }
+        });
+        updateMonsterController(monster);
+
+        spawnedMonstersOnMap.incrementAndGet();
+    }
+
+
+替換：
+
+    public final void spawnMonster(final MapleMonster monster, final int spawnType, final boolean overwrite) {
+        if (monster.getMap() == null && monster.getStats().isPatrol()) {
+            monster.setPatrolScopeX1(monster.getPosition().x);
+            monster.setPatrolScopeX2(monster.getPosition().x + monster.getStats().getPatrolRange());
+        }
+        monster.setMap(this);
+        checkRemoveAfter(monster);
+
+        spawnAndAddRangedMapObject(monster, new DelayedPacketCreation() {
+
+            public final void sendPackets(MapleClient c) {
+                c.getSession().write(MobPacket.spawnMonster(monster, monster.getStats().getSummonType() <= 1 || monster.getStats().getSummonType() == 27 || overwrite ? spawnType : monster.getStats().getSummonType(), 0));
+            }
+        });
+        updateMonsterController(monster);
+
+        spawnedMonstersOnMap.incrementAndGet();
+    }
+
+
+搜索：
+
+        if (type != -2 && type != -3 && type != -4) { // Not map damage
+            monsteridfrom = slea.readInt();
+            oid = slea.readInt();
+            attacker = chr.getMap().getMonsterByOid(oid);
+            direction = slea.readByte(); // Knock direction
+
+            if (attacker == null || attacker.getId() != monsteridfrom || attacker.getLinkCID() > 0 || attacker.isFake() || attacker.getStats().isFriendly()) {
+                return;
+            }
+
+
+替換：
+
+
+        if (type != -2 && type != -3 && type != -4) { // Not map damage
+            monsteridfrom = slea.readInt();
+            oid = slea.readInt();
+            attacker = chr.getMap().getMonsterByOid(oid);
+            direction = slea.readByte(); // Knock direction
+
+            if (attacker == null || attacker.getId() != monsteridfrom || attacker.getLinkCID() > 0 || attacker.isFake() || attacker.getStats().isFriendly()) {
+                return;
+            }
+            if (attacker.getId() == 9400809 || attacker.getId() == 9300507) {
+                List<BanishInfo> infos = attacker.getStats().getBanishInfo();
+                BanishInfo info = infos.get(Randomizer.nextInt(infos.size()));
+                if (info != null) {
+                    chr.changeMapBanish(info.getMap(), info.getPortal(), info.getMsg());
+                }
+            }
+
+頁首添加：
+
+import server.life.BanishInfo;
+
+
+搜索：
+
+            case 129: // Banish
+                if (monster != null && monster.getMap().getSquadByMap() == null) { //not pb/vonleon map
+                    if (monster.getEventInstance() != null && monster.getEventInstance().getName().indexOf("BossQuest") != -1) {
+                        break;
+                    }
+                    final BanishInfo info = monster.getStats().getBanishInfo();
+                    if (info != null) {
+                        if (lt != null && rb != null && skill && player != null) {
+                            for (MapleCharacter chr : getPlayersInRange(monster, player)) {
+				if (!chr.hasBlockedInventory()) {
+                                    chr.changeMapBanish(info.getMap(), info.getPortal(), info.getMsg());
+				}
+                            }
+                        } else if (player != null && !player.hasBlockedInventory()) {
+                            player.changeMapBanish(info.getMap(), info.getPortal(), info.getMsg());
+                        }
+                    }
+                }
+                break;
+
+替換：
+
+            case 129: // Banish
+                List<BanishInfo> infos = monster.getStats().getBanishInfo();
+                if (monster != null && monster.getMap().getSquadByMap() == null) { //not pb/vonleon map
+                    if (monster.getEventInstance() != null && monster.getEventInstance().getName().indexOf("BossQuest") != -1) {
+                        break;
+                    }
+                    BanishInfo info = infos.get(Randomizer.nextInt(infos.size()));
+                    if (info != null) {
+                        if (lt != null && rb != null && skill && player != null) {
+                            for (MapleCharacter chr : getPlayersInRange(monster, player)) {
+				if (!chr.hasBlockedInventory()) {
+                                    chr.changeMapBanish(info.getMap(), info.getPortal(), info.getMsg());
+				}
+                            }
+                        } else if (player != null && !player.hasBlockedInventory()) {
+                            player.changeMapBanish(info.getMap(), info.getPortal(), info.getMsg());
+                        }
+                    }
+                }
+                break;
+
+頁首添加：
+
+import server.Randomizer;
+
+搜索：
+
+    public static byte[] spawnMonster(MapleMonster life, int spawnType, int link) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+        mplew.writeShort(SendPacketOpcode.SPAWN_MONSTER.getValue());
+        mplew.writeInt(life.getObjectId());
+        mplew.write(1); // 1 = Control normal, 5 = Control none
+        mplew.writeInt(life.getId());
+        addMonsterStatus(mplew, life);
+        mplew.writePos(life.getTruePosition());
+        mplew.write(life.getStance());
+        mplew.writeShort(0); // FH
+        mplew.writeShort(life.getFh()); // Origin FH
+        mplew.write(spawnType);
+        if (spawnType == -3 || spawnType >= 0) {
+            mplew.writeInt(link);
+        }
+        mplew.write(life.getCarnivalTeam());
+        mplew.writeInt(0);
+        mplew.writeInt(0);
+        mplew.write(-1);
+
+        return mplew.getPacket();
+    }
+
+替換：
+
+
+    public static byte[] spawnMonster(MapleMonster life, int spawnType, int link) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+        mplew.writeShort(SendPacketOpcode.SPAWN_MONSTER.getValue());
+        mplew.writeInt(life.getObjectId());
+        mplew.write(1); // 1 = Control normal, 5 = Control none
+        mplew.writeInt(life.getId());
+        addMonsterStatus(mplew, life);
+        mplew.writePos(life.getTruePosition());
+        mplew.write(life.getStance());
+        mplew.writeShort(0); // FH
+        mplew.writeShort(life.getFh()); // Origin FH
+        mplew.write(spawnType);
+        if (spawnType == -3 || spawnType >= 0) {
+            mplew.writeInt(link);
+        }
+        mplew.write(life.getCarnivalTeam());
+        
+        if (life.getStats().isPatrol()) {
+            mplew.writeInt(life.getPatrolScopeX1());
+            mplew.writeInt(life.getPatrolScopeX2());
+            mplew.writeInt(life.getStats().getPatrolDetectX());
+            mplew.writeInt(life.getStats().getPatrolSenseX());
+        }
+        mplew.writeInt(0);
+        mplew.writeInt(0);
+        mplew.write(-1);
+
+        return mplew.getPacket();
+    }

@@ -1,0 +1,24 @@
+搜索：
+
+            } else if (dropMod == 1 && item.getItemId() / 10000 == 536) {
+                if (item.getItemId() == 5360000 || item.getItemId() == 5360042) {
+                    dropMod = 2;
+                }
+
+
+替換：
+
+
+            } else if (dropMod == 1 && item.getItemId() / 10000 == 536) {
+                if (item.getItemId() == 5360000
+                    || (item.getItemId() == 5360001 && hour > 6 && hour < 12)
+                    || (item.getItemId() == 5360002 && hour > 9 && hour < 15)
+                    || (item.getItemId() == 5360003 && hour > 12 && hour < 18)
+                    || (item.getItemId() == 5360004 && hour > 15 && hour < 21)
+                    || (item.getItemId() == 5360005 && hour > 18 && hour < 24)
+                    || (item.getItemId() == 5360006 && hour < 5)
+                    || (item.getItemId() == 5360007 && hour > 2 && hour < 8)
+                    || (item.getItemId() == 5360008 && hour > 5 && hour < 11)
+                    || item.getItemId() == 5360042) {
+                    dropMod = 2;
+                }

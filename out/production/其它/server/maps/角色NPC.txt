@@ -1,0 +1,81 @@
+搜索：
+
+    public static byte[] spawnPlayerNPC(PlayerNPC npc) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+        mplew.writeShort(SendPacketOpcode.PLAYER_NPC.getValue());
+        mplew.write(1); // Size
+        mplew.writeInt(npc.getId());
+        mplew.writeMapleAsciiString(npc.getName());
+        PacketHelper.addCharLook(mplew, npc, true); // remove npc.getPet(i), npc.getF()?
+
+        return mplew.getPacket();
+    }
+
+替換：
+
+   public static byte[] spawnPlayerNPC(PlayerNPC npc) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.PLAYER_NPC.getValue());
+        mplew.write(npc.getF() == 1 ? 0 : 1);
+        mplew.writeInt(npc.getId());
+        mplew.writeMapleAsciiString(npc.getName());
+        mplew.write(npc.getGender());
+        mplew.write(npc.getSkinColor());
+        mplew.writeInt(npc.getFace());
+        mplew.writeInt(0); //job lol
+        mplew.write(0);
+        mplew.writeInt(npc.getHair());
+        Map<Byte, Integer> equip = npc.getEquips();
+        Map<Byte, Integer> myEquip = new LinkedHashMap<Byte, Integer>();
+        Map<Byte, Integer> maskedEquip = new LinkedHashMap<Byte, Integer>();
+        for (Entry<Byte, Integer> position : equip.entrySet()) {
+            byte pos = (byte) (position.getKey() * -1);
+            if (pos < 100 && myEquip.get(pos) == null) {
+                myEquip.put(pos, position.getValue());
+            } else if (pos > 100 && pos != 111) { // don't ask. o.o
+                pos = (byte) (pos - 100);
+                if (myEquip.get(pos) != null) {
+                    maskedEquip.put(pos, myEquip.get(pos));
+                }
+                myEquip.put(pos, position.getValue());
+            } else if (myEquip.get(pos) != null) {
+                maskedEquip.put(pos, position.getValue());
+            }
+        }
+        for (Entry<Byte, Integer> entry : myEquip.entrySet()) {
+            mplew.write(entry.getKey());
+            mplew.writeInt(entry.getValue());
+        }
+        mplew.write(0xFF);
+        for (Entry<Byte, Integer> entry : maskedEquip.entrySet()) {
+            mplew.write(entry.getKey());
+            mplew.writeInt(entry.getValue());
+        }
+        mplew.write(0xFF);
+        Integer cWeapon = equip.get((byte) -111);
+        if (cWeapon != null) {
+            mplew.writeInt(cWeapon);
+        } else {
+            mplew.writeInt(0);
+        }
+        mplew.write(0); // mercedes ears
+        for (int i = 0; i < 3; i++) {
+            mplew.writeInt(npc.getPet(i));
+        }
+        return mplew.getPacket();
+    }
+
+頁首添加：
+
+import java.util.LinkedHashMap;
+
+
+
+
+##########################備註
+
+            PlayerNPC.updateByCharId(this, con);//啟動伺服器自動更新角色NPC
+            keylayout.saveKeys(id);
+            mount.saveMount(id);
+            monsterbook.saveCards(accountid);

@@ -1,0 +1,48 @@
+搜索：
+
+            stats.setHp(MapleDataTool.getIntConvert("maxHP", monsterInfoData));
+            stats.setMp(MapleDataTool.getIntConvert("maxMP", monsterInfoData, 0));
+
+替換：
+
+            stats.setHp(mid == 9300275 ? 5000 : mid == 9300438 ? 2000 : MapleDataTool.getIntConvert("maxHP", monsterInfoData));
+            stats.setMp(MapleDataTool.getIntConvert("maxMP", monsterInfoData, 0));
+
+
+搜索替換：
+
+            case shammos_Fenter: {//邪摩斯
+                if (c.getPlayer().getMapId() >= (GameConstants.GMS ? 921120100 : 921120005) && c.getPlayer().getMapId() < (GameConstants.GMS ? 921120400 : 921120600)) {
+                    final MapleMonster shammos = MapleLifeFactory.getMonster(9300275);
+                    if (c.getPlayer().getEventInstance() != null) {
+                        c.getPlayer().getEventInstance().registerMonster(shammos);
+                        if (c.getPlayer().getEventInstance().getProperty("HP") != null) {
+                            shammos.setHp(Long.parseLong(c.getPlayer().getEventInstance().getProperty("HP")));
+                        } else {
+                            c.getPlayer().getEventInstance().setProperty("HP", "5000");
+                        }
+                    }
+                    c.getPlayer().getMap().spawnMonsterWithEffectBelow(shammos, new Point(c.getPlayer().getMap().getPortal(0).getPosition()), 12);
+                    shammos.switchController(c.getPlayer(), false);
+                    c.getSession().write(MobPacket.getNodeProperties(shammos, c.getPlayer().getMap()));
+                }
+                break;
+            }
+            //5120038 =  dr bing. 5120039 = visitor lady. 5120041 = unknown dr bing.
+            case iceman_FEnter: {//冰騎士
+                if (c.getPlayer().getMapId() >= 932000100 && c.getPlayer().getMapId() < 932000300) {
+                    final MapleMonster shammos = MapleLifeFactory.getMonster(9300438);
+                    if (c.getPlayer().getEventInstance() != null) {
+                        c.getPlayer().getEventInstance().registerMonster(shammos);
+                        if (c.getPlayer().getEventInstance().getProperty("HP") != null) {
+                            shammos.setHp(Long.parseLong(c.getPlayer().getEventInstance().getProperty("HP")));
+                        } else {
+                            c.getPlayer().getEventInstance().setProperty("HP", "2000");
+                        }
+                    }
+                    c.getPlayer().getMap().spawnMonsterWithEffectBelow(shammos, new Point(c.getPlayer().getMap().getPortal(0).getPosition()), 12);
+                    shammos.switchController(c.getPlayer(), false);
+                    c.getSession().write(MobPacket.getNodeProperties(shammos, c.getPlayer().getMap()));
+                }
+                break;
+            }

@@ -1,0 +1,29 @@
+搜索：
+
+    public void leaveMap(MapleMap map) {
+        controlledLock.writeLock().lock();
+        visibleMapObjectsLock.writeLock().lock();
+        try {
+            for (MapleMonster mons : controlled) {
+                if (mons != null) {
+                    mons.setController(null);
+                    mons.setControllerHasAggro(false);
+                    map.updateMonsterController(mons);
+                }
+            }
+
+
+替換：
+
+    public void leaveMap(MapleMap map) {
+        controlledLock.writeLock().lock();
+        visibleMapObjectsLock.writeLock().lock();
+        try {
+            for (final MapleMapObject monstermo : map.getAllMonstersThreadsafe()) {
+                final MapleMonster mons = (MapleMonster) monstermo;
+                if (mons != null) {
+                    mons.setController(null);
+                    mons.setControllerHasAggro(false);
+                    map.updateMonsterController(mons);
+                }
+            }

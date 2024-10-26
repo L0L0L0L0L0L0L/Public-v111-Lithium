@@ -1,0 +1,38 @@
+搜索：
+
+                    if (itemId == 0) { //meso
+                        itemId = 4031041; //display sack of cash
+                        namez = (de.Minimum * getClient().getChannelServer().getMesoRate()) + " ~ " + (de.Maximum * getClient().getChannelServer().getMesoRate()) + " 楓幣";
+                    }
+                    ch = de.chance * getClient().getChannelServer().getDropRate();
+                    name.append((num + 1) + ") #v" + itemId + "#" + namez + " - " + (Integer.valueOf(ch >= 999999 ? 1000000 : ch).doubleValue() / 10000.0) + "% 概率 " + (de.questid > 0 && MapleQuest.getInstance(de.questid).getName().length() > 0 ? (MapleQuest.getInstance(de.questid).getName() + " 任務道具") : "") + "\r\n");
+                    num++;
+                }
+            }
+            if (name.length() > 0) {
+                return name.toString();
+            }
+
+        }
+        return "該怪物沒有任何掉寶數據。";
+    }
+
+
+替換：
+
+                    if (itemId == 0) { //meso
+                        itemId = 4031041; //display sack of cash
+                        namez = (de.Minimum * getClient().getChannelServer().getMesoRate() * c.getPlayer().getStat().mesoBuff / 100.0) + " ~ " + (de.Maximum * getClient().getChannelServer().getMesoRate() * c.getPlayer().getStat().mesoBuff / 100.0) + " 楓幣"; //楓幣概率
+                    }
+                    ch = (int) (de.chance * getClient().getChannelServer().getDropRate() * c.getPlayer().getDropMod() * (c.getPlayer().getStat().dropBuff / 100.0)); //道具概率
+                    name.append((num + 1) + ") #v" + itemId + "#" + namez + " - " + (Integer.valueOf(ch >= 999999 ? 1000000 : ch).doubleValue() / 10000.0) + "% 概率 " + (de.questid > 0 && MapleQuest.getInstance(de.questid).getName().length() > 0 ? (MapleQuest.getInstance(de.questid).getName() + " 任務道具") : "") + "\r\n");
+                    num++;
+                }
+            }
+            if (name.length() > 0) {
+                return name.toString();
+            }
+
+        }
+        return "該怪物沒有任何掉寶數據。";
+    }

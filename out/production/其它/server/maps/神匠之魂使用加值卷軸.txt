@@ -1,0 +1,62 @@
+搜索：
+
+            case 5064100:
+            case 5064300:
+            case 5064000: {
+                final Item item = c.getPlayer().getInventory(MapleInventoryType.EQUIPPED).getItem((byte) slea.readShort());
+                // another int here, lock = 5A E5 F2 0A, 7 day = D2 30 F3 0A
+                if (item != null && item.getType() == 1) { //equip
+                    if (((Equip) item).getEnhance() >= 12) {
+                        break; //cannot be used
+                    }
+                    short flag = item.getFlag();
+                    if (itemId == 5064000) {
+                        flag |= ItemFlag.PROTECT.getValue();
+                    } else if (itemId == 5064100) {
+                        flag |= ItemFlag.SAFETY.getValue();
+                    } else if (itemId == 5064300) {
+                        flag |= ItemFlag.RECOVERY.getValue();
+                    }
+                    item.setFlag(flag);
+                    c.getSession().write(InventoryPacket.scrolledItem(toUse, item, false, false));
+                    c.getPlayer().getMap().broadcastMessage(EtcPacket.getScrollEffect(c.getPlayer().getId(), Equip.ScrollResult.SUCCESS, false, false));
+                    used = true;
+                }
+                break;
+            }
+
+
+替換：
+
+            case 5064100:
+            case 5064300:
+            case 5064000: {
+                byte a = slea.readByte();
+                byte b = slea.readByte();
+                if (a > 0) {
+                    if (b == 0) {
+                        b = 1;
+                    }
+                }
+                final MapleInventoryType type = MapleInventoryType.getByType(b);
+                final Item item = c.getPlayer().getInventory(type).getItem(a);
+                // another int here, lock = 5A E5 F2 0A, 7 day = D2 30 F3 0A
+                if (item != null && item.getType() == 1) { //equip
+                    if (((Equip) item).getEnhance() >= 8) {
+                        break; //cannot be used
+                    }
+                    short flag = item.getFlag();
+                    if (itemId == 5064000) {
+                        flag |= ItemFlag.PROTECT.getValue();
+                    } else if (itemId == 5064100) {
+                        flag |= ItemFlag.SAFETY.getValue();
+                    } else if (itemId == 5064300) {
+                        flag |= ItemFlag.RECOVERY.getValue();
+                    }
+                    item.setFlag(flag);
+                    c.getSession().write(InventoryPacket.scrolledItem(toUse, item, false, false));
+                    c.getPlayer().getMap().broadcastMessage(EtcPacket.getScrollEffect(c.getPlayer().getId(), Equip.ScrollResult.SUCCESS, MapleInventoryType.EQUIP == MapleInventoryType.getByType(b) ? true : false, false));
+                    used = true;
+                }
+                break;
+            }

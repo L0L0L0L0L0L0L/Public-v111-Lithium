@@ -1,0 +1,29 @@
+查找：
+
+                case 2430227: //energy drink
+                    if (c.getPlayer().getFatigue() > 0) {
+                        MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.USE, slot, (byte) 1, false);
+                        c.getPlayer().setFatigue(c.getPlayer().getFatigue() - 50);
+                    }
+                    break;
+
+替換：
+
+                case 2430227: //energy drink
+                    if (c.getPlayer().getFatigue() > 0) {
+                        MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.USE, slot, (byte) 1, false);
+                        c.getPlayer().setFatigue(c.getPlayer().getFatigue() - 50);
+                    }
+                    break;
+                case 2430032: //energy drink
+                    if (c.getPlayer().getMapId() == 922030011) {
+                          //c.getPlayer().getMap().spawnMonsterOnGroundBelow(MapleLifeFactory.getMonster(9300388),new Point(600, -26)); //自由的靈魂
+                          c.getPlayer().getMap().spawnMonsterOnGroundBelow(MapleLifeFactory.getMonster(9300388),c.getPlayer().getPosition());//當前座標
+                          c.getPlayer().getMap().spawnMonsterOnGroundBelow(MapleLifeFactory.getMonster(9300388),c.getPlayer().getPosition());//當前座標
+                          c.getPlayer().getMap().spawnMonsterOnGroundBelow(MapleLifeFactory.getMonster(9300388),c.getPlayer().getPosition());//當前座標
+                          c.getPlayer().getMap().spawnMonsterOnGroundBelow(MapleLifeFactory.getMonster(9300388),c.getPlayer().getPosition());//當前座標
+                                MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.USE, slot, (byte) 1, false);
+                    } else {
+                                c.getPlayer().dropMessage(-1, "必須要在保管倉庫第一入口地圖才能釋放自由的靈魂 ");
+                        }
+                    break;

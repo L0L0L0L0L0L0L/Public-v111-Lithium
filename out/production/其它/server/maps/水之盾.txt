@@ -1,0 +1,69 @@
+搜索：
+
+        barrier = getStatForBuff(MapleBuffStat.WATER_SHIELD);
+        if (barrier != null) {
+            damage = ((barrier.getX() / 1000.0) * damage);
+        }
+
+替換：
+
+        barrier = getStatForBuff(MapleBuffStat.WATER_SHIELD);//水之盾
+        if (barrier != null) {
+            damage *= (1.0d - (barrier.getX() / 100.0d));
+        }
+
+
+搜索：
+
+        public static byte[] giveForeignBuff(int cid, Map<MapleBuffStat, Integer> statups, MapleStatEffect effect) {
+            MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+            mplew.writeShort(SendPacketOpcode.GIVE_FOREIGN_BUFF.getValue());
+            mplew.writeInt(cid);
+            PacketHelper.writeBuffMask(mplew, statups);
+            for (Entry<MapleBuffStat, Integer> statup : statups.entrySet()) {
+                if (statup.getKey() == MapleBuffStat.SHADOWPARTNER || statup.getKey() == MapleBuffStat.MECH_CHANGE || statup.getKey() == MapleBuffStat.DARK_AURA || statup.getKey() == MapleBuffStat.YELLOW_AURA || statup.getKey() == MapleBuffStat.BLUE_AURA || statup.getKey() == MapleBuffStat.GIANT_POTION || statup.getKey() == MapleBuffStat.SPIRIT_LINK || statup.getKey() == MapleBuffStat.PYRAMID_PQ || statup.getKey() == MapleBuffStat.WK_CHARGE || statup.getKey() == MapleBuffStat.SPIRIT_SURGE || statup.getKey() == MapleBuffStat.MORPH || statup.getKey() == MapleBuffStat.DARK_METAMORPHOSIS|| statup.getKey() == MapleBuffStat.ANGEL_ATK|| statup.getKey() == MapleBuffStat.ANGEL_MATK || statup.getKey() == MapleBuffStat.WATER_SHIELD) {
+                    mplew.writeShort(statup.getValue().shortValue());
+                    mplew.writeInt(effect.isSkill() ? effect.getSourceId() : -effect.getSourceId());
+                } else if (statup.getKey() == MapleBuffStat.FAMILIAR_SHADOW) {
+                    mplew.writeInt(statup.getValue().intValue());
+                    mplew.writeInt(effect.getCharColor());
+                } else {
+                    mplew.writeShort(statup.getValue().shortValue());
+                }
+            }
+            mplew.writeShort(0); // same as give_buff
+            mplew.writeShort(0);			
+            mplew.write(1); // 0 for shadow partner?
+            mplew.write(1);
+
+            return mplew.getPacket();
+        }
+
+
+替換：
+
+        public static byte[] giveForeignBuff(int cid, Map<MapleBuffStat, Integer> statups, MapleStatEffect effect) {
+            MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+            mplew.writeShort(SendPacketOpcode.GIVE_FOREIGN_BUFF.getValue());
+            mplew.writeInt(cid);
+            PacketHelper.writeBuffMask(mplew, statups);
+            for (Entry<MapleBuffStat, Integer> statup : statups.entrySet()) {
+                if (statup.getKey() == MapleBuffStat.SHADOWPARTNER || statup.getKey() == MapleBuffStat.MECH_CHANGE || statup.getKey() == MapleBuffStat.DARK_AURA || statup.getKey() == MapleBuffStat.YELLOW_AURA || statup.getKey() == MapleBuffStat.BLUE_AURA || statup.getKey() == MapleBuffStat.GIANT_POTION || statup.getKey() == MapleBuffStat.SPIRIT_LINK || statup.getKey() == MapleBuffStat.PYRAMID_PQ || statup.getKey() == MapleBuffStat.WK_CHARGE || statup.getKey() == MapleBuffStat.SPIRIT_SURGE || statup.getKey() == MapleBuffStat.MORPH || statup.getKey() == MapleBuffStat.DARK_METAMORPHOSIS|| statup.getKey() == MapleBuffStat.ANGEL_ATK|| statup.getKey() == MapleBuffStat.ANGEL_MATK || statup.getKey() == MapleBuffStat.WATER_SHIELD) {
+                    mplew.writeShort(statup.getValue().shortValue());
+                    mplew.writeInt(effect.isSkill() ? effect.getSourceId() : -effect.getSourceId());
+                } else if (statup.getKey() == MapleBuffStat.FAMILIAR_SHADOW) {
+                    mplew.writeInt(statup.getValue().intValue());
+                    mplew.writeInt(effect.getCharColor());
+                } else {
+                    mplew.writeShort(statup.getValue().shortValue());
+                }
+            }
+            mplew.writeShort(0); // same as give_buff
+            mplew.writeShort(0);
+            mplew.write(1); // 0 for shadow partner?
+            mplew.write(1);
+
+            return mplew.getPacket();
+        }

@@ -1,0 +1,15 @@
+    public static final String ip = "127.0.0.1"; // ththaud.codns.com  127.0.0.1
+    public static String host = "127.0.0.1";//125.188.255.195
+    public static String SQL_URL = "jdbc:mysql://localhost:3306/v111?autoReconnect=true&characterEncoding=euckr";
+    public static String SQL_USER = "root";
+    public static String SQL_PASSWORD = "root";
+
+
+
+public static final int PORT = 8484;
+
+
+    private short port = 8484;
+
+
+

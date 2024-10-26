@@ -1,0 +1,30 @@
+搜索：
+
+    public static final void repairAll(final MapleClient c) {
+        if (c.getPlayer().getMapId() != 240000000) {
+            return;
+        }
+
+
+替換：
+
+    public static final void repairAll(final MapleClient c) {
+
+
+
+
+搜索：
+
+    public static final void repair(final LittleEndianAccessor slea, final MapleClient c) {
+        if (c.getPlayer().getMapId() != 240000000 || slea.available() < 4) { //leafre for now
+            return;
+        }
+
+
+
+替換：
+
+    public static final void repair(final LittleEndianAccessor slea, final MapleClient c) {
+        if (slea.available() < 4) { //leafre for now
+            return;
+        }

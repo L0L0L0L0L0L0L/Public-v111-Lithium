@@ -1,0 +1,146 @@
+搜索：
+
+                } else if (itemId / 10000 == 510) {
+                    c.getPlayer().getMap().startJukebox(c.getPlayer().getName(), itemId);
+                    used = true;
+
+替換：
+
+                } else if (itemId / 10000 == 510) {
+                    c.getPlayer().getMap().startJukebox(c.getPlayer().getName(), itemId);
+                    used = true;
+                } else if (itemId / 10000 == 508) {
+                    MapleKite Kite = new MapleKite(c.getPlayer(), c.getPlayer().getPosition(), c.getPlayer().getMap().getFootholds().findBelow(c.getPlayer().getPosition()).getId(), slea.readMapleAsciiString(), itemId);
+                    c.getPlayer().getMap().spawnKite(Kite);
+                    used = true;
+
+页首添加
+
+import server.maps.MapleKite;
+
+
+
+搜索：
+
+    REMOVE_PLAYER_FROM_MAP,
+    REMOVE_ITEM_FROM_MAP,
+
+替換：
+
+    REMOVE_PLAYER_FROM_MAP,
+    REMOVE_ITEM_FROM_MAP,
+    SPAWN_KITE_ERROR,
+    SPAWN_KITE,
+    DESTROY_KITE,
+
+
+搜索：
+
+public class MaplePacketCreator {
+
+
+替換：
+
+public class MaplePacketCreator {
+
+    public static byte[] spawnKiteError() {// CMessageBoxPool::OnCreateFailed
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.SPAWN_KITE_ERROR.getValue());
+        return mplew.getPacket();
+    }
+
+    public static byte[] spawnKite(int oid, int itemid, String name, String msg, Point pos, int ft) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.SPAWN_KITE.getValue());
+        mplew.writeInt(oid);
+        mplew.writeInt(itemid);
+        mplew.writeMapleAsciiString(msg);
+        mplew.writeMapleAsciiString(name);
+        mplew.writeShort(pos.x);
+        mplew.writeShort(pos.y - 100);
+        mplew.writeShort(ft);
+
+        return mplew.getPacket();
+    }
+
+    public static byte[] destroyKite(int objectid, byte animationType) {// CMessageBoxPool::OnMessageBoxLeaveField
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.DESTROY_KITE.getValue());
+        mplew.write(animationType);
+        mplew.writeInt(objectid);
+        return mplew.getPacket();
+    }
+
+
+搜索：
+
+public enum MapleMapObjectType {
+
+    NPC,
+    MONSTER,
+    ITEM,
+    PLAYER,
+    DOOR,
+    SUMMON,
+    SHOP,
+    MIST,
+    REACTOR,
+    EXTRACTOR,
+	FAMILIAR,
+    HIRED_MERCHANT;
+}
+
+替換：
+
+public enum MapleMapObjectType {
+
+    NPC,
+    MONSTER,
+    ITEM,
+    PLAYER,
+    DOOR,
+    SUMMON,
+    SHOP,
+    MIST,
+    REACTOR,
+    EXTRACTOR,
+	FAMILIAR,
+    KITE,
+    HIRED_MERCHANT;
+}
+
+
+搜索：
+
+    public List<Pair<Point, Integer>> getGuardians() {
+        return nodes.getGuardians();
+    }
+
+    public DirectionInfo getDirectionInfo(int i) {
+        return nodes.getDirection(i);
+    }
+}
+
+替換：
+
+    public List<Pair<Point, Integer>> getGuardians() {
+        return nodes.getGuardians();
+    }
+
+    public DirectionInfo getDirectionInfo(int i) {
+        return nodes.getDirection(i);
+    }
+
+    public final void spawnKite(final MapleKite Kite) {
+        addMapObject(Kite);
+        broadcastMessage(Kite.makeSpawnData());
+        MapTimer.getInstance().schedule(new Runnable() {
+
+            @Override
+            public void run() {
+                broadcastMessage(Kite.makeDestroyData());
+                removeMapObject(Kite);
+            }
+        }, 1000 * 60 * 60);
+    }
+}

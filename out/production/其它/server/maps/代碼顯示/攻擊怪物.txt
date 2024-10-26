@@ -1,0 +1,68 @@
+搜索：
+
+            for (int j = 0; j < ret.hits; j++) {
+                damage = lea.readInt();
+                allDamageNumbers.add(new Pair<Integer, Boolean>(Integer.valueOf(damage), false));
+                //System.out.println("parseDmgMa Damage: " + damage);
+            }
+
+替換：
+
+            for (int j = 0; j < ret.hits; j++) {
+                damage = lea.readInt();
+                allDamageNumbers.add(new Pair<Integer, Boolean>(Integer.valueOf(damage), false));
+                //System.out.println("parseDmgMa Damage: " + damage);
+                if (chr.isGM()) {
+                    chr.dropMessage(5, "怪物資訊：" + chr.getMap().getMonsterByOid(oid));
+                    chr.dropMessage(6, "魔法攻擊[" + ret.skill + "] - 攻擊數量: " + ret.targets + " 攻擊段數: " + ret.hits + " 傷害: " + damage);
+                }
+            }
+
+
+
+
+搜索：
+
+            for (int j = 0; j < ret.hits; j++) {
+                damage = lea.readInt();
+                //System.out.println("parseDmgM Damage: " + damage);
+                allDamageNumbers.add(new Pair<Integer, Boolean>(Integer.valueOf(damage), false));
+            }
+
+
+替換：
+
+
+            for (int j = 0; j < ret.hits; j++) {
+                damage = lea.readInt();
+                //System.out.println("parseDmgM Damage: " + damage);
+                allDamageNumbers.add(new Pair<Integer, Boolean>(Integer.valueOf(damage), false));
+                if (chr.isGM()) {
+                    chr.dropMessage(5, "怪物資訊：" + chr.getMap().getMonsterByOid(oid));
+                    chr.dropMessage(6, "近距離攻擊[" + ret.skill + "] - 攻擊數量: " + ret.targets + " 攻擊段數: " + ret.hits + " 傷害: " + damage);
+                }
+            }
+
+
+
+
+搜索：
+
+            for (int j = 0; j < ret.hits; j++) {
+                damage = lea.readInt();
+                allDamageNumbers.add(new Pair<Integer, Boolean>(Integer.valueOf(damage), false));
+                //System.out.println("parseDmgR Hit " + j + " from " + i + " to mobid " + oid + ", damage " + damage);
+            }
+
+
+替換：
+
+            for (int j = 0; j < ret.hits; j++) {
+                damage = lea.readInt();
+                allDamageNumbers.add(new Pair<Integer, Boolean>(Integer.valueOf(damage), false));
+                //System.out.println("parseDmgR Hit " + j + " from " + i + " to mobid " + oid + ", damage " + damage);
+                if (chr.isGM()) {
+                    chr.dropMessage(5, "怪物資訊：" + chr.getMap().getMonsterByOid(oid));
+                    chr.dropMessage(6, "遠距離攻擊[" + ret.skill + "] - 攻擊數量: " + ret.targets + " 攻擊段數: " + ret.hits + " 傷害: " + damage);
+                }
+            }

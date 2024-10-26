@@ -1,0 +1,47 @@
+搜索：
+
+        if (isDispel() && makeChanceResult()) {
+            applyto.dispelDebuffs();
+        } else if (isHeroWill()) {
+            applyto.dispelDebuffs();
+
+
+替換：
+
+        } else if (isHeroWill() || sourceid == 2003548) {//覺醒的秘藥
+            applyto.dispelDebuffs();
+
+
+
+搜索：
+
+            switch (sourceid) {
+                case 2022746: //angel bless
+                case 2022747: //d.angel bless
+                case 2022823:
+                    //ret.statups.clear(); //no atk/matk
+                    ret.statups.put(MapleBuffStat.PYRAMID_PQ, 1); //ITEM_EFFECT buff
+                    break;
+            }
+        }
+
+替換：
+
+            switch (sourceid) {
+                case 2022746: //angel bless
+                case 2022747: //d.angel bless
+                case 2022823:
+                    ret.statups.put(MapleBuffStat.PYRAMID_PQ, 1); //ITEM_EFFECT buff
+                    break;
+                case 2003547:
+                    ret.statups.put(MapleBuffStat.ABNORMAL_STATUS_R, (int) ret.terR);//狀態異常抗性
+                    break;
+                case 2003551:
+                    ret.statups.put(MapleBuffStat.DROP_RATE, (int) 110);//獲得財物秘藥
+                    ret.statups.put(MapleBuffStat.MESO_RATE, (int) 110);
+                    break;
+                case 2003549:
+                    ret.statups.put(MapleBuffStat.HOLY_MAGIC_SHELL, 100);//無敵秘藥
+                    break;
+            }
+        }

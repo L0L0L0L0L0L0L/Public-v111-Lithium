@@ -1,0 +1,16 @@
+搜索：
+
+                case 23121004://TODO LEGEND
+                    ret.statups.put(MapleBuffStat.ENHANCED_MAXHP, (int) ret.ehp);
+                    ret.statups.put(MapleBuffStat.PIRATES_REVENGE, (int) ret.damR);
+                    break;
+
+替換：
+
+                case 23121004://TODO LEGEND
+                    ret.statups.put(MapleBuffStat.ENHANCED_MAXHP, (int) ret.ehp);
+                    ret.statups.put(MapleBuffStat.PIRATES_REVENGE, (int) ret.damR);
+                    break;
+                case 23111000://斯特萊克雙擊
+                    ret.monsterStatus.put(MonsterStatus.STUN, Integer.valueOf(1));
+                    break;

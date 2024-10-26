@@ -1,0 +1,56 @@
+        //开始重置潜能属性
+        List<List<StructItemOption>> pots = new LinkedList<List<StructItemOption>>(ii.getAllPotentialInfo().values());
+        int reqLevel = ii.getReqLevel(toScroll.getItemId()) / 10;
+        int new_state = Math.abs(toScroll.getPotential1());
+        if (new_state > 20 || new_state < 17) {
+            new_state = 17;
+        }
+        int lines = (toScroll.getPotential2() != 0 ? 3 : 2); // 默认2条属性
+        while (toScroll.getState() != new_state) {
+            for (int i = 0; i < lines; i++) { //最小 2 条, 最大 3 条
+                boolean rewarded = false;
+                while (!rewarded) {
+                    StructItemOption pot = pots.get(Randomizer.nextInt(pots.size())).get(reqLevel);
+                    if (pot != null && pot.reqLevel / 10 <= reqLevel && GameConstants.optionTypeFits(pot.optionType, toScroll.getItemId()) && GameConstants.optionTypeFitsX(pot.opID, toScroll.getItemId()) && GameConstants.potentialIDFits(pot.opID, new_state, i)) { //optionType
+                        if (i == 0) {
+                            toScroll.setPotential1(pot.opID);
+                        } else if (i == 1) {
+                            toScroll.setPotential2(pot.opID);
+                        } else if (i == 2) {
+                            toScroll.setPotential3(pot.opID);
+                        }
+                        rewarded = true;
+                    }
+                }
+            }
+        }
+        //开始检测提示
+        if (toScroll.getState() >= 18 && toScroll.getStateMsg() < 3) {
+            if (toScroll.getState() == 18 && toScroll.getStateMsg() == 0) {
+                toScroll.setStateMsg(1);
+                player.finishAchievement(52);
+                if (!player.isAdmin()) {
+                    String msg = player.getMedalText() + player.getName() + " : 鉴定出 A 级装备，大家祝贺他(她)吧！";
+                    WorldBroadcastService.getInstance().broadcastSmega(MaplePacketCreator.itemMegaphone(msg, true, player.getClient().getChannel(), toScroll));
+                }
+            } else if (toScroll.getState() == 19 && toScroll.getStateMsg() <= 1) {
+                toScroll.setStateMsg(2);
+                player.finishAchievement(53);
+                if (!player.isAdmin()) {
+                    String msg = player.getMedalText() + player.getName() + " : 鉴定出 S 级装备，大家祝贺他(她)吧！";
+                    WorldBroadcastService.getInstance().broadcastSmega(MaplePacketCreator.itemMegaphone(msg, true, player.getClient().getChannel(), toScroll));
+                }
+            } else if (toScroll.getState() == 20 && toScroll.getStateMsg() <= 2) {
+                toScroll.setStateMsg(3);
+                player.finishAchievement(54);
+                if (!player.isAdmin()) {
+                    String msg = player.getMedalText() + player.getName() + " : 鉴定出 SS 级装备，大家祝贺他(她)吧！";
+                    WorldBroadcastService.getInstance().broadcastSmega(MaplePacketCreator.itemMegaphone(msg, true, player.getClient().getChannel(), toScroll));
+                }
+            }
+        }
+        player.forceUpdateItem(toScroll, true);
+        player.getMap().broadcastMessage(InventoryPacket.showMagnifyingEffect(player.getId(), toScroll.getPosition(), false));
+        return true;
+    }
+}

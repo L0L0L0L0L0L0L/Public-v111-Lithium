@@ -1,0 +1,64 @@
+搜索：
+
+                bx = SkillFactory.getSkill(31111006);
+                bof = chra.getTotalSkillLevel(bx);
+                if (bof > 0) {
+                    eff = bx.getEffect(bof);
+                    dam_r *= (eff.getX() + 100.0) / 100.0;
+                    bossdam_r *= (eff.getX() + 100.0) / 100.0;
+                    passive_sharpeye_rate += eff.getY();
+                }
+
+
+替換：
+
+                bx = SkillFactory.getSkill(31110006);//邪惡酷刑
+                bof = chra.getTotalSkillLevel(bx);
+                if (bof > 0) {
+                    eff = bx.getEffect(bof);
+                    dam_r *= (eff.getX() + 100.0) / 100.0;
+                    bossdam_r *= (eff.getX() + 100.0) / 100.0;
+                    passive_sharpeye_rate += eff.getY();
+                }
+
+
+
+
+搜索：
+
+                bx = SkillFactory.getSkill(31111007);
+                bof = chra.getTotalSkillLevel(bx);
+                if (bof > 0) {
+                    eff = bx.getEffect(bof);
+                    dam_r *= (eff.getDAMRate() + 100.0) / 100.0;
+                    bossdam_r *= (eff.getDAMRate() + 100.0) / 100.0;
+                }
+
+替換：
+
+                bx = SkillFactory.getSkill(31110007);//精神集中
+                bof = chra.getTotalSkillLevel(bx);
+                if (bof > 0) {
+                    eff = bx.getEffect(bof);
+                    dam_r *= (eff.getDAMRate() + 100.0) / 100.0;
+                    bossdam_r *= (eff.getDAMRate() + 100.0) / 100.0;
+                }
+
+
+
+搜索：
+
+                bx = SkillFactory.getSkill(31120010);
+                bof = chra.getTotalSkillLevel(bx);
+                if (bof > 0) {
+                    percent_wdef += bx.getEffect(bof).getT();
+                }
+
+
+替換：
+
+                bx = SkillFactory.getSkill(31120009);//堅硬肌膚
+                bof = chra.getTotalSkillLevel(bx);
+                if (bof > 0) {
+                    percent_wdef += bx.getEffect(bof).getT();
+                }

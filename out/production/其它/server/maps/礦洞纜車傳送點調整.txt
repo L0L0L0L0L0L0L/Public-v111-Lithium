@@ -1,0 +1,44 @@
+搜索：
+
+    public void startMapTimeLimitTask(int time, final MapleMap to) {
+        if (time <= 0) { //jail
+            time = 1;
+        }
+        client.getSession().write(EtcPacket.getClock(time));
+        final MapleMap ourMap = getMap();
+        time *= 1000;
+        mapTimeLimitTask = MapTimer.getInstance().register(new Runnable() {
+
+            @Override
+            public void run() {
+                if (ourMap.getId() == GameConstants.JAIL) {
+                    getQuestNAdd(MapleQuest.getInstance(GameConstants.JAIL_TIME)).setCustomData(String.valueOf(System.currentTimeMillis()));
+                    getQuestNAdd(MapleQuest.getInstance(GameConstants.JAIL_QUEST)).setCustomData("0"); //release them!
+                }
+                changeMap(to, to.getPortal(0));
+            }
+        }, time, time);
+    }
+
+
+替換：
+
+    public void startMapTimeLimitTask(int time, final MapleMap to) {
+        if (time <= 0) { //jail
+            time = 1;
+        }
+        client.getSession().write(EtcPacket.getClock(time));
+        final MapleMap ourMap = getMap();
+        time *= 1000;
+        mapTimeLimitTask = MapTimer.getInstance().register(new Runnable() {
+
+            @Override
+            public void run() {
+                if (ourMap.getId() == GameConstants.JAIL) {
+                    getQuestNAdd(MapleQuest.getInstance(GameConstants.JAIL_TIME)).setCustomData(String.valueOf(System.currentTimeMillis()));
+                    getQuestNAdd(MapleQuest.getInstance(GameConstants.JAIL_QUEST)).setCustomData("0"); //release them!
+                }
+                changeMap(to, to.getPortal(ourMap.getId() == 310030211 ? 3 : 0));
+            }
+        }, time, time);
+    }

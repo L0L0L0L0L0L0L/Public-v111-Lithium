@@ -1,0 +1,54 @@
+搜索：
+
+    public static final void UseCatchItem(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
+        c.getPlayer().updateTick(slea.readInt());
+        c.getPlayer().setScrolledPosition((short) 0);
+        final byte slot = (byte) slea.readShort();
+        final int itemid = slea.readInt();
+        final MapleMonster mob = chr.getMap().getMonsterByOid(slea.readInt());
+        final Item toUse = chr.getInventory(MapleInventoryType.USE).getItem(slot);
+        final MapleMap map = chr.getMap();
+
+        if (toUse != null && toUse.getQuantity() > 0 && toUse.getItemId() == itemid && mob != null && !chr.hasBlockedInventory() && itemid / 10000 == 227 && MapleItemInformationProvider.getInstance().getCardMobId(itemid) == mob.getId()) {
+            if (!MapleItemInformationProvider.getInstance().isMobHP(itemid) || mob.getHp() <= mob.getMobMaxHp() / 2) {
+                map.broadcastMessage(MobPacket.catchMonster(mob.getObjectId(), itemid, (byte) 1));
+                map.killMonster(mob, chr, true, false, (byte) 1);
+                MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.USE, slot, (short) 1, false, false);
+                if (MapleItemInformationProvider.getInstance().getCreateId(itemid) > 0) {
+                    MapleInventoryManipulator.addById(c, MapleItemInformationProvider.getInstance().getCreateId(itemid), (short) 1, "Catch item " + itemid + " on " + FileoutputUtil.CurrentReadable_Date());
+                }
+            } else {
+                map.broadcastMessage(MobPacket.catchMonster(mob.getObjectId(), itemid, (byte) 0));
+                c.getSession().write(MaplePacketCreator.catchMob(mob.getId(), itemid, (byte) 0));
+            }
+        }
+        c.getSession().write(MaplePacketCreator.enableActions());
+    }
+
+替換：
+
+    public static final void UseCatchItem(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
+        c.getPlayer().updateTick(slea.readInt());
+        c.getPlayer().setScrolledPosition((short) 0);
+        final byte slot = (byte) slea.readShort();
+        final int itemid = slea.readInt();
+        final MapleMonster mob = chr.getMap().getMonsterByOid(slea.readInt());
+        final Item toUse = chr.getInventory(MapleInventoryType.USE).getItem(slot);
+        final MapleMap map = chr.getMap();
+
+        if (toUse != null && toUse.getQuantity() > 0 && toUse.getItemId() == itemid && mob != null && !chr.hasBlockedInventory() && itemid / 10000 == 227 && MapleItemInformationProvider.getInstance().getCardMobId(itemid) == mob.getId()) {
+            if (!MapleItemInformationProvider.getInstance().isMobHP(itemid) || mob.getHp() <= mob.getMobMaxHp() / 2) {
+                map.broadcastMessage(MobPacket.catchMonster(mob.getObjectId(), itemid, (byte) 1));
+                map.killMonster(mob, chr, true, false, (byte) 1);
+                MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.USE, slot, (short) 1, false, false);
+                if (MapleItemInformationProvider.getInstance().getCreateId(itemid) > 0) {
+                    MapleInventoryManipulator.addById(c, MapleItemInformationProvider.getInstance().getCreateId(itemid), (short) 1, "Catch item " + itemid + " on " + FileoutputUtil.CurrentReadable_Date());
+                }
+            } else {
+                //map.broadcastMessage(MobPacket.catchMonster(mob.getObjectId(), itemid, (byte) 0));//注釋掉 版本不支援0 特效
+                map.broadcastMessage(MobPacket.getMobCoolEffect(mob.getObjectId(), itemid));//添加COOL 特效
+                c.getSession().write(MaplePacketCreator.catchMob(mob.getId(), itemid, (byte) 0));
+            }
+        }
+        c.getSession().write(MaplePacketCreator.enableActions());
+    }

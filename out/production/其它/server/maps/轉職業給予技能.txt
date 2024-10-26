@@ -1,0 +1,21 @@
+搜索：
+
+
+    public static int getSkillByJob(final int skillID, final int job) {
+        if (GameConstants.isKOC(job)) {
+            return skillID + 10000000;
+        } else if (GameConstants.isAran(job)) {
+            return skillID + 20000000;
+        } else if (GameConstants.isEvan(job)) {
+            return skillID + 20010000;
+        } else if (GameConstants.isMercedes(job)) {
+            return skillID + 20020000;
+        } else if (GameConstants.isDemon(job)) {
+            return skillID + 30010000;
+        } else if (GameConstants.isResist(job)) {
+            return skillID + 30000000;
+            //} else if (GameConstants.isCannon(job)) {
+            //    return skillID + 10000;
+        }
+        return skillID;
+    }

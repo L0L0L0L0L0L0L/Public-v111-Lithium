@@ -1,0 +1,10 @@
+/*
+	名字:	神木村
+	地圖:	天空地區2
+	描述:	240080200
+*/
+
+function enter(pi) {
+	pi.getClient().getSession().write(Packages.tools.packet.MaplePacketCreator.serverNotice(6, "The exit has been closed."));
+	return false;
+}

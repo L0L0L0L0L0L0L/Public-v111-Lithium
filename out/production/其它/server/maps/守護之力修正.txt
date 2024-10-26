@@ -1,0 +1,10 @@
+搜索：
+
+            addBuffStatPairToListIfNotZero(ret.statups, MapleBuffStat.MAXHP, (int) ret.mhpR);
+
+
+替換：
+
+            if (sourceid != 22131001) {//龍魔導士這個技能是被動加的HP上限
+            addBuffStatPairToListIfNotZero(ret.statups, MapleBuffStat.MAXHP, (int) ret.mhpR);
+            }

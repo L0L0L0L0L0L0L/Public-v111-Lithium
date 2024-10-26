@@ -1,0 +1,111 @@
+搜索：
+
+    public void applySkill(final MapleCharacter chr, final int id) {
+        SkillFactory.getSkill(id).getEffect(1).applyTo(chr);
+    }
+}
+
+替換：
+
+    public void applySkill(final MapleCharacter chr, final int id) {
+        SkillFactory.getSkill(id).getEffect(1).applyTo(chr);
+    }
+
+    public final int getSkillByJob(MapleCharacter chr, int skillId, int job) {//PVP冰騎士支援
+        return chr.getStat().getSkillByJob(skillId, job);
+    }
+}
+
+
+
+搜索：
+
+    public static boolean isIceKnightSkill(final int skill) {
+        return isBeginnerJob(skill / 10000) && (skill % 10000 == 1098 || skill % 10000 == 99 || skill % 10000 == 100 || skill % 10000 == 103 || skill % 10000 == 104 || skill % 10000 == 1105);
+    }
+
+替換：
+
+    public static boolean isIceKnightSkill(final int skill) {
+        return isBeginnerJob(skill / 10000) && (skill % 10000 == 1098 || skill % 10000 == 97 || skill % 10000 == 99 || skill % 10000 == 100 || skill % 10000 == 103 || skill % 10000 == 104 || skill % 10000 == 1105);
+    }
+
+
+
+搜索：
+
+        if (chr.getTotalSkillLevel(GameConstants.getLinkedAranSkill(skillid)) <= 0 || chr.getTotalSkillLevel(GameConstants.getLinkedAranSkill(skillid)) != skillLevel) {
+            if (!GameConstants.isMulungSkill(skillid) && !GameConstants.isPyramidSkill(skillid) && chr.getTotalSkillLevel(GameConstants.getLinkedAranSkill(skillid)) <= 0) {
+                c.getSession().close();
+                return;
+            }
+
+替換：
+
+
+        if (chr.getTotalSkillLevel(GameConstants.getLinkedAranSkill(skillid)) <= 0 || chr.getTotalSkillLevel(GameConstants.getLinkedAranSkill(skillid)) != skillLevel) {
+            if (!GameConstants.isIceKnightSkill(skillid) && !GameConstants.isMulungSkill(skillid) && !GameConstants.isPyramidSkill(skillid) && chr.getTotalSkillLevel(GameConstants.getLinkedAranSkill(skillid)) <= 0) {//PVP冰騎士支援
+                //c.getSession().close();
+                return;
+            }
+
+
+搜索：
+
+            if (chr.getTotalSkillLevel(GameConstants.getLinkedAranSkill(skillid)) <= 0) {
+                if (!GameConstants.isIceKnightSkill(skillid) && chr.getTotalSkillLevel(GameConstants.getLinkedAranSkill(skillid)) <= 0) {
+                    c.getSession().close();
+                    return;
+                }
+                if (GameConstants.isIceKnightSkill(skillid) && chr.getBuffSource(MapleBuffStat.MORPH) % 10000 != 1105) {
+                    return;
+                }
+            }
+
+替換：
+
+            if (chr.getTotalSkillLevel(GameConstants.getLinkedAranSkill(skillid)) <= 0) {
+                if (!GameConstants.isIceKnightSkill(skillid) && chr.getTotalSkillLevel(GameConstants.getLinkedAranSkill(skillid)) <= 0) {//PVP冰騎士支援
+                    //c.getSession().close();
+                    return;
+                }
+                if (GameConstants.isIceKnightSkill(skillid) && chr.getBuffSource(MapleBuffStat.MORPH) % 10000 != 1105) {
+                    return;
+                }
+            }
+
+搜索：
+
+    public static byte[] pvpAttack(int cid, int playerLevel, int skill, int skillLevel, int speed, int mastery, int projectile, int attackCount, int chargeTime, int stance, int direction, int range, int linkSkill, int linkSkillLevel, boolean movementSkill, boolean pushTarget, boolean pullTarget, List<AttackPair> attack) {
+        final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+        mplew.writeShort(SendPacketOpcode.PVP_ATTACK.getValue());
+        mplew.writeInt(cid);
+        mplew.write(playerLevel);
+        mplew.writeInt(skill);
+        mplew.write(skillLevel);
+        mplew.writeInt(linkSkill != skill ? linkSkill : 0);
+        mplew.write(linkSkillLevel != skillLevel ? linkSkillLevel : 0);
+        mplew.write(direction);
+
+
+替換：
+
+    public static byte[] pvpAttack(int cid, int playerLevel, int skill, int skillLevel, int speed, int mastery, int projectile, int attackCount, int chargeTime, int stance, int direction, int range, int linkSkill, int linkSkillLevel, boolean movementSkill, boolean pushTarget, boolean pullTarget, List<AttackPair> attack) {
+        final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+        mplew.writeShort(SendPacketOpcode.PVP_ATTACK.getValue());
+        mplew.writeInt(cid);
+        mplew.write(playerLevel);
+        mplew.writeInt(skill);
+        if (GameConstants.isIceKnightSkill(skill)) {//PVP冰騎士支援
+            mplew.write(1);
+            mplew.writeInt(skill);
+            mplew.write(1);
+        } else {
+            mplew.write(skillLevel);
+            mplew.writeInt(linkSkill != skill ? linkSkill : 0);
+            mplew.write(linkSkillLevel != skillLevel ? linkSkillLevel : 0);
+        }
+        mplew.write(direction);
+

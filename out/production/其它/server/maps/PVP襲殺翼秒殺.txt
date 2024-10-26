@@ -1,0 +1,52 @@
+搜索：
+
+    public void giveDebuff(final MapleDisease disease, int x, long duration, int skillid, int level) {
+        if (map != null && !hasDisease(disease)) {
+            if (!(disease == MapleDisease.SEDUCE || disease == MapleDisease.STUN || disease == MapleDisease.FLAG)) {
+                if (getBuffedValue(MapleBuffStat.HOLY_SHIELD) != null) {
+                    return;
+                }
+            }
+            final int mC = getBuffSource(MapleBuffStat.MECH_CHANGE);
+            if (mC > 0 && mC != 35121005) { //missile tank can have debuffs
+                return; //flamethrower and siege can't
+            }
+            if (stats.ASR > 0 && Randomizer.nextInt(100) < stats.ASR) {
+                return;
+            }
+
+            diseases.put(disease, new MapleDiseaseValueHolder(disease, System.currentTimeMillis(), duration - stats.decreaseDebuff));
+            client.getSession().write(BuffPacket.giveDebuff(disease, x, skillid, level, (int) duration));
+            map.broadcastMessage(this, BuffPacket.giveForeignDebuff(id, disease, skillid, level, x), false);
+
+            if (x > 0 && disease == MapleDisease.POISON) { //poison, subtract all HP
+                addHP((int) -(x * ((duration - stats.decreaseDebuff) / 1000)));
+            }
+        }
+    }
+
+
+替換：
+
+
+    public void giveDebuff(final MapleDisease disease, int x, long duration, int skillid, int level) {
+        if (map != null && !hasDisease(disease)) {
+            if (!(disease == MapleDisease.SEDUCE || disease == MapleDisease.STUN || disease == MapleDisease.FLAG)) {
+                if (getBuffedValue(MapleBuffStat.HOLY_SHIELD) != null) {
+                    return;
+                }
+            }
+            final int mC = getBuffSource(MapleBuffStat.MECH_CHANGE);
+            if (mC > 0 && mC != 35121005) { //missile tank can have debuffs
+                return; //flamethrower and siege can't
+            }
+            if (stats.ASR > 0 && Randomizer.nextInt(100) < stats.ASR) {
+                return;
+            }
+
+            diseases.put(disease, new MapleDiseaseValueHolder(disease, System.currentTimeMillis(), duration - stats.decreaseDebuff));
+            client.getSession().write(BuffPacket.giveDebuff(disease, x, skillid, level, (int) duration));
+            map.broadcastMessage(this, BuffPacket.giveForeignDebuff(id, disease, skillid, level, x), false);
+
+        }
+    }

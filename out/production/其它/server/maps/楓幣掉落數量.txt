@@ -1,0 +1,19 @@
+搜索：
+
+                    if (mesos > 0) {
+                        if (chr.getPC()>=System.currentTimeMillis()) {
+                            mesos += mesos * 0.5; //프리미엄 서비스 메소배율, ex(0.5면 50%)
+                        }
+                        spawnMobMesoDrop((int) (mesos * (chr.getStat().mesoBuff / 100.0) * chr.getDropMod() * cmServerrate), calcDropPos(pos, mob.getTruePosition()), mob, chr, false, droptype);
+                        mesoDropped = true;
+                    }
+
+替換：
+
+                    if (mesos > 0) {
+                        if (chr.getPC()>=System.currentTimeMillis()) {
+                            mesos += mesos * 0.5; //프리미엄 서비스 메소배율, ex(0.5면 50%)
+                        }
+                        spawnMobMesoDrop((int) (mesos * (chr.getStat().mesoBuff / 100.0) * cmServerrate), calcDropPos(pos, mob.getTruePosition()), mob, chr, false, droptype);
+                        mesoDropped = true;
+                    }

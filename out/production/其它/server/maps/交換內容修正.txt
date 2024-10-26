@@ -1,0 +1,51 @@
+搜索：
+
+case INVITE_TRADE: {
+                if (chr.getMap() == null) {
+                    return;
+                }
+                if (chr.getLevel() < 50) {
+                    chr.dropMessage(1, "等級50以下無法兌換。");
+                    return;
+                }
+
+替換：
+
+            case INVITE_TRADE: {
+                if (chr.getMap() == null) {
+                    return;
+                }
+                if (chr.getLevel() < 10) {
+                    chr.dropMessage(1, "等級10以下不可以交換。");
+                    return;
+                }
+
+
+搜索：
+
+        public static byte[] getTradeCancel(final byte UserSlot, final int unsuccessful) { //0 = canceled 1 = invent space 2 = pickuprestricted
+            MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+            mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
+            mplew.write(GameConstants.GMS ? 18 : 0xA);
+            mplew.write(UserSlot);
+            mplew.write(unsuccessful == 0 ? (GameConstants.GMS ? 7 : 2) : (unsuccessful == 1 ? 8 : 9));
+
+            return mplew.getPacket();
+        }
+    }
+
+
+替換：
+
+        public static byte[] getTradeCancel(final byte UserSlot, final int unsuccessful) { //0 = canceled 1 = invent space 2 = pickuprestricted
+            MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+            mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
+            mplew.write(GameConstants.GMS ? 18 : 0xA);
+            mplew.write(UserSlot);
+            mplew.write(unsuccessful == 0 ? 2 : (unsuccessful == 1 ? 8 : 9));//取消交換申請時，發送2，為拒絕提示
+
+            return mplew.getPacket();
+        }
+    }

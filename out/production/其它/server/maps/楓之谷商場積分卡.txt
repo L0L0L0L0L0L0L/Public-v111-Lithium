@@ -1,0 +1,77 @@
+搜索：
+
+                    MapleInventoryManipulator.addFromDrop(c, mapitem.getItem(), true, mapitem.getDropper() instanceof MapleMonster);
+                    removeItem(chr, mapitem, ob);
+                } else {
+                    c.getSession().write(InventoryPacket.getInventoryFull());
+                    c.getSession().write(InventoryPacket.getShowInventoryFull());
+                    c.getSession().write(MaplePacketCreator.enableActions());
+                }
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+
+
+替換：
+
+
+                if (mapitem.getItemId() == 4031865 || mapitem.getItemId() == 4031866) {
+                    chr.modifyCSPoints(1, mapitem.getItemId() == 4031865 ? 100 : 250, true);
+                    c.getSession().write(InventoryPacket.getInventoryFull());
+                    c.getSession().write(InventoryPacket.getShowInventoryFull());
+                    c.getSession().write(MaplePacketCreator.enableActions());
+                    removeItem(chr, mapitem, ob);
+                    return;
+                    }
+                    MapleInventoryManipulator.addFromDrop(c, mapitem.getItem(), true, mapitem.getDropper() instanceof MapleMonster);
+                    removeItem(chr, mapitem, ob);
+                } else {
+                    c.getSession().write(InventoryPacket.getInventoryFull());
+                    c.getSession().write(InventoryPacket.getShowInventoryFull());
+                    c.getSession().write(MaplePacketCreator.enableActions());
+                }
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+
+
+搜索：
+
+
+                    if (mapitem.getItem().getQuantity() >= 50 && mapitem.getItemId() == 2340000) {
+                        c.setMonitored(true); //hack check
+                    }
+                    MapleInventoryManipulator.addFromDrop(c, mapitem.getItem(), true, mapitem.getDropper() instanceof MapleMonster, false);
+                    removeItem_Pet(chr, mapitem, petz);
+                }
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+
+替換：
+
+                    if (mapitem.getItem().getQuantity() >= 50 && mapitem.getItemId() == 2340000) {
+                        c.setMonitored(true); //hack check
+                    }
+                if (mapitem.getItemId() == 4031865 || mapitem.getItemId() == 4031866) {
+                    chr.modifyCSPoints(1, mapitem.getItemId() == 4031865 ? 100 : 250, true);
+                    c.getSession().write(InventoryPacket.getInventoryFull());
+                    c.getSession().write(InventoryPacket.getShowInventoryFull());
+                    c.getSession().write(MaplePacketCreator.enableActions());
+                    removeItem_Pet(chr, mapitem, petz);
+                    return;
+                    }
+                    MapleInventoryManipulator.addFromDrop(c, mapitem.getItem(), true, mapitem.getDropper() instanceof MapleMonster, false);
+                    removeItem_Pet(chr, mapitem, petz);
+                }
+            }
+        } finally {
+            lock.unlock();
+        }
+    }

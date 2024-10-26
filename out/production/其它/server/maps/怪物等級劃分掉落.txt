@@ -1,0 +1,36 @@
+搜索：
+
+        if ((mob.getStats().getLevel() >= 1) && (mob.getStats().getLevel() <= 69)) {
+            dropEntry.add(new MonsterDropEntry(4001513, 15000, 1, 1, (short) 0));
+            dropEntry.add(new MonsterDropEntry(2022450, 100000, 1, 1, (short) 0));
+        }
+        if ((mob.getStats().getLevel()) >= 70 && (mob.getStats().getLevel() <= 119)) {
+            dropEntry.add(new MonsterDropEntry(4001515, 15000, 1, 1, (short) 0));
+            dropEntry.add(new MonsterDropEntry(2022451, 100000, 1, 1, (short) 0));
+        }
+        if ((mob.getStats().getLevel()) >= 120 && (mob.getStats().getLevel() <= 255)) {
+            dropEntry.add(new MonsterDropEntry(4001521, 15000, 1, 1, (short) 0));
+            dropEntry.add(new MonsterDropEntry(2022452, 100000, 1, 1, (short) 0));
+        }
+        if ((mob.getStats().getLevel()) >= 140 && (mob.getStats().getLevel() <= 255)) {
+            dropEntry.add(new MonsterDropEntry(4021020, 1000, 1, 1, (short) 0));
+            dropEntry.add(new MonsterDropEntry(2022452, 100000, 1, 1, (short) 0));
+        }
+
+替換：
+
+        if ((mob.getStats().getLevel() >= 1) && (mob.getStats().getLevel() <= 69)) {
+            dropEntry.add(new MonsterDropEntry(4001513, 5000, 1, 1, (short) 0));//斑點紋卷碎片
+            dropEntry.add(new MonsterDropEntry(2022450, 10000, 1, 1, (short) 0));//經驗值上升(小)
+        }
+        if ((mob.getStats().getLevel()) >= 70 && (mob.getStats().getLevel() <= 119)) {
+            dropEntry.add(new MonsterDropEntry(4001515, 5000, 1, 1, (short) 0));//豹紋卷碎片
+            dropEntry.add(new MonsterDropEntry(2022451, 10000, 1, 1, (short) 0));//經驗值上升(中)
+        }
+        if ((mob.getStats().getLevel()) >= 120 && (mob.getStats().getLevel() <= 255)) {
+            dropEntry.add(new MonsterDropEntry(4001521, 5000, 1, 1, (short) 0));//老虎紋卷碎片
+            dropEntry.add(new MonsterDropEntry(2022452, 10000, 1, 1, (short) 0));//經驗值上升(大)
+        }
+        if ((mob.getStats().getLevel()) >= 10 && (mob.getStats().getLevel() <= 255)) {
+            dropEntry.add(new MonsterDropEntry(2430692, 500, 1, 1, (short) 0));//Nebulite Box
+        }

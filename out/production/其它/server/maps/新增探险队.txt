@@ -1,0 +1,49 @@
+搜索：
+
+    public static enum MapleSquadType {
+        bossbalrog(2), zak(2), chaoszak(3), horntail(2), chaosht(3), pinkbean(3), nmm_squad(2), vergamot(2), dunas(2), nibergen_squad(2), dunas2(2), core_blaze(2), aufheben(2), cwkpq(10), tokyo_2095(2), vonleon(3), scartar(2), cygnus(3);
+
+
+替換：
+
+    public static enum MapleSquadType {
+        bossbalrog(2), zak(2), chaoszak(3), horntail(2), chaosht(3), pinkbean(3), nmm_squad(2), vergamot(2), dunas(2), nibergen_squad(2), dunas2(2), core_blaze(2), aufheben(2), cwkpq(10), tokyo_2095(2), vonleon(3), scartar(2), cygnus(3), arkarium(3), showa(3);
+
+
+搜索：
+
+            case 271040100:
+                zz = MapleSquadType.cygnus;
+                break;
+
+替換：
+
+            case 271040100:
+                zz = MapleSquadType.cygnus;
+                break;
+            case 272020200:
+                zz = MapleSquadType.arkarium;
+                break;
+            case 801040100:
+                zz = MapleSquadType.showa;
+                break;
+
+
+搜索：
+
+            case 271040100:
+                em = "CygnusBattle";
+                break;
+
+
+替換：
+
+            case 271040100:
+                em = "CygnusBattle";
+                break;
+            case 272020200:
+                em = "ArkariumBattle";
+                break;
+            case 801040100:
+                em = "ShowaBattle";
+                break;

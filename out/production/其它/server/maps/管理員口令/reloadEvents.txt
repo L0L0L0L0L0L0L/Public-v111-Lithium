@@ -1,0 +1,26 @@
+搜索：
+
+    public static class 이벤트리셋 extends CommandExecute {
+
+        @Override
+        public int execute(MapleClient c, String[] splitted) {
+            for (ChannelServer instance : ChannelServer.getAllInstances()) {
+                instance.reloadEvents();
+            }
+            return 1;
+        }
+    }
+
+替換：
+
+    public static class reloadEvents extends CommandExecute {
+
+        @Override
+        public int execute(MapleClient c, String[] splitted) {
+            for (ChannelServer instance : ChannelServer.getAllInstances()) {
+                instance.reloadEvents();
+                c.getPlayer().dropMessage(6, "Event已更新。");
+            }
+            return 1;
+        }
+    }

@@ -1,0 +1,41 @@
+搜索：
+
+                bx = SkillFactory.getSkill(23110004);
+                bof = chra.getTotalSkillLevel(bx);
+                if (bof > 0) {
+                    dodgeChance += bx.getEffect(bof).getProb();
+                }
+                bx = SkillFactory.getSkill(23110004);
+                bof = chra.getTotalSkillLevel(bx);
+                if (bof > 0) {
+                    damageIncrease.put(23101001, (int) bx.getEffect(bof).getDAMRate());
+                }
+
+
+替換：
+
+                bx = SkillFactory.getSkill(23111004);// 依古尼斯咆哮
+                bof = chra.getTotalSkillLevel(bx);
+                if (bof > 0) {
+                    dodgeChance += bx.getEffect(bof).getProb();
+                }
+                bx = SkillFactory.getSkill(23110006);// 騰空踢擊
+                bof = chra.getTotalSkillLevel(bx);
+                if (bof > 0) {
+                    damageIncrease.put(23101001, (int) bx.getEffect(bof).getDAMRate());
+                }
+                bx = SkillFactory.getSkill(23121000);// 伊修塔爾之環
+                bof = chra.getTotalSkillLevel(bx);
+                if (bof > 0) {
+                    damageIncrease.put(23111000, (int) bx.getEffect(bof).getDAMRate());
+                }
+                bx = SkillFactory.getSkill(23121002);// 傳說之槍
+                bof = chra.getTotalSkillLevel(bx);
+                if (bof > 0) {
+                    damageIncrease.put(23111001, (int) bx.getEffect(bof).getDAMRate());
+                }
+                bx = SkillFactory.getSkill(23120011);// 旋風月光翻轉
+                bof = chra.getTotalSkillLevel(bx);
+                if (bof > 0) {
+                    damageIncrease.put(23101001, (int) bx.getEffect(bof).getDAMRate());
+                }

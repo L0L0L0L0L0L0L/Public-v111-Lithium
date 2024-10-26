@@ -1,0 +1,331 @@
+查找：
+
+    PET_AUTO_POT,
+
+替換：
+
+    PET_AUTO_POT,
+    PET_AUTO_BUFF,
+
+
+查找：
+
+
+            case PET_AUTO_POT:
+                PetHandler.Pet_AutoPotion(slea, c, c.getPlayer());
+                break;
+
+替換：
+
+            case PET_AUTO_POT:
+                PetHandler.Pet_AutoPotion(slea, c, c.getPlayer());
+                break;
+            case PET_AUTO_BUFF:
+                PetHandler.Pet_AutoBuff(slea, c, c.getPlayer());
+                break;
+
+
+
+
+查找：
+
+    public static final void SpawnPet(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
+        chr.updateTick(slea.readInt());
+        chr.spawnPet(slea.readByte(), slea.readByte() > 0);
+
+    }
+
+
+替換：
+
+
+    public static final void SpawnPet(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
+        chr.updateTick(slea.readInt());
+        chr.spawnPet(slea.readByte(), slea.readByte() > 0);
+
+    }
+
+  public static void Pet_AutoBuff(LittleEndianAccessor slea, MapleClient c, MapleCharacter chr) {
+    int petid = slea.readInt();
+    MaplePet pet = chr.getPet(petid);
+    if (chr == null || (chr.getMap() == null) || (pet == null)) {
+      return;
+    }
+    int skillId = slea.readInt();
+    Skill buffId = SkillFactory.getSkill(skillId);
+    if ((chr.getSkillLevel(buffId) > 0) || (skillId == 0)) {
+      pet.setBuffSkill(skillId);
+      c.getSession().write(PetPacket.updatePet(pet, chr.getInventory(MapleInventoryType.CASH).getItem((short)(byte)pet.getInventoryPosition()), true));
+    }
+    c.getSession().write(CWvsContext.enableActions());
+  }
+
+
+頁首添加：
+
+import client.Skill;
+import client.SkillFactory;
+
+查找：
+
+public class PetPacket {
+
+    public static final byte[] updatePet(final MaplePet pet, final Item item, final boolean active) {
+        final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+        mplew.writeShort(SendPacketOpcode.INVENTORY_OPERATION.getValue());
+        mplew.write(0);
+        mplew.write(2);
+        mplew.write(3);
+        mplew.write(5);
+        mplew.writeShort(pet.getInventoryPosition());
+        mplew.write(0);
+        mplew.write(5);
+        mplew.writeShort(pet.getInventoryPosition());
+        mplew.write(3);
+        mplew.writeInt(pet.getPetItemId());
+        mplew.write(1);
+        mplew.writeLong(pet.getUniqueId());
+        PacketHelper.addPetItemInfo(mplew, item, pet, active);
+        return mplew.getPacket();
+    }
+
+
+替換：
+
+
+public class PetPacket {
+
+    public static final byte[] updatePet(final MaplePet pet, final Item item, final boolean active) {
+        final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+        mplew.writeShort(SendPacketOpcode.INVENTORY_OPERATION.getValue());
+        mplew.write(0);
+        mplew.write(2);
+        mplew.write(0);
+        mplew.write(3);
+        mplew.write(5);
+        mplew.writeShort(pet.getInventoryPosition());
+        mplew.write(0);
+        mplew.write(5);
+        mplew.writeShort(pet.getInventoryPosition());
+        mplew.write(3);
+        mplew.writeInt(pet.getPetItemId());
+        mplew.write(1);
+        mplew.writeLong(pet.getUniqueId());
+        PacketHelper.addPetItemInfo(mplew, item, pet, active);
+        return mplew.getPacket();
+    }
+
+
+
+查找：
+
+    public static final void addPetItemInfo(final MaplePacketLittleEndianWriter mplew, final Item item, final MaplePet pet, final boolean active) {
+        if (item == null) {
+            mplew.writeLong(PacketHelper.getKoreanTimestamp((long) (System.currentTimeMillis() * 1.5)));
+        } else {
+            PacketHelper.addExpirationTime(mplew, item.getExpiration() <= System.currentTimeMillis() ? -1 : item.getExpiration());
+        }
+        mplew.writeInt(-1);
+        mplew.writeAsciiString(pet.getName(), 13);
+        mplew.write(pet.getLevel());
+        mplew.writeShort(pet.getCloseness());
+        mplew.write(pet.getFullness());
+        if (item == null) {
+            mplew.writeLong(PacketHelper.getKoreanTimestamp((long) (System.currentTimeMillis() * 1.5)));
+        } else {
+            PacketHelper.addExpirationTime(mplew, item.getExpiration() <= System.currentTimeMillis() ? -1 : item.getExpiration());
+        }
+        mplew.writeShort(0);
+        mplew.writeShort(pet.getFlags());
+        mplew.writeInt(pet.getPetItemId() == 5000054 && pet.getSecondsLeft() > 0 ? pet.getSecondsLeft() : 0); //in seconds, 3600 = 1 hr.
+        mplew.writeShort(0);
+        mplew.write(active ? (pet.getSummoned() ? pet.getSummonedValue() : 0) : 0); // 1C 5C 98 C6 01
+        for (int i = 0; i < 4; i++) {
+            mplew.write(0); //0x40 before, changed to 0?
+        }
+    }
+
+
+替換：
+
+
+
+    public static final void addPetItemInfo(final MaplePacketLittleEndianWriter mplew, final Item item, final MaplePet pet, final boolean active) {
+        if (item == null) {
+            mplew.writeLong(PacketHelper.getKoreanTimestamp((long) (System.currentTimeMillis() * 1.5)));
+        } else {
+            PacketHelper.addExpirationTime(mplew, item.getExpiration() <= System.currentTimeMillis() ? -1 : item.getExpiration());
+        }
+        mplew.writeInt(-1);
+        mplew.writeAsciiString(pet.getName(), 13);
+        mplew.write(pet.getLevel());
+        mplew.writeShort(pet.getCloseness());
+        mplew.write(pet.getFullness());
+        if (item == null) {
+            mplew.writeLong(PacketHelper.getKoreanTimestamp((long) (System.currentTimeMillis() * 1.5)));
+        } else {
+            PacketHelper.addExpirationTime(mplew, item.getExpiration() <= System.currentTimeMillis() ? -1 : item.getExpiration() + (3600000 * 12));//寵物載入時間
+        }
+        mplew.writeShort(0);
+        mplew.writeShort(pet.getFlags());
+        mplew.writeInt(pet.getPetItemId() == 5000054 && pet.getSecondsLeft() > 0 ? pet.getSecondsLeft() : 0); //in seconds, 3600 = 1 hr.
+        mplew.writeShort(0);
+        mplew.write(active ? (pet.getSummoned() ? pet.getSummonedValue() : 0) : 0); // 1C 5C 98 C6 01
+        mplew.writeInt(active ? pet.getBuffSkill() : 0);
+    }
+
+
+
+
+
+查找替換：
+
+    private static final long serialVersionUID = 9179541993413738569L;
+    private String name;
+    private int Fh = 0, stance = 0, uniqueid, petitemid, secondsLeft = 0;
+    private Point pos;
+    private byte fullness = 100, level = 1, summoned = 0;
+    private short inventorypos = 0, closeness = 0, flags = 0;
+    private boolean changed = false;
+    private int skillid;
+
+    private MaplePet(final int petitemid, final int uniqueid) {
+        this.petitemid = petitemid;
+        this.uniqueid = uniqueid;
+    }
+
+    private MaplePet(final int petitemid, final int uniqueid, final short inventorypos) {
+        this.petitemid = petitemid;
+        this.uniqueid = uniqueid;
+        this.inventorypos = inventorypos;
+    }
+
+    public static final MaplePet loadFromDb(final int itemid, final int petid, final short inventorypos) {
+        try {
+            final MaplePet ret = new MaplePet(itemid, petid, inventorypos);
+
+            Connection con = DatabaseConnection.getConnection(); // Get a connection to the database
+            PreparedStatement ps = con.prepareStatement("SELECT * FROM pets WHERE petid = ?"); // Get pet details..
+            ps.setInt(1, petid);
+
+            final ResultSet rs = ps.executeQuery();
+            if (!rs.next()) {
+                rs.close();
+                ps.close();
+                return null;
+            }
+
+            ret.setName(rs.getString("name"));
+            ret.setCloseness(rs.getShort("closeness"));
+            ret.setLevel(rs.getByte("level"));
+            ret.setFullness(rs.getByte("fullness"));
+            ret.setSecondsLeft(rs.getInt("seconds"));
+	    ret.setFlags(rs.getShort("flags"));
+            ret.setBuffSkill(rs.getInt("skillid"));
+	    ret.changed = false;
+
+            rs.close();
+            ps.close();
+
+            return ret;
+        } catch (SQLException ex) {
+            Logger.getLogger(MaplePet.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
+        }
+    }
+
+    public final void saveToDb() {
+	if (!changed) {
+	    return;
+	}
+        try {
+            final PreparedStatement ps = DatabaseConnection.getConnection().prepareStatement("UPDATE pets SET name = ?, level = ?, closeness = ?, fullness = ?, seconds = ?, flags = ? , skillid = ? WHERE petid = ?");
+            ps.setString(1, name); // Set name
+            ps.setByte(2, level); // Set Level
+            ps.setShort(3, closeness); // Set Closeness
+            ps.setByte(4, fullness); // Set Fullness
+            ps.setInt(5, secondsLeft);
+	    ps.setShort(6, flags);
+            ps.setInt(7, skillid);  
+            ps.setInt(8, uniqueid); // Set ID
+            ps.executeUpdate(); // Execute statement
+            ps.close();
+	    changed = false;
+        } catch (final SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+
+   public int getBuffSkill() {
+     return this.skillid;
+   }
+
+   public void setBuffSkill(int id) {
+     this.skillid = id;
+   }
+
+    public static final MaplePet createPet(final int itemid, final int uniqueid) {
+        return createPet(itemid, MapleItemInformationProvider.getInstance().getName(itemid), 1, 0, 100, uniqueid, itemid == 5000054 ? 18000 : 0, (short)(itemid == 5000067 && !GameConstants.GMS ? 0x37 : 0), 0);
+    }
+
+    public static final MaplePet createPet(int itemid, String name, int level, int closeness, int fullness, int uniqueid, int secondsLeft, short flag, int skillId) {
+        if (uniqueid <= -1) { //wah
+            uniqueid = MapleInventoryIdentifier.getInstance();
+        }
+        try { // Commit to db first
+            PreparedStatement pse = DatabaseConnection.getConnection().prepareStatement("INSERT INTO pets (petid, name, level, closeness, fullness, seconds, flags, skillId) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+            pse.setInt(1, uniqueid);
+            pse.setString(2, name);
+            pse.setByte(3, (byte) level);
+            pse.setShort(4, (short) closeness);
+            pse.setByte(5, (byte) fullness);
+            pse.setInt(6, secondsLeft);
+	    pse.setShort(7, flag);
+            pse.setInt(8, skillId); 
+            pse.executeUpdate();
+            pse.close();
+        } catch (final SQLException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+        final MaplePet pet = new MaplePet(itemid, uniqueid);
+        pet.setName(name);
+        pet.setLevel(level);
+        pet.setFullness(fullness);
+        pet.setCloseness(closeness);
+	pet.setFlags(flag);
+        pet.setSecondsLeft(secondsLeft);
+        pet.setBuffSkill(skillId);
+
+        return pet;
+    }
+
+
+
+查找：
+
+        if (fullness > 100) {
+            fullness = 100;
+        }
+        try {
+            MapleInventoryManipulator.addById(c, id, (short) 1, "", MaplePet.createPet(id, name, level, closeness, fullness, MapleInventoryIdentifier.getInstance(), id == 5000054 ? (int) period : 0, flags), 45, "Pet from interaction " + id + " (" + id2 + ")" + " on " + FileoutputUtil.CurrentReadable_Date());
+        } catch (NullPointerException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+
+替換：
+
+        if (fullness > 100) {
+            fullness = 100;
+        }
+        try {
+            MapleInventoryManipulator.addById(c, id, (short) 1, "", MaplePet.createPet(id, name, level, closeness, fullness, MapleInventoryIdentifier.getInstance(), id == 5000054 ? (int) period : 0, flags, 0), 45, "Pet from interaction " + id + " (" + id2 + ")" + " on " + FileoutputUtil.CurrentReadable_Date());
+        } catch (NullPointerException ex) {
+            ex.printStackTrace();
+        }
+    }

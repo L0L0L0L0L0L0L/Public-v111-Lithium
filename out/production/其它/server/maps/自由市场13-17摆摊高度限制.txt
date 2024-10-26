@@ -1,0 +1,13 @@
+搜索：
+
+                    } else if (chr.getPosition().y >= 890) {
+                            chr.dropMessage(1, "請在精靈商人專用區使用。");
+                            c.getSession().write(MaplePacketCreator.enableActions());
+                            return;
+
+替換：
+
+                    } else if (chr.getPosition().y >= 980) {
+                            chr.dropMessage(1, "請在精靈商人專用區使用。");
+                            c.getSession().write(MaplePacketCreator.enableActions());
+                            return;

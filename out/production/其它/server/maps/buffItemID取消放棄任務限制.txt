@@ -1,0 +1,23 @@
+搜索：
+
+            case buffItemID:
+                status = c.getQuest(quest);
+                if (status.getForfeited() > 0) {
+                    break;
+                }
+                final int tobuff = intStore;
+                if (tobuff <= 0) {
+                    break;
+                }
+                MapleItemInformationProvider.getInstance().getItemEffect(tobuff).applyTo(c);
+                break;
+
+替換：
+
+            case buffItemID:
+                final int tobuff = intStore;
+                if (tobuff <= 0) {
+                    break;
+                }
+                MapleItemInformationProvider.getInstance().getItemEffect(tobuff).applyTo(c);
+                break;

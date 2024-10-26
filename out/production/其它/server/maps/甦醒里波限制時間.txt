@@ -1,0 +1,156 @@
+搜索：
+
+                            if(summon.isReaper() && (System.currentTimeMillis()-summon.getSpawnTime())>=10000+((getSkillLevel(32111006)-1)*2)){
+                                map.broadcastMessage(SummonPacket.removeSummon(summon, true));
+                                map.removeMapObject(summon);
+                                visibleMapObjects.remove(summon);
+                                toRemove.add(summon);                                
+                            }
+                        }
+
+替換：
+
+                            if (summon.isReaper() && (System.currentTimeMillis() - summon.getSpawnTime()) >= 10000 + (2 * ((getSkillLevel(32111006) / 2) * 1000))) {
+                                map.broadcastMessage(SummonPacket.removeSummon(summon, true));
+                                map.removeMapObject(summon);
+                                visibleMapObjects.remove(summon);
+                                toRemove.add(summon);                                
+                            }
+                        }
+
+
+搜索：
+
+        if(sum.isReaper() && (System.currentTimeMillis()-sum.getSpawnTime())>=10000+((chr.getSkillLevel(32111006)-1)*2)){
+        chr.getMap().broadcastMessage(SummonPacket.removeSummon(sum, true));
+        chr.getMap().removeMapObject(sum);
+        chr.removeSummon(sum);
+        }
+    }
+
+
+替換：
+  
+        if (sum.isReaper() && (System.currentTimeMillis() - sum.getSpawnTime()) >= 10000 + (2 * ((chr.getSkillLevel(32111006) / 2) * 1000))) {
+        chr.getMap().broadcastMessage(SummonPacket.removeSummon(sum, true));
+        chr.getMap().removeMapObject(sum);
+        chr.removeSummon(sum);
+        }
+    }
+
+
+搜索：
+
+            while (iter.hasNext()) {     
+                summon = iter.next();   
+                    if(summon.isReaper() && (System.currentTimeMillis()-summon.getSpawnTime())>=10000+((chr.getSkillLevel(32111006)-1)*2)){
+                    chr.getMap().broadcastMessage(SummonPacket.removeSummon(summon, true));
+                    chr.getMap().removeMapObject(summon);
+                    chr.removeSummon(summon);                                
+                    }
+
+
+替換：
+
+            while (iter.hasNext()) {     
+                summon = iter.next();   
+                    if (summon.isReaper() && (System.currentTimeMillis() - summon.getSpawnTime()) >= 10000 + (2 * ((chr.getSkillLevel(32111006) / 2) * 1000))) {
+                    chr.getMap().broadcastMessage(SummonPacket.removeSummon(summon, true));
+                    chr.getMap().removeMapObject(summon);
+                    chr.removeSummon(summon);
+                    }
+
+
+
+搜索：
+
+
+        if(summon.isReaper() && (System.currentTimeMillis()-summon.getSpawnTime())>=10000+((chr.getSkillLevel(32111006)-1)*2)){
+        chr.getMap().broadcastMessage(SummonPacket.removeSummon(summon, true));
+        chr.getMap().removeMapObject(summon);
+        chr.removeSummon(summon);                                
+        }
+    }
+
+替換：
+
+
+        if (summon.isReaper() && (System.currentTimeMillis() - summon.getSpawnTime()) >= 10000 + (2 * ((chr.getSkillLevel(32111006) / 2) * 1000))) {
+        chr.getMap().broadcastMessage(SummonPacket.removeSummon(summon, true));
+        chr.getMap().removeMapObject(summon);
+        chr.removeSummon(summon);
+        }
+    }
+
+
+
+搜索：
+
+
+        if(sum.isReaper() && (System.currentTimeMillis()-sum.getSpawnTime())>=10000+((chr.getSkillLevel(32111006)-1)*2)){        
+        chr.getMap().broadcastMessage(SummonPacket.removeSummon(sum, true));
+        chr.getMap().removeMapObject(sum);
+        chr.removeSummon(sum);
+        }
+
+替換：
+
+        if (sum.isReaper() && (System.currentTimeMillis() - sum.getSpawnTime()) >= 10000 + (2 * ((chr.getSkillLevel(32111006) / 2) * 1000))) {        
+        chr.getMap().broadcastMessage(SummonPacket.removeSummon(sum, true));
+        chr.getMap().removeMapObject(sum);
+        chr.removeSummon(sum);
+        }
+  
+
+
+搜索：
+
+
+        if(summon.isReaper() && (System.currentTimeMillis()-summon.getSpawnTime())>=10000+((chr.getSkillLevel(32111006)-1)*2)){
+        chr.getMap().broadcastMessage(SummonPacket.removeSummon(summon, true));
+        chr.getMap().removeMapObject(summon);
+        chr.removeSummon(summon);                                
+        }
+    }
+}
+
+替換：
+
+
+        if (summon.isReaper() && (System.currentTimeMillis() - summon.getSpawnTime()) >= 10000 + (2 * ((chr.getSkillLevel(32111006) / 2) * 1000))) {
+        chr.getMap().broadcastMessage(SummonPacket.removeSummon(summon, true));
+        chr.getMap().removeMapObject(summon);
+        chr.removeSummon(summon);
+        }
+    }
+}
+
+
+
+搜索：
+
+        if (chr.getBuffedValue(MapleBuffStat.REAPER) != null) {
+            Skill reaper = SkillFactory.getSkill(32111006);
+            if (reaper.getEffect(chr.getSkillLevel(reaper)).makeChanceResult()) {
+                MapleSummon summon = chr.getSummons().get(32111006);
+                if (summon == null) {
+                    summon = new MapleSummon(chr, 32111006, chr.getSkillLevel(reaper), chr.getPosition(), SummonMovementType.WALK_STATIONARY);
+                    summon.setSpawnTime(System.currentTimeMillis());
+                    chr.addSummon(summon);
+                }
+                chr.getMap().spawnSummon(summon);
+            }
+
+替換：
+
+        if (chr.getBuffedValue(MapleBuffStat.REAPER) != null) {
+            Skill reaper = SkillFactory.getSkill(32111006);
+            if (reaper.getEffect(chr.getSkillLevel(reaper)).makeChanceResult() && chr.getSummonsSize() < 5) {//召喚裡波數量限制
+                MapleSummon summon = chr.getSummons().get(32111006);
+                if (summon == null) {
+                    summon = new MapleSummon(chr, 32111006, chr.getSkillLevel(reaper), chr.getPosition(), SummonMovementType.WALK_STATIONARY);
+                    summon.setSpawnTime(System.currentTimeMillis());
+                    chr.addSummon(summon);
+                }
+                chr.getMap().spawnSummon(summon);
+            }

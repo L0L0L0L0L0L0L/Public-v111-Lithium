@@ -1,0 +1,183 @@
+1、
+public void initItemInformation(ResultSet sqlItemData) throws SQLException {
+        final ItemInformation ret = new ItemInformation();
+        final int itemId = sqlItemData.getInt("itemid");
+        ret.itemId = itemId;
+        ret.slotMax = GameConstants.getSlotMax(itemId) > 0 ? GameConstants.getSlotMax(itemId) : sqlItemData.getShort("slotMax");
+        ret.price = Double.parseDouble(sqlItemData.getString("price"));
+        ret.wholePrice = sqlItemData.getInt("wholePrice");
+        ret.stateChange = sqlItemData.getInt("stateChange");
+        ret.name = sqlItemData.getString("name");
+        ret.desc = sqlItemData.getString("desc");
+        ret.msg = sqlItemData.getString("msg");
+
+        ret.flag = sqlItemData.getInt("flags");
+
+        ret.karmaEnabled = sqlItemData.getByte("karma");
+        ret.meso = sqlItemData.getInt("meso");
+        ret.monsterBook = sqlItemData.getInt("monsterBook");
+        ret.itemMakeLevel = sqlItemData.getShort("itemMakeLevel");
+        ret.questId = sqlItemData.getInt("questId");
+        ret.create = sqlItemData.getInt("create");
+        ret.replaceItem = sqlItemData.getInt("replaceId");
+        ret.replaceMsg = sqlItemData.getString("replaceMsg");
+        ret.afterImage = sqlItemData.getString("afterImage");
+        ret.cardSet = 0;
+        if (ret.monsterBook > 0 && itemId / 10000 == 238) {
+            mobIds.put(ret.monsterBook, itemId);
+            for (Entry<Integer, Triple<Integer, List<Integer>, List<Integer>>> set : monsterBookSets.entrySet()) {
+                if (set.getValue().mid.contains(itemId)) {
+                    ret.cardSet = set.getKey();
+                    break;
+                }
+            }
+        }
+
+        final String scrollRq = sqlItemData.getString("scrollReqs");
+        if (scrollRq.length() > 0) {
+            ret.scrollReqs = new ArrayList<Integer>();
+            final String[] scroll = scrollRq.split(",");
+            for (String s : scroll) {
+                if (s.length() > 1) {
+                    ret.scrollReqs.add(Integer.parseInt(s));
+                }
+            }
+        }
+        final String consumeItem = sqlItemData.getString("consumeItem");
+        if (consumeItem.length() > 0) {
+            ret.questItems = new ArrayList<Integer>();
+            //final String[] scroll = scrollRq.split(",");
+            final String[] scroll = consumeItem.split(",");//听北冥修改任务id
+            for (String s : scroll) {
+                if (s.length() > 1) {
+                    ret.questItems.add(Integer.parseInt(s));
+                }
+            }
+            System.out.println(ret.questItems);
+        }
+
+        ret.totalprob = sqlItemData.getInt("totalprob");
+        final String incRq = sqlItemData.getString("incSkill");
+        if (incRq.length() > 0) {
+            ret.incSkill = new ArrayList<Integer>();
+            final String[] scroll = incRq.split(",");
+            for (String s : scroll) {
+                if (s.length() > 1) {
+                    ret.incSkill.add(Integer.parseInt(s));
+                }
+            }
+        }
+        dataCache.put(itemId, ret);
+    }
+
+
+
+2、
+    public static final void UseItemQuest(final LittleEndianAccessor slea, final MapleClient c) {
+        System.out.println(slea.toString());
+        final short slot = slea.readShort();
+        final int itemId = slea.readInt();
+        final Item item = c.getPlayer().getInventory(MapleInventoryType.ETC).getItem(slot);
+        final int qid = slea.readInt();
+        final MapleQuest quest = MapleQuest.getInstance(qid);
+        final MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        Pair<Integer, List<Integer>> questItemInfo = null;
+        boolean found = false;
+        for (Item i : c.getPlayer().getInventory(MapleInventoryType.ETC)) {
+            if (i.getItemId() / 10000 == 422) {
+                questItemInfo = ii.questItemInfo(i.getItemId());
+                if (questItemInfo != null && questItemInfo.getLeft() == qid && questItemInfo.getRight() != null && questItemInfo.getRight().contains(itemId)) {
+                    found = true;
+                    break; //i believe it's any order
+                }
+            }
+        }
+        if (quest != null && found && item != null && item.getQuantity() > 0 && item.getItemId() == itemId) {
+            final int newData = slea.readInt();
+            final MapleQuestStatus stats = c.getPlayer().getQuestNoAdd(quest);
+            if (stats != null && stats.getStatus() == 1) {
+                stats.setCustomData(String.valueOf(newData));
+                c.getPlayer().updateQuest(stats, true);
+                MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.ETC, slot, (short) 1, false);
+            }
+        }
+    }
+    
+    public static final void UseItemQuest1(final LittleEndianAccessor slea, final MapleClient c) {
+        final int qid = slea.readShort();
+        //MapleQuest.getInstance(qid).forceStart(c.getPlayer(), 0, "0");
+        final MapleQuest quest = MapleQuest.getInstance(qid);
+        final MapleQuestStatus stats = c.getPlayer().getQuestNoAdd(quest);
+        c.getPlayer().updateQuest(stats, true);
+        c.announce(MaplePacketCreator.enableActions());
+    }
+
+    public static final void UseItemQuest2(final LittleEndianAccessor slea, final MapleClient c) {
+        slea.readByte();
+        final short slot = slea.readByte();
+        slea.readByte();
+        final int itemId = slea.readInt();
+        final Item item = c.getPlayer().getInventory(MapleInventoryType.ETC).getItem(slot);
+        System.out.println(item.toString());
+        
+        final MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        int qid = ii.questItemInfo(itemId).left;
+        final MapleQuest quest = MapleQuest.getInstance(qid);
+        
+        
+        if (quest != null && item != null && item.getQuantity() > 0) {
+            //final int newData = slea.readInt();
+            final MapleQuestStatus stats = c.getPlayer().getQuestNoAdd(quest);
+            if (stats != null && stats.getStatus() == 1) {
+                if (stats.getCustomData()== null){
+                    stats.setCustomData(String.valueOf(0));
+                }
+                if (ii.questItemInfo(itemId).getRight() == null ){
+                    return;
+                }
+                //int questItems = ii.questItemInfo(itemId).getRight().get(1);
+                int num = ii.questItemInfo(itemId).getRight().get(1);
+                
+                stats.setCustomData(String.valueOf(Long.parseLong(stats.getCustomData())+num));
+                c.getPlayer().updateQuest(stats, true);
+                MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.ETC, slot, (short) 1, false);
+                c.announce(MaplePacketCreator.enableActions());
+            }
+        }
+    }
+
+3、
+            case USE_SKILL_BOOK:
+                c.getPlayer().updateTick(slea.readInt());
+                InventoryHandler.UseSkillBook((byte) slea.readShort(), slea.readInt(), c, c.getPlayer());
+                break;
+            
+                //北冥任务道具
+            case OPEN_ITEMUI:
+                //NPCHandler.UseItemQuest1(slea, c);
+                break;
+            case ITEMUI:
+                NPCHandler.UseItemQuest1(slea, c);
+                break;
+            case USE_ITEMUI:
+                NPCHandler.UseItemQuest2(slea, c);
+                break;
+
+4、
+    USE_SP_RESET_SCROLL,
+    
+    OPEN_ITEMUI,
+    ITEMUI,
+    USE_ITEMUI,
+
+5、
+    RPS_GAME, 
+    
+    OPEN_ITEMUI,
+    ITEMUI,
+    USE_ITEMUI,
+
+
+6、数据库wz_itemdata新增
+
+7、recvops.ini和sendops.ini 增加包头

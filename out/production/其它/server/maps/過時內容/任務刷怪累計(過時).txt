@@ -1,0 +1,51 @@
+搜索：
+
+        final int mobid = monster.getId();
+        ExpeditionType type = null;
+        if (mobid == 8810018 && mapid == 240060200) { // Horntail
+            World.Broadcast.broadcastMessage(MaplePacketCreator.serverNotice(6, "以不疲倦的精神，擊敗了暗黑龍王的探險隊！你們才是真正的冒險家英雄！"));
+            charactersLock.readLock().lock();
+            try {
+                for (MapleCharacter c : characters) {
+                    c.finishAchievement(16);
+                }
+            } finally {
+                charactersLock.readLock().unlock();
+            }
+
+
+
+替換：
+
+        final int mobid = monster.getId();
+        ExpeditionType type = null;
+        if ((mobid == 8830007 && mapid == 105100300) || (mobid == 8830000 && mapid == 105100400)) {
+            for (MapleCharacter c : characters) {
+                if (c.getQuestStatus(2239) == 1) {
+                    c.mobKilled(9101003, 1);//添加任務怪物計數
+                    MapleQuestStatus status;
+                    status = c.getQuest(MapleQuest.getInstance(2239));
+                    c.getClient().getSession().write(MaplePacketCreator.InfoPacket.updateQuestMobKills(status));//刷新任務怪物計數
+                }
+            }
+        } else if (mobid == 8810018 && mapid == 240060200) { // Horntail
+            World.Broadcast.broadcastMessage(MaplePacketCreator.serverNotice(6, "以不疲倦的精神，擊敗了暗黑龍王的探險隊！你們才是真正的冒險家英雄！"));
+            charactersLock.readLock().lock();
+            try {
+                for (MapleCharacter c : characters) {
+                    if (c.getQuestStatus(3707) == 1) {
+                        c.mobKilled(8810018, 1);//添加任務怪物計數
+                        MapleQuestStatus status;
+                        status = c.getQuest(MapleQuest.getInstance(3707));
+                        c.getClient().getSession().write(MaplePacketCreator.InfoPacket.updateQuestMobKills(status));//刷新任務怪物計數
+                    }
+                    c.finishAchievement(16);
+                }
+            } finally {
+                charactersLock.readLock().unlock();
+            }
+
+
+頁首添加：
+
+import client.MapleQuestStatus;

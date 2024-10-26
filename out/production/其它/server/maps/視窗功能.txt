@@ -1,0 +1,98 @@
+搜索：
+
+    public void sendRepairWindow() {
+        c.getSession().write(UIPacket.sendRepairWindow(id));
+    }
+
+    public void sendProfessionWindow() {
+        c.getSession().write(UIPacket.openUI(42));
+    }
+
+
+替換：
+
+    public void sendLinkSkillWindow(int skillId) {//連接技能視窗
+        if (hasSkill(skillId)) {
+            c.getSession().write(UIPacket.sendLinkSkillWindow(skillId));
+        }
+    }
+
+    public void sendPartyWindow() {//組隊搜索視窗
+        c.getSession().write(UIPacket.sendPartyWindow(id));
+    }
+
+    public void sendRepairWindow() {//道具修理視窗
+        c.getSession().write(UIPacket.sendRepairWindow(id));
+    }
+
+    public void sendProfessionWindow() {//專業技術視窗
+        c.getSession().write(UIPacket.sendProfessionWindow(0));
+    }
+
+    public void sendEventWindow() {//活動清單視窗
+        c.getSession().write(UIPacket.sendEventWindow(0));
+    }
+
+
+搜索：
+
+        public static byte[] sendRepairWindow(final int npc) {
+            final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter(10);
+
+            // 1st int: 3(Skill), 7(Maple User), 21(Party Search), 33(Repair)
+            // 0: Buddy, 1: Party, 2: Expedition, 3: Guild, 4: Alliance, 5: Blacklist or npc id
+            mplew.writeShort(SendPacketOpcode.OPEN_UI_OPTION.getValue());
+            mplew.writeInt(33);
+            mplew.writeInt(npc);
+
+            return mplew.getPacket();
+        }
+
+替換：
+
+        public static byte[] sendUIWindow(int op, int npc) {
+
+            MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+            mplew.writeShort(SendPacketOpcode.OPEN_UI_OPTION.getValue());
+            /*
+            * 0x03 連接技能視窗
+            * 0x15 組隊搜索視窗
+            * 0x21 道具修理視窗
+            * 0x2A 專業技術視窗
+            */
+            mplew.writeInt(op);
+            mplew.writeInt(npc);
+            mplew.writeInt(0); //V.114新增 未知
+
+            return mplew.getPacket();
+        }
+
+        public static byte[] sendLinkSkillWindow(int skillId) {//連接技能視窗
+            return sendUIWindow(0x03, skillId);
+        }
+
+        public static byte[] sendPartyWindow(int npc) {//組隊搜索視窗
+            return sendUIWindow(0x15, npc);
+        }
+
+        public static byte[] sendRepairWindow(int npc) {//道具修理視窗
+            return sendUIWindow(0x21, npc);
+        }
+
+        public static byte[] sendProfessionWindow(int npc) {//專業技術視窗
+            return sendUIWindow(0x2A, npc);
+        }
+
+        public static byte[] sendEventWindow(int npc) {//活動清單視窗
+
+            MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+            mplew.writeShort(SendPacketOpcode.OPEN_UI.getValue());
+            mplew.writeInt(0x37);
+            if (npc > 0) {
+                mplew.writeInt(npc);
+            }
+
+            return mplew.getPacket();
+        }

@@ -1,0 +1,16 @@
+搜索：
+
+    public final boolean applyTo(final MapleCharacter applyfrom, final MapleCharacter applyto, final boolean primary, final Point pos, int newDuration) {
+
+
+替換：
+
+    public final boolean applyTo(final MapleCharacter applyfrom, final MapleCharacter applyto, final boolean primary, final Point pos, int newDuration) {
+        if (sourceid == 2022198) {
+            applyfrom.giveDebuff(MapleDisease.POISON, MobSkillFactory.getMobSkill(125, 1)); //go left
+           }
+
+
+
+
+import server.life.MobSkillFactory;

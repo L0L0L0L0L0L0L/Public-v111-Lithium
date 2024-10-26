@@ -1,0 +1,86 @@
+搜索：
+
+            double price;
+            if (GameConstants.isThrowingStar(item.getItemId()) || GameConstants.isBullet(item.getItemId())) {
+                price = ii.getWholePrice(item.getItemId()) / (double) ii.getSlotMax(item.getItemId());
+            } else {
+                price = ii.getPrice(item.getItemId());
+            }
+            final int recvMesos = (int) Math.max(Math.ceil(price * quantity), 0);
+            if (price != -1.0 && recvMesos > 0) {
+                c.getPlayer().gainMeso(recvMesos, false);
+            }
+            c.getSession().write(NPCPacket.confirmShopTransaction((byte) 0x4, this, c, -1));
+        }
+    }
+
+
+替換：
+
+            double price;
+            if (GameConstants.isThrowingStar(item.getItemId()) || GameConstants.isBullet(item.getItemId())) {
+                price = ii.getPrice(item.getItemId()) * (double) quantity;//飛鏢 子彈計算方式
+            } else {
+                price = ii.getPrice(item.getItemId());
+            }
+            final int recvMesos = (int) Math.max(Math.ceil(price * quantity), 0);
+            final int recvMesos2 = (int) Math.max(Math.ceil(price + ii.getWholePrice(item.getItemId())), 0);//對應飛鏢 子彈售出價格
+            if (price != -1.0 && recvMesos > 0 && GameConstants.isThrowingStar(item.getItemId()) || price != -1.0 && recvMesos > 0 && GameConstants.isBullet(item.getItemId())) {
+                c.getPlayer().gainMeso(recvMesos2, false);
+            } else {
+               c.getPlayer().gainMeso(recvMesos, false);
+            }
+            c.getSession().write(NPCPacket.confirmShopTransaction((byte) 0x4, this, c, -1));
+        }
+    }
+
+
+
+搜索：
+
+        if (index >= 0) {
+            final Item i = c.getPlayer().getRebuy().get(index);
+            final int price = (int) Math.max(Math.ceil(ii.getPrice(itemId) * (GameConstants.isRechargable(itemId) ? 1 : i.getQuantity())), 0);
+            if (price >= 0 && c.getPlayer().getMeso() >= price) {
+                if (MapleInventoryManipulator.checkSpace(c, itemId, i.getQuantity(), i.getOwner())) {
+                    c.getPlayer().gainMeso(-price, false);
+                    MapleInventoryManipulator.addbyItem(c, i);
+                    c.getPlayer().getRebuy().remove(index);
+                    c.getSession().write(NPCPacket.confirmShopTransaction((byte) 0, this, c, x));
+                } else {
+                    c.getPlayer().dropMessage(1, "Your inventory is full.");
+                    c.getSession().write(NPCPacket.confirmShopTransaction((byte) 0, this, c, -1));
+                }
+            } else {
+                c.getSession().write(NPCPacket.confirmShopTransaction((byte) 0, this, c, -1));
+            }
+            return;
+        }
+
+
+替換：
+
+        if (index >= 0) {
+            final Item i = c.getPlayer().getRebuy().get(index);
+            final int price = (int) Math.max(Math.ceil(ii.getPrice(itemId) * (GameConstants.isRechargable(itemId) ? 1 : i.getQuantity())), 0);
+            final int price2 = (int) Math.max(Math.ceil(ii.getPrice(itemId) * i.getQuantity() + ii.getWholePrice(itemId)) ,0);
+            if (price >= 0 && c.getPlayer().getMeso() >= price) {
+            if (MapleInventoryManipulator.checkSpace(c, itemId, i.getQuantity(), i.getOwner()) && GameConstants.isRechargable(itemId) || MapleInventoryManipulator.checkSpace(c, itemId, i.getQuantity(), i.getOwner()) && GameConstants.isBullet(itemId) ) {
+                    c.getPlayer().gainMeso(-price2, false);
+                    MapleInventoryManipulator.addbyItem(c, i);
+                    c.getPlayer().getRebuy().remove(index);
+                    c.getSession().write(NPCPacket.confirmShopTransaction((byte) 0, this, c, x));
+                } else if (MapleInventoryManipulator.checkSpace(c, itemId, i.getQuantity(), i.getOwner())) {
+                    c.getPlayer().gainMeso(-price, false);
+                    MapleInventoryManipulator.addbyItem(c, i);
+                    c.getPlayer().getRebuy().remove(index);
+                    c.getSession().write(NPCPacket.confirmShopTransaction((byte) 0, this, c, x));
+                } else {
+                    c.getPlayer().dropMessage(1, "在收到物品之前，請檢查一下背包是否留有空位。");
+                    c.getSession().write(NPCPacket.confirmShopTransaction((byte) 0, this, c, -1));
+                }
+            } else {
+                c.getSession().write(NPCPacket.confirmShopTransaction((byte) 0, this, c, -1));
+            }
+            return;
+        }

@@ -1,0 +1,16 @@
+搜索：
+
+                } else if (chr.getMapId() == 931000021 && targetid == 931000030) {
+                    unlock = true;
+                    warp = true;
+                }
+
+替換：
+
+                } else if (chr.getMapId() == 931000021 && targetid == 931000030) {
+                    unlock = true;
+                    warp = true;
+                } else if (chr.getMapId() == 931000632 && targetid == 310000000) {//任務23144播放動畫後返回埃德爾斯坦
+                    unlock = true;
+                    warp = true;
+                }

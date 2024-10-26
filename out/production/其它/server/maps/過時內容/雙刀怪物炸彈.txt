@@ -1,0 +1,187 @@
+GameConstants.java
+
+搜索：
+
+    public static final int[] blockedSkills = {4341003};
+    public static final String[] RESERVED = {"Rental", "Donor", "MapleNews"};
+
+替換：
+
+    public static final int[] blockedSkills = {};
+    public static final String[] RESERVED = {"Rental", "Donor", "MapleNews"};
+
+
+
+
+
+
+MobHandler.java
+
+搜索：
+
+    public static final void MobBomb(final LittleEndianAccessor slea, final MapleCharacter chr) {
+        final MapleMap map = chr.getMap();
+        if (map == null) {
+            return;
+        }
+        final MapleMonster mobfrom = map.getMonsterByOid(slea.readInt());
+        slea.skip(4); // something, 9E 07
+        slea.readInt(); //-204?
+
+        if (mobfrom != null && mobfrom.getBuff(MonsterStatus.MONSTER_BOMB) != null) {
+            /* not sure
+            12D -    0B 3D 42 00 EC 05 00 00 32 FF FF FF 00 00 00 00 00 00 00 00
+            <monsterstatus done>
+            108 - 07 0B 3D 42 00 EC 05 00 00 32 FF FF FF 01 00 00 00 7B 00 00 00
+             */
+        }
+    }
+
+
+
+替換：
+
+ public static final void MobBomb(final LittleEndianAccessor slea, final MapleCharacter chr) {
+        final MapleMap map = chr.getMap();
+        if (map == null) {
+            return;
+        }
+        /*
+        final MapleMonster mobfrom = map.getMonsterByOid(slea.readInt());
+        slea.skip(4); // something, 9E 07
+        slea.readInt(); //-204?
+
+        if (mobfrom != null && mobfrom.getBuff(MonsterStatus.MONSTER_BOMB) != null) {
+            //not sure
+            //12D -    0B 3D 42 00 EC 05 00 00 32 FF FF FF 00 00 00 00 00 00 00 00
+            //<monsterstatus done>
+            //108 - 07 0B 3D 42 00 EC 05 00 00 32 FF FF FF 01 00 00 00 7B 00 00 00
+            */
+        
+        //怪物炸弹
+        final MapleMonster mobfrom = map.getMonsterByOid(slea.readInt());
+        //int pos = slea.readInt();
+        //int type = slea.readInt();
+        //}
+        if (mobfrom != null /*&& mobfrom.getBuff(MonsterStatus.MONSTER_BOMB) != null*/) {
+            chr.getClient().getSession().write(MobPacket.itemBombAttack(4341003, mobfrom.getPosition().x, mobfrom.getPosition().y, 0));
+        }
+    }
+
+
+
+
+搜索：
+
+
+            maxdamage *= (effect.getDamage() + chr.getStat().getDamageIncrease(attack.skill)) / 100.0;
+            attackCount = effect.getAttackCount();
+
+            if (effect.getCooldown(chr) > 0 && !chr.isGM() && !energy) {
+                if (chr.skillisCooling(attack.skill)) {
+                    c.getSession().write(CWvsContext.enableActions());
+                    return;
+                }
+                c.getSession().write(CField.skillCooldown(attack.skill, effect.getCooldown(chr)));
+                chr.addCooldown(attack.skill, System.currentTimeMillis(), effect.getCooldown(chr) * 1000);
+            }
+        }
+
+
+替換：
+
+            maxdamage *= (effect.getDamage() + chr.getStat().getDamageIncrease(attack.skill)) / 100.0;
+            attackCount = effect.getAttackCount();
+
+            if (attack.skill != 4341003) { //怪物炸弹
+            if (effect.getCooldown(chr) > 0 && !chr.isGM() && !energy) {
+                if (chr.skillisCooling(attack.skill)) {
+                    c.getSession().write(CWvsContext.enableActions());
+                    return;
+                }
+                c.getSession().write(CField.skillCooldown(attack.skill, effect.getCooldown(chr)));
+                chr.addCooldown(attack.skill, System.currentTimeMillis(), effect.getCooldown(chr) * 1000);
+                }
+            }
+        }
+
+
+
+
+
+
+
+MapleStatEffect.java
+
+
+搜索：
+
+            }
+            i++;
+            if (i >= mobCount && sourceid != 35111005) {
+                break;
+            }
+        }
+    }
+
+
+替換：
+
+            }
+            i++;
+            if (i >= mobCount && sourceid != 35111005) {
+                break;
+            }
+            //怪物炸弹
+            if (sourceid == 4341003) {
+                break;
+            }
+        }
+    }
+
+
+
+MobPacket.java
+
+
+搜索：
+
+
+    public static byte[] catchMonster(int mobid, int itemid, byte success) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+        mplew.writeShort(SendPacketOpcode.CATCH_MONSTER.getValue());
+        mplew.writeInt(mobid);
+        mplew.writeInt(itemid);
+        mplew.write(success);
+
+        return mplew.getPacket();
+    }
+}
+
+
+替換：
+
+    public static byte[] catchMonster(int mobid, int itemid, byte success) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+        mplew.writeShort(SendPacketOpcode.CATCH_MONSTER.getValue());
+        mplew.writeInt(mobid);
+        mplew.writeInt(itemid);
+        mplew.write(success);
+
+        return mplew.getPacket();
+    }
+    //怪物炸弹
+    public static byte[] itemBombAttack(int skillid, int x, int y, int tybe) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+        mplew.writeShort(SendPacketOpcode.TIME_BOMB_ATTACK.getValue());
+        mplew.writeInt(skillid);
+        mplew.writeInt(x);
+        mplew.writeInt(y);
+        mplew.writeInt(tybe);
+        mplew.writeInt(0);
+        return mplew.getPacket();
+    }
+}

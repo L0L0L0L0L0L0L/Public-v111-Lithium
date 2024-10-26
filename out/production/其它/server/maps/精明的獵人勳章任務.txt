@@ -1,0 +1,23 @@
+搜索：
+
+        if (animation >= 0) {
+            broadcastMessage(MobPacket.killMonster(monster.getObjectId(), animation));
+        }
+
+替換：
+
+        if (animation >= 0) {
+            broadcastMessage(MobPacket.killMonster(monster.getObjectId(), animation));
+        }
+        if (chr.getQuestStatus(29400) == 1 && monster.getStats().getLevel() > chr.getLevel()) {//精明的獵人勳章任務
+            final int mobdiy = Integer.parseInt(chr.getQuestNAdd(MapleQuest.getInstance(29400)).getCustomData()) + 1;
+            chr.getQuestNAdd(MapleQuest.getInstance(29400)).setCustomData(mobdiy + "");
+            chr.updateQuest(chr.getQuestNAdd(MapleQuest.getInstance(29400)), true);
+        }
+
+
+
+
+頁首：
+
+import server.quest.MapleQuest;

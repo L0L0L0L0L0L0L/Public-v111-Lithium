@@ -1,0 +1,170 @@
+搜索：
+
+        duration += from.getStat().dotTime * 1000;
+        long aniTime = duration;
+        if (skilz != null) {
+            aniTime += skilz.getAnimationTime();
+        }
+        status.setCancelTask(aniTime);
+        if (poison && getHp() > 1) {
+            status.setValue(status.getStati(), Integer.valueOf((int) ((eff.getDOT() + from.getStat().dot + from.getStat().getDamageIncrease(eff.getSourceId())) * from.getStat().getCurrentMaxBaseDamage() / 100.0)));
+	    int dam = Integer.valueOf((int)(aniTime / 1000 * status.getX() / 2));
+            status.setPoisonSchedule(dam, from);
+	    if (dam > 0) {
+		if (dam >= hp) {
+		    dam = (int)(hp - 1);
+		}
+		damage(from, dam, false);
+	    }
+        } else if (statusSkill == 4111003 || statusSkill == 14111001) { // shadow web
+
+替換：
+
+
+        duration += from.getStat().dotTime * 1000;
+        long aniTime = duration;
+        /*if (skilz != null) {
+            aniTime += skilz.getAnimationTime();
+        }*/
+
+        status.setCancelTask(aniTime);
+        if (poison && getHp() > 1) {
+            //if (getStats().isBoss()) {
+            //    return;
+            //}
+            if (status.getchr() != null) {
+                return;
+            }
+            status.setDotTime(duration);
+            int poisonDot = from.getStat().dot;
+            int damageIncrease = from.getStat().getDamageIncrease(eff.getSourceId());
+            if (damageIncrease > eff.getDOT()) {
+                poisonDot += damageIncrease;
+            } else {
+                poisonDot += eff.getDOT();
+            }
+            if (from.isAdmin()) {
+                from.dropMessage(6, "[持續傷害] 開始處理效果 - 技能ID：" + eff.getSourceId());
+                from.dropMessage(6, "[持續傷害] 加成 - 技能ID：" + eff.getDOT() + " 被動： " + from.getStat().dot + " 被動加成： " + damageIncrease + " 最終加成：" + poisonDot);
+            }
+            int poisonDamage = (int) (aniTime / 1000 * ((int) (poisonDot * from.getStat().getCurrentMaxBaseDamage() / 100.0D) / 1));
+            int damagex = (int) (((getHp() > poisonDamage) ? poisonDamage : (getHp() - 1)) / (aniTime / 1000));
+            status.setValue(status.getStati(), damagex);
+
+            if (from.isAdmin()) {
+                from.dropMessage(6, "[持續傷害] 持續傷害： " + ((getHp() > poisonDamage) ? poisonDamage : (getHp() - 1)) + " 持續時間：" + aniTime + " 持續掉血：" + status.getX());
+            }
+            status.setPoisonSchedule(status.getX(), from);
+        } else if (statusSkill == 4111003 || statusSkill == 14111001) { // shadow web
+
+
+
+
+搜索：
+
+            poisonsLock.writeLock().lock();
+            try {
+                poisons.add(status);
+                if (con != null) {
+                    map.broadcastMessage(con, MobPacket.applyMonsterStatus(this, poisons), getTruePosition());
+                    con.getClient().getSession().write(MobPacket.applyMonsterStatus(this, poisons));
+                } else {
+                    map.broadcastMessage(MobPacket.applyMonsterStatus(this, poisons), getTruePosition());
+                }
+
+替換：
+
+            poisonsLock.writeLock().lock();
+            try {
+                poisons.add(status);
+                status.scheduledoPoison(this);//持續掉血
+                if (con != null) {
+                    map.broadcastMessage(con, MobPacket.applyMonsterStatus(this, poisons), getTruePosition());
+                    con.getClient().getSession().write(MobPacket.applyMonsterStatus(this, poisons));
+                } else {
+                    map.broadcastMessage(MobPacket.applyMonsterStatus(this, poisons), getTruePosition());
+                }
+
+
+
+
+搜索：
+
+    private boolean reflect = false;
+    private long cancelTime = 0;
+
+
+替換：
+
+    private boolean reflect = false;
+    private long cancelTime = 0;
+    private long dotTime = 0;
+    private boolean newpoison = true;
+
+
+
+
+
+搜索：
+
+    public final void cancelPoisonSchedule(MapleMonster mm) {
+	mm.doPoison(this, weakChr);
+	this.poisonSchedule = 0;
+	this.weakChr = null;
+    }
+
+
+替換：
+
+    public final void cancelPoisonSchedule(MapleMonster mm) {
+	mm.doPoison(this, weakChr);
+	this.poisonSchedule = 0;
+	this.weakChr = null;
+    }
+
+    public WeakReference<MapleCharacter> getchr() {
+	return this.weakChr;
+    }
+
+    public void setDotTime(long duration) {
+	this.dotTime = duration;
+    }
+
+    public long getDotTime() {
+	return this.dotTime;
+    }
+
+    public void setnewpoison(boolean s) {
+	this.newpoison = s;
+    }
+
+    public void scheduledoPoison(final MapleMonster mon) {
+        final java.util.Timer timer = new java.util.Timer(true);
+        final long time = System.currentTimeMillis();
+        final MonsterStatusEffect eff = this;
+        if (newpoison) {
+            TimerTask task = new TimerTask() {
+                @Override
+                public void run() {
+                if (time + getDotTime() > System.currentTimeMillis() && mon.isAlive()) {
+                        //每次需要執行的代碼放到這裡面  
+                        //if (weakChr.get().isAdmin()) {
+                        //      weakChr.get().dropMessage(6, "[持續傷害] 持續傷害");
+                        //}
+                        setnewpoison(false);
+                        mon.doPoison(eff, weakChr);
+                    } else {
+                        setnewpoison(true);
+                        //cancelPoisonSchedule(mon);
+                        timer.cancel();
+                    }
+                }
+            };
+            timer.schedule(task, 0, 1000);
+        }
+    }
+
+
+頁首：
+
+import java.util.TimerTask;

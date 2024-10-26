@@ -1,0 +1,22 @@
+搜索：
+
+                bx = SkillFactory.getSkill(5310007);
+                bof = chra.getTotalSkillLevel(bx);
+                if (bof > 0) {
+                    eff = bx.getEffect(bof);
+                    percent_hp += eff.getHpR();
+                    ASR += eff.getASRRate();
+                    percent_wdef += eff.getWDEFRate();
+                }
+
+
+替換：
+
+                bx = SkillFactory.getSkill(5310007);// 終極狀態
+                bof = chra.getTotalSkillLevel(bx);
+                if (bof > 0) {
+                    eff = bx.getEffect(bof);
+                    percent_hp += eff.getPercentHP();
+                    ASR += eff.getASRRate();
+                    percent_wdef += eff.getWDEFRate();
+                }

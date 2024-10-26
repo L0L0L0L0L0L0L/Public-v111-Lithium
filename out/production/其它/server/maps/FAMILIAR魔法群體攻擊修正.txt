@@ -1,0 +1,142 @@
+搜索：
+
+    public static final void AttackFamiliar(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
+        if (chr.getSummonedFamiliar() == null) {
+            return;
+        }
+        slea.skip(6); //byte 0 and monster id, then something we don't need
+        final int skillid = slea.readInt();
+        FamiliarEntry f = SkillFactory.getFamiliar(skillid);
+        if (f == null) {
+            return;
+        }
+        final byte unk = slea.readByte();
+        final byte size = slea.readByte();
+        final List<Triple<Integer, Integer, List<Integer>>> attackPair = new ArrayList<Triple<Integer, Integer, List<Integer>>>(size);
+        for (int i = 0; i < size; i++) {
+            final int oid = slea.readInt();
+            final int type = slea.readInt();
+            slea.skip(10);
+            final byte si = slea.readByte();
+            List<Integer> attack = new ArrayList<Integer>(si);
+            for (int x = 0; x < si; x++) {
+                attack.add(slea.readInt());
+            }
+            attackPair.add(new Triple<Integer, Integer, List<Integer>>(oid, type, attack));
+        }
+        if (attackPair.isEmpty() || !chr.getCheatTracker().checkFamiliarAttack(chr) || attackPair.size() > f.targetCount) {
+            return;
+        }
+        final MapleMonsterStats oStats = chr.getSummonedFamiliar().getOriginalStats();
+        chr.getMap().broadcastMessage(chr, CField.familiarAttack(chr.getId(), unk, attackPair), chr.getTruePosition());
+        for (Triple<Integer, Integer, List<Integer>> attack : attackPair) {
+            final MapleMonster mons = chr.getMap().getMonsterByOid(attack.left);
+            if (mons == null || !mons.isAlive() || mons.getStats().isFriendly() || mons.getLinkCID() > 0 || attack.right.size() > f.attackCount) {
+                continue;
+            }
+            if (chr.getTruePosition().distanceSq(mons.getTruePosition()) > 640000.0 || chr.getSummonedFamiliar().getTruePosition().distanceSq(mons.getTruePosition()) > GameConstants.getAttackRange(f.lt, f.rb)) {
+                chr.getCheatTracker().registerOffense(CheatingOffense.ATTACK_FARAWAY_MONSTER_SUMMON);
+            }
+            for (int damage : attack.right) {
+                if (damage <= (oStats.getPhysicalAttack() * 4)) { //approx.
+                    mons.damage(chr, damage, true);
+                }
+            }
+            if (f.makeChanceResult() && mons.isAlive()) {
+                for (MonsterStatus s : f.status) {
+                    mons.applyStatus(chr, new MonsterStatusEffect(s, (int) f.speed, MonsterStatusEffect.genericSkill(s), null, false), false, f.time * 1000, false, null);
+                }
+                if (f.knockback) {
+                    mons.switchController(chr, true);
+                }
+            }
+        }
+        chr.getSummonedFamiliar().addFatigue(chr, attackPair.size());
+    }
+
+替換：
+
+    public static final void AttackFamiliar(final LittleEndianAccessor slea, final MapleClient c, final MapleCharacter chr) {
+        /*
+         Data: 
+        00 24 FC 97 00 02 
+        86 03 00 00 sid
+        01 
+        06 6target 
+        
+        
+        23 A1 07 00 oid1
+        07 00 00 00 00 00 00 00 00 01 B0 04 00 00 02 BD 1B 03 00 3E 2C 03 00 
+        26 A1 07 00 oid2
+        07 00 00 00 81 00 00 00 00 01 B0 04 00 00 02 C9 16 03 00 8E CB 02 00 
+        27 A1 07 00 oid3
+        07 00 00 00 80 00 00 00 00 01 B0 04 00 00 02 9F FD 02 00 C7 E1 02 00 
+        28 A1 07 00 oid4
+        07 00 00 00 80 04 00 00 00 01 B0 04 00 00 02 C4 2B 03 00 7F CF 02 00 
+        2A A1 07 00 oid5
+        07 00 00 00 80 00 00 00 00 01 B0 04 00 00 02 AD C2 02 00 46 08 03 00 
+        2B A1 07 00 oid6
+        07 00 00 00 81 00 00 00 00 01 B0 04 00 00 02 DB E8 02 00 53 EF 02 00 
+        14 4E 15 84 /wtf
+         */
+        if (chr.getSummonedFamiliar() == null) {
+            return;
+        }
+        slea.skip(6); //byte 0 and monster id, then something we don't need
+        final int skillid = slea.readInt();
+        FamiliarEntry f = SkillFactory.getFamiliar(skillid);
+        if (f == null) {
+            return;
+        }
+        final byte unk = slea.readByte();
+        final byte size = slea.readByte();
+        final List<Triple<Integer, Integer, List<Integer>>> attackPair = new ArrayList<Triple<Integer, Integer, List<Integer>>>(size);
+        for (int i = 0; i < size; i++) {
+            /*
+            23 A1 07 00 oid1
+            07 00 00 00 
+            00 00 00 00 00 01 B0 04 00 00 
+            02 
+            BD 1B 03 00 dmg
+            3E 2C 03 00 dmg2
+            */
+            final int oid = slea.readInt();
+            final int type = slea.readInt();
+            slea.skip(10);
+            final byte si = slea.readByte(); // 02
+            List<Integer> attack = new ArrayList<Integer>(si);
+            for (int x = 0; x < si; x++) {
+                attack.add(slea.readInt());
+            }
+            attackPair.add(new Triple<Integer, Integer, List<Integer>>(oid, type, attack));
+            //oid = left
+            //middle = type
+            //attack(dmg) = right
+            
+        }
+        if (attackPair.isEmpty() || !chr.getCheatTracker().checkFamiliarAttack(chr) || attackPair.size() > f.targetCount) {
+            return;
+        }
+        final MapleMonsterStats oStats = chr.getSummonedFamiliar().getOriginalStats();
+        chr.getMap().broadcastMessage(chr, CField.familiarAttack(chr.getId(), unk, attackPair), chr.getTruePosition());
+        for (Triple<Integer, Integer, List<Integer>> attack : attackPair) {
+            final MapleMonster mons = chr.getMap().getMonsterByOid(attack.left);
+            if (mons == null || !mons.isAlive() || mons.getStats().isFriendly() || mons.getLinkCID() > 0 || attack.right.size() > f.attackCount) {
+                continue;
+            }
+            for (int damage : attack.right) {
+               // if (damage <= (oStats.getPhysicalAttack() * 4)) { //approx.
+                    mons.damage(chr, damage, true);
+               // }
+            }
+            if (f.makeChanceResult() && mons.isAlive()) {
+                for (MonsterStatus s : f.status) {
+                    mons.applyStatus(chr, new MonsterStatusEffect(s, (int) f.speed, MonsterStatusEffect.genericSkill(s), null, false), false, f.time * 1000, false, null);
+                }
+                if (f.knockback) {
+                    mons.switchController(chr, true);
+                }
+            }
+        }
+        chr.getSummonedFamiliar().addFatigue(chr, attackPair.size());
+    }

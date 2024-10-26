@@ -1,0 +1,134 @@
+搜索：
+
+    private static final boolean isGuildNameAcceptable(final String name) {
+        if(name.getBytes(Charset.forName("MS949")).length < 1 || name.getBytes(Charset.forName("MS949")).length > 12){
+            return false;
+        }
+        if(!Pattern.compile("[a-zA-Z0-9가-힣]{2,12}").matcher(name).matches()){
+            return false;
+        }
+
+
+替換：
+
+    private static final boolean isGuildNameAcceptable(final String name) {
+        if(name.getBytes(Charset.forName("GBK")).length < 1 || name.getBytes(Charset.forName("GBK")).length > 12){
+            return false;
+        }
+        if(!Pattern.compile("^(?!_)(?!.*?_$)[a-zA-Z0-9_\\u4e00-\\u9fa5]+$").matcher(name).matches()){
+            return false;
+        }
+
+
+
+搜索：
+
+    private static Charset ENC = Charset.forName("MS949");
+    public static final String getLeftPaddedStr(final String in, final char padchar, final int length) {
+        StringBuilder builder = new StringBuilder(length);
+        for (int x = in.getBytes(ENC).length; x < length; x++) {
+            builder.append(padchar);
+        }
+        builder.append(in);
+        return builder.toString();
+    }
+
+替換：
+
+    public static final String getLeftPaddedStr(final String in, final char padchar, final int length) {
+        StringBuilder builder = new StringBuilder(length);
+        for (int x = in.length(); x < length; x++) {
+            builder.append(padchar);
+        }
+        builder.append(in);
+        return builder.toString();
+    }
+
+
+搜索：
+
+    public static final String getRightPaddedStr(final String in, final char padchar, final int length) {
+        StringBuilder builder = new StringBuilder(in);
+        for (int x = in.getBytes(ENC).length; x < length; x++) {
+            builder.append(padchar);
+        }
+        return builder.toString();
+    }
+
+替換：
+
+    public static final String getRightPaddedStr(final String in, final char padchar, final int length) {
+        StringBuilder builder = new StringBuilder(in);
+        for (int x = in.length(); x < length; x++) {
+            builder.append(padchar);
+        }
+        return builder.toString();
+    }
+
+
+
+搜索：
+
+    public final String readAsciiString(int n) {
+	byte ret[] = new byte[n];
+	for (int x = 0; x < n; x++) {
+	    ret[x] = readByte();
+	}
+	return new String(ret, Charset.forName("MS949"));
+    }
+
+替換
+
+    public final String readAsciiString(int n) {
+	byte ret[] = new byte[n];
+	for (int x = 0; x < n; x++) {
+	    ret[x] = readByte();
+	}
+	return new String(ret, Charset.forName("GBK"));
+    }
+
+
+
+搜索：
+
+    private final ByteArrayOutputStream baos;
+    private static final Charset ASCII = Charset.forName("MS949"); // ISO-8859-1, UTF-8
+
+
+替換：
+
+    private final ByteArrayOutputStream baos;
+    private static final Charset ASCII = Charset.forName("GBK"); // ISO-8859-1, UTF-8
+
+
+
+搜索：
+
+    public final String readAsciiString(int n) {
+	byte ret[] = new byte[n];
+	for (int x = 0; x < n; x++) {
+	    ret[x] = readByte();
+	}
+	return new String(ret, Charset.forName("MS949"));
+    }
+
+替換
+
+    public final String readAsciiString(int n) {
+	byte ret[] = new byte[n];
+	for (int x = 0; x < n; x++) {
+	    ret[x] = readByte();
+	}
+	return new String(ret, Charset.forName("GBK"));
+    }
+
+
+搜索：
+
+    private static final Charset ASCII = Charset.forName("MS949"); // ISO-8859-1, UTF-8
+    private ByteOutputStream bos;
+
+替換：
+
+    private static final Charset ASCII = Charset.forName("GBK"); // ISO-8859-1, UTF-8
+    private ByteOutputStream bos;

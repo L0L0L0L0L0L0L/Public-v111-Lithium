@@ -1,0 +1,12 @@
+搜索：
+
+
+                } else if (divi == 9120601 || divi == 9140602 || divi == 9140603 || divi == 9140604 || divi == 9140605) {
+                    warp = targetid == 912060100 || targetid == 912060200 || targetid == 912060300 || targetid == 912060400 || targetid == 912060500 || targetid == 3000100;
+                    unlock = true;
+
+替換：
+
+                } else if (divi == 9120601 || (divi == 9120603 || divi == 9120604)) {//必須加括弧，否則只能識別前兩位
+                    warp = targetid == 3000100 || targetid == 912060400 || targetid == 912060500;//砲手逃離荒島地圖動畫傳送
+                    unlock = true;

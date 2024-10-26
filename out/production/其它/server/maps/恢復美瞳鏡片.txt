@@ -1,0 +1,41 @@
+搜索：
+
+            case 5060004:
+            case 5060003: {//peanut
+                Item item = c.getPlayer().getInventory(MapleInventoryType.ETC).findById(itemId == 5060003 ? 4170023 : 4170024);
+                if (item == null || item.getQuantity() <= 0) { // hacking{
+                    return;
+                }
+                if (getIncubatedItems(c, itemId)) {
+                    MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.ETC, item.getPosition(), (short) 1, false);
+                    used = true;
+                }
+                break;
+            }
+
+
+下麵添加：
+
+            case 5152100:
+            case 5152101:
+            case 5152102:
+            case 5152103:
+            case 5152104:
+            case 5152105:
+            case 5152106:
+            case 5152107: {
+                if (c.getPlayer().getLevel() < 30) {
+                    c.getPlayer().dropMessage(1, "必須等級30級以上才可以使用。");
+                    break;
+                }
+                int teye = (itemId - 5152100) * 100;
+                if (teye >= 0) {
+                    c.getPlayer().setFace(c.getPlayer().getGender() == 0 ? teye + 20000 : teye + 21000);
+                    c.getPlayer().updateSingleStat(MapleStat.FACE, c.getPlayer().getFace());
+                    c.getPlayer().equipChanged();
+                    used = true;
+                } else {
+                    c.getPlayer().dropMessage(1, "使用日拋隱形眼鏡出現錯誤。");
+                }
+                break;
+            }

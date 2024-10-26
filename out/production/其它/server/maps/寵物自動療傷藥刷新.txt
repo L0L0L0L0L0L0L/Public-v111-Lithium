@@ -1,0 +1,80 @@
+sendops包頭
+
+搜索：
+
+# 自動吃藥MP
+PET_AUTO_MP = 0x230
+
+替換：
+
+# 自動吃藥MP
+PET_AUTO_MP = 0x230
+
+# 自動吃藥CURE
+#PET_AUTO_CURE = 0x231
+
+
+
+源碼部分
+
+搜索：
+
+    PET_AUTO_HP,
+    PET_AUTO_MP,
+
+
+替換：
+
+    PET_AUTO_HP,
+    PET_AUTO_MP,
+    PET_AUTO_CURE,
+
+
+搜索：
+
+    public static byte[] petAutoMP(int itemId) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+        mplew.writeShort(SendPacketOpcode.PET_AUTO_MP.getValue());
+        mplew.writeInt(itemId);
+
+        return mplew.getPacket();
+    }
+
+替換：
+
+    public static byte[] petAutoMP(int itemId) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+        mplew.writeShort(SendPacketOpcode.PET_AUTO_MP.getValue());
+        mplew.writeInt(itemId);
+
+        return mplew.getPacket();
+    }
+
+    public static byte[] petAutoCURE(int itemId) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+        mplew.writeShort(SendPacketOpcode.PET_AUTO_CURE.getValue());
+        mplew.writeInt(itemId);
+
+        return mplew.getPacket();
+    }
+
+
+搜索：
+
+        if (getIntNoRecord(GameConstants.CURE) > 0) {
+            //getQuestNAdd(MapleQuest.getInstance(GameConstants.CURE)).setCustomData(String.valueOf(getIntNoRecord(GameConstants.CURE)));
+            client.getSession().write(EtcPacket.petAutoMP(getIntRecord(GameConstants.CURE)));
+        }
+    }
+
+
+替換：
+
+        if (getIntNoRecord(GameConstants.CURE) > 0) {
+            //getQuestNAdd(MapleQuest.getInstance(GameConstants.CURE)).setCustomData(String.valueOf(getIntNoRecord(GameConstants.CURE)));
+            client.getSession().write(EtcPacket.petAutoCURE(getIntRecord(GameConstants.CURE)));
+        }
+    }

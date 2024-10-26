@@ -1,0 +1,38 @@
+搜索：
+
+                case 1101007: // pguard
+                case 1201007:
+                    ret.statups.put(MapleBuffStat.POWERGUARD, ret.x);
+                    break;
+
+替換：
+
+
+                case 1101007: //狂戰士
+                case 1201007://見習騎士   伤害反射
+                case 11101006://聖魂劍士 伤害反射
+                    ret.statups.put(MapleBuffStat.POWERGUARD, ret.x);
+                    break;
+
+
+搜索：
+
+        if (pPhysical && skillid == 1201007 && chr.getTotalSkillLevel(1201007) > 0) { // Only Power Guard decreases damage
+            damage = (damage - pDMG);
+            if (damage > 0) {
+                final MapleStatEffect eff = SkillFactory.getSkill(1201007).getEffect(chr.getTotalSkillLevel(1201007));
+                long enemyDMG = Math.min((damage * (eff.getY() / 100)), (attacker.getMobMaxHp() / 2));
+                if (enemyDMG > pDMG) {
+                    enemyDMG = pDMG; // ;)
+                }
+                if (enemyDMG > 1000) { // just a rough estimation, we cannot reflect > 1k
+                    enemyDMG = 1000; // too bad
+                }
+                attacker.damage(chr, enemyDMG, true, 1201007);
+            } else {
+                damage = 1;
+            }
+        }
+
+
+全部删除

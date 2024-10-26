@@ -1,0 +1,241 @@
+搜索：
+
+    public void CPUpdate(final boolean party, final int available, final int total, final int team) {
+        client.getSession().write(MonsterCarnivalPacket.CPUpdate(party, available, total, team));
+    }
+
+替換：
+
+    public void CPUpdate(final boolean party, final int available, final int total, final int team) {
+        client.getSession().write(MonsterCarnivalPacket.CPUpdate(party, available, total, team));
+    }
+
+    public static int rand(int l, int u) {
+        return Randomizer.nextInt(u - l + 1) + l;
+    }
+
+
+搜索：
+
+    public static byte[] startMonsterCarnival(final MapleCharacter chr, final int enemyavailable, final int enemytotal) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+        mplew.writeShort(SendPacketOpcode.MONSTER_CARNIVAL_START.getValue());
+        final MapleCarnivalParty friendly = chr.getCarnivalParty();
+        mplew.write(friendly.getTeam());
+        mplew.writeInt(chr.getAvailableCP());
+        mplew.writeInt(chr.getTotalCP());
+        mplew.writeInt(friendly.getAvailableCP()); // ??
+        mplew.writeInt(friendly.getTotalCP()); // ??
+        mplew.write(0); // ??
+
+        return mplew.getPacket();
+    }
+
+替換：
+
+    public static byte[] startMonsterCarnival(final MapleCharacter chr, final int enemyavailable, final int enemytotal) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+        mplew.writeShort(SendPacketOpcode.MONSTER_CARNIVAL_START.getValue());
+        final MapleCarnivalParty friendly = chr.getCarnivalParty();
+        mplew.write(friendly.getTeam());
+        mplew.writeShort(chr.getAvailableCP());
+        mplew.writeShort(chr.getTotalCP());
+        mplew.writeShort(friendly.getAvailableCP());
+        mplew.writeShort(friendly.getTotalCP());
+        mplew.writeShort(enemyavailable);
+        mplew.writeShort(enemytotal);
+        mplew.writeLong(0);
+        mplew.writeShort(0);
+
+        return mplew.getPacket();
+    }
+
+
+搜索：
+
+        } else if (cp != 0 && applyto.getCarnivalParty() != null) {
+            applyto.getCarnivalParty().addCP(applyto, cp);
+            applyto.CPUpdate(false, applyto.getAvailableCP(), applyto.getTotalCP(), 0);
+            for (MapleCharacter chr : applyto.getMap().getCharactersThreadsafe()) {
+                chr.CPUpdate(true, applyto.getCarnivalParty().getAvailableCP(), applyto.getCarnivalParty().getTotalCP(), applyto.getCarnivalParty().getTeam());
+            }
+
+替換：
+
+        } else if (cp != 0 && applyto.getCarnivalParty() != null) {
+            applyto.getCarnivalParty().addCP(applyto, cp);
+            applyto.CPUpdate(false, applyto.getAvailableCP(), applyto.getTotalCP(), 0);
+            if (applyto.getMapId() == 980031100 || applyto.getMapId() == 980032100 || applyto.getMapId() == 980033100) {
+                applyto.dropMessage(-1, applyto.getName() + " has earned " + cp + " points for Team [" + (applyto.getCarnivalParty().getTeam() == 0 ? "Maple Red" : "Maple Blue") + "]!");
+            }
+            // @eric: this should fix CPQ giving the CP for all of the teams, gMS BB now has ONE board and does not have 2 team digits, it's client-sided.
+            for (MaplePartyCharacter mpc : applyto.getParty().getMembers()) {
+                if (mpc.getId() != applyto.getId() && mpc.getChannel() == applyto.getClient().getChannel() && mpc.getMapid() == applyto.getMapId() && mpc.isOnline()) {
+                    MapleCharacter mc = applyto.getMap().getCharacterById(mpc.getId());
+                    if (mc != null) {
+                        if (mc.getMapId() == 980031100 || mc.getMapId() == 980032100 || mc.getMapId() == 980033100) {
+                            mc.dropMessage(-1, applyto.getName() + " has earned " + cp + " points for Team [" + (applyto.getCarnivalParty().getTeam() == 0 ? "Maple Red" : "Maple Blue") + "]!");
+                        } else {
+                            mc.CPUpdate(true, applyto.getCarnivalParty().getAvailableCP(), applyto.getCarnivalParty().getTotalCP(), applyto.getCarnivalParty().getTeam());
+                        }
+                    }
+                }
+            }
+
+
+搜索替換整頁：
+
+package handling.channel.handler;
+
+import client.MapleCharacter;
+import client.MapleClient;
+import client.MapleDisease;
+import client.SkillFactory;
+import handling.world.MaplePartyCharacter;
+import java.util.List;
+import server.MapleCarnivalFactory;
+import server.MapleCarnivalFactory.MCSkill;
+import server.Randomizer;
+import server.life.MapleLifeFactory;
+import server.life.MapleMonster;
+import server.life.MobSkillFactory;
+import tools.Pair;
+import tools.packet.MonsterCarnivalPacket;
+import tools.data.LittleEndianAccessor;
+import tools.packet.MaplePacketCreator;
+
+public class MonsterCarnivalHandler {
+
+    public static final void MonsterCarnival(LittleEndianAccessor slea, MapleClient c) {
+        if (c.getPlayer().getCarnivalParty() == null) {
+            c.getSession().write(MaplePacketCreator.enableActions());
+            return;
+        }
+        int tab = slea.readByte();
+        
+        if (tab == 0) { // 100 CP
+            List mobs = c.getPlayer().getMap().getMobsToSpawn();
+            int num = MapleCharacter.rand(1, 4); // size should be (int)5
+            if ((num >= mobs.size()) || (c.getPlayer().getAvailableCP() < 100)) {
+                c.getPlayer().dropMessage(5, "因CP不足，無法執行");
+                c.getSession().write(MaplePacketCreator.enableActions());
+                return;
+            }
+            MapleMonster mons = MapleLifeFactory.getMonster(((Integer) ((Pair) mobs.get(num)).left).intValue());
+            if ((mons != null) && (c.getPlayer().getMap().makeCarnivalSpawn(c.getPlayer().getCarnivalParty().getTeam(), mons, num))) {
+                c.getPlayer().getCarnivalParty().useCP(c.getPlayer(), 100);
+                c.getPlayer().CPUpdate(false, c.getPlayer().getAvailableCP(), c.getPlayer().getTotalCP(), 0);
+                for (MapleCharacter chr : c.getPlayer().getMap().getCharactersThreadsafe()) {
+                    chr.CPUpdate(true, c.getPlayer().getCarnivalParty().getAvailableCP(), c.getPlayer().getCarnivalParty().getTotalCP(), c.getPlayer().getCarnivalParty().getTeam());
+                }
+                c.getPlayer().getMap().broadcastMessage(MonsterCarnivalPacket.playerSummoned(c.getPlayer().getName(), tab, num));
+                c.getSession().write(MaplePacketCreator.enableActions());
+            } else {
+                c.getPlayer().dropMessage(5, "無法繼續召喚怪物");
+                c.getSession().write(MaplePacketCreator.enableActions());
+            }
+        } else if (tab == 1) { // 200 CP
+            if (c.getPlayer().getAvailableCP() < 200) {
+                c.getPlayer().dropMessage(5, "因CP不足，無法執行");
+                c.getSession().write(MaplePacketCreator.enableActions());
+                return;
+            }
+            int rand = MapleCharacter.rand(1, 20);
+            if (rand < 10) {
+            SkillFactory.getSkill(80001079).getEffect(SkillFactory.getSkill(80001079).getMaxLevel()).applyTo(c.getPlayer());
+            c.getSession().write(MonsterCarnivalPacket.playerSummoned(c.getPlayer().getName(), tab, 0));
+            for (MaplePartyCharacter mpc : c.getPlayer().getParty().getMembers()) {
+                if (mpc.getId() != c.getPlayer().getId() && mpc.getChannel() == c.getChannel() && mpc.getMapid() == c.getPlayer().getMapId() && mpc.isOnline()) {
+                    MapleCharacter mc = c.getPlayer().getMap().getCharacterById(mpc.getId());
+                    if (mc != null) {
+                        SkillFactory.getSkill(80001079).getEffect(SkillFactory.getSkill(80001079).getMaxLevel()).applyTo(mc);
+                        mc.getClient().getSession().write(MonsterCarnivalPacket.playerSummoned(c.getPlayer().getName(), tab, 0));
+                    }
+                }
+            }
+            } else {
+                for (MapleCharacter chr : c.getPlayer().getMap().getCharactersThreadsafe()) { // should check for null partys but whatever
+                    if (chr.getParty() != c.getPlayer().getParty()) {
+                        chr.giveDebuff(MapleDisease.BLIND, MobSkillFactory.getMobSkill(136, 1));
+                        c.getPlayer().getMap().broadcastMessage(MonsterCarnivalPacket.playerSummoned(c.getPlayer().getName(), tab, 1));
+                    }
+                }
+            }
+                c.getPlayer().getCarnivalParty().useCP(c.getPlayer(), 200);
+                c.getPlayer().CPUpdate(false, c.getPlayer().getAvailableCP(), c.getPlayer().getTotalCP(), 0);
+                for (MaplePartyCharacter mpc : c.getPlayer().getParty().getMembers()) {
+                    MapleCharacter mc = c.getPlayer().getMap().getCharacterById(mpc.getId());
+                    mc.CPUpdate(true, c.getPlayer().getCarnivalParty().getAvailableCP(), c.getPlayer().getCarnivalParty().getTotalCP(), c.getPlayer().getCarnivalParty().getTeam());
+                }
+        } else if (tab == 2) { // 300 CP
+            if (c.getPlayer().getAvailableCP() < 300) {
+                c.getPlayer().dropMessage(5, "因CP不足，無法執行");
+                c.getSession().write(MaplePacketCreator.enableActions());
+                return;
+            }
+            int rand = MapleCharacter.rand(1, 20);
+            if (rand < 10) {
+            SkillFactory.getSkill(80001080).getEffect(SkillFactory.getSkill(80001080).getMaxLevel()).applyTo(c.getPlayer());
+            c.getSession().write(MonsterCarnivalPacket.playerSummoned(c.getPlayer().getName(), tab, 2));
+            for (MaplePartyCharacter mpc : c.getPlayer().getParty().getMembers()) {
+                if (mpc.getId() != c.getPlayer().getId() && mpc.getChannel() == c.getChannel() && mpc.getMapid() == c.getPlayer().getMapId() && mpc.isOnline()) {
+                    MapleCharacter mc = c.getPlayer().getMap().getCharacterById(mpc.getId());
+                    if (mc != null) {
+                        SkillFactory.getSkill(80001080).getEffect(SkillFactory.getSkill(80001080).getMaxLevel()).applyTo(mc);
+                        mc.getClient().getSession().write(MonsterCarnivalPacket.playerSummoned(c.getPlayer().getName(), tab, 2));
+                    }
+                }
+            }
+            } else {
+                for (MapleCharacter chr : c.getPlayer().getMap().getCharactersThreadsafe()) {
+                    if (chr.getParty() != c.getPlayer().getParty()) {
+                        chr.giveDebuff(MapleDisease.SLOW, MobSkillFactory.getMobSkill(126, 10));
+                        c.getPlayer().getMap().broadcastMessage(MonsterCarnivalPacket.playerSummoned(c.getPlayer().getName(), tab, 3));
+                    }
+                }
+            }
+                c.getPlayer().getCarnivalParty().useCP(c.getPlayer(), 300);
+                c.getPlayer().CPUpdate(false, c.getPlayer().getAvailableCP(), c.getPlayer().getTotalCP(), 0);
+                for (MaplePartyCharacter mpc : c.getPlayer().getParty().getMembers()) {
+                    MapleCharacter mc = c.getPlayer().getMap().getCharacterById(mpc.getId());
+                    mc.CPUpdate(true, c.getPlayer().getCarnivalParty().getAvailableCP(), c.getPlayer().getCarnivalParty().getTotalCP(), c.getPlayer().getCarnivalParty().getTeam());
+                }
+        } else if (tab == 3) { // 400 CP
+            if (c.getPlayer().getAvailableCP() < 400) {
+                c.getPlayer().dropMessage(5, "因CP不足，無法執行");
+                c.getSession().write(MaplePacketCreator.enableActions());
+                return;
+            }
+            int rand = MapleCharacter.rand(1, 20);
+            if (rand < 10) {
+            SkillFactory.getSkill(80001081).getEffect(SkillFactory.getSkill(80001081).getMaxLevel()).applyTo(c.getPlayer());
+            c.getSession().write(MonsterCarnivalPacket.playerSummoned(c.getPlayer().getName(), tab, 4));
+            for (MaplePartyCharacter mpc : c.getPlayer().getParty().getMembers()) {
+                if (mpc.getId() != c.getPlayer().getId() && mpc.getChannel() == c.getChannel() && mpc.getMapid() == c.getPlayer().getMapId() && mpc.isOnline()) {
+                    MapleCharacter mc = c.getPlayer().getMap().getCharacterById(mpc.getId());
+                    if (mc != null) {
+                        SkillFactory.getSkill(80001081).getEffect(SkillFactory.getSkill(80001081).getMaxLevel()).applyTo(mc);
+                        mc.getClient().getSession().write(MonsterCarnivalPacket.playerSummoned(c.getPlayer().getName(), tab, 4));
+                    }
+                }
+            }
+            } else {
+                for (MapleCharacter chr : c.getPlayer().getMap().getCharactersThreadsafe()) {
+                    if (chr.getParty() != c.getPlayer().getParty()) {
+                        chr.giveDebuff(MapleDisease.SEAL, MobSkillFactory.getMobSkill(120, 10));
+                        c.getPlayer().getMap().broadcastMessage(MonsterCarnivalPacket.playerSummoned(c.getPlayer().getName(), tab, 5));
+                    }
+                }
+            }
+                c.getPlayer().getCarnivalParty().useCP(c.getPlayer(), 400);
+                c.getPlayer().CPUpdate(false, c.getPlayer().getAvailableCP(), c.getPlayer().getTotalCP(), 0);
+                for (MaplePartyCharacter mpc : c.getPlayer().getParty().getMembers()) {
+                    MapleCharacter mc = c.getPlayer().getMap().getCharacterById(mpc.getId());
+                    mc.CPUpdate(true, c.getPlayer().getCarnivalParty().getAvailableCP(), c.getPlayer().getCarnivalParty().getTotalCP(), c.getPlayer().getCarnivalParty().getTeam());
+                }
+            }
+        c.getSession().write(MaplePacketCreator.enableActions());
+    }
+}

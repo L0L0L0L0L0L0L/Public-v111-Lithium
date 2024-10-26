@@ -1,0 +1,27 @@
+搜索：
+
+                case 2430144: //smb
+                    final int itemid = Randomizer.nextInt(373) + 2290000;
+                    if (MapleItemInformationProvider.getInstance().itemExists(itemid) && !MapleItemInformationProvider.getInstance().getName(itemid).contains("Special") && !MapleItemInformationProvider.getInstance().getName(itemid).contains("Event")) {
+                        MapleInventoryManipulator.addById(c, itemid, (short) 1, "Reward item: " + toUse.getItemId() + " on " + FileoutputUtil.CurrentReadable_Date());
+                        MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.USE, slot, (byte) 1, false);
+                    }
+                    break;
+
+替換：
+
+                case 2430144: //smb
+                    final int itemid = Randomizer.nextInt(373) + 2290000;
+                    if (MapleItemInformationProvider.getInstance().itemExists(itemid) && !MapleItemInformationProvider.getInstance().getName(itemid).contains("Special") && !MapleItemInformationProvider.getInstance().getName(itemid).contains("Event")) {
+                        MapleInventoryManipulator.addById(c, itemid, (short) 1, "Reward item: " + toUse.getItemId() + " on " + FileoutputUtil.CurrentReadable_Date());
+                        MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.USE, slot, (byte) 1, false);
+                    }
+                    break;
+                case 2430559://盧頓的技能書
+                    final int book = Randomizer.nextInt(373) + 2290000;
+                    if (MapleItemInformationProvider.getInstance().itemExists(book) && !MapleItemInformationProvider.getInstance().getName(book).contains("Special") && !MapleItemInformationProvider.getInstance().getName(book).contains("Event")) {
+                        MapleInventoryManipulator.addById(c, book, (short) 1, "Reward item: " + toUse.getItemId() + " on " + FileoutputUtil.CurrentReadable_Date());
+                        MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.USE, slot, (byte) 1, false);
+                        MapleQuest.getInstance(3148).forceComplete(c.getPlayer(), 0);
+                    }
+                    break;

@@ -1,0 +1,21 @@
+搜索：
+
+                        if (owner != null) {
+                            nItem.setOwner(owner);
+                        }
+                        if (period > 0) {
+                            nItem.setExpiration(System.currentTimeMillis() + (period * 24 * 60 * 60 * 1000));
+                        }
+
+替換：
+
+                        if (owner != null) {
+                            nItem.setOwner(owner);
+                        }
+                        if (period > 0) {
+                            if (itemId == 4001432) {//高級黃金券
+                                nItem.setExpiration(System.currentTimeMillis() + (1 * 60 * 60 * 1000));//1小時限定
+                        } else {
+                                nItem.setExpiration(System.currentTimeMillis() + (period * 24 * 60 * 60 * 1000));
+                            }
+                        }

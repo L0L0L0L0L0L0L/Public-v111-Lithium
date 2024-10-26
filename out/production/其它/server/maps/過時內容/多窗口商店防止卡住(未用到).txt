@@ -1,0 +1,9 @@
+MapleShop.java
+搜
+public void recharge(final MapleClient c, final byte slot) {
+if (c.getPlayer().getMeso() >= price) {
+結尾 後面補
+} else {
+                c.getSession().write(NPCPacket.confirmShopTransaction((byte) 0x0A, this, c, -1));
+            }
+這樣就不會卡住

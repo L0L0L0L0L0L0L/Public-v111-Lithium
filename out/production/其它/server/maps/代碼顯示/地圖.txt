@@ -1,0 +1,37 @@
+搜索：
+
+    public final void executePortalScript(final MaplePortal portal, final MapleClient c) {
+        final PortalScript script = getPortalScript(portal.getScriptName());
+
+        if (script != null) {
+            try {
+                script.enter(new PortalPlayerInteraction(c, portal));
+            } catch (Exception e) {
+                System.err.println("Error entering Portalscript: " + portal.getScriptName() + " : " + e);
+            }
+        } else {
+            System.out.println("不存在的portal腳本 : " + portal.getScriptName() + " ID : " + c.getPlayer().getMapId());
+            FileoutputUtil.log(FileoutputUtil.ScriptEx_Log, "Unhandled portal script " + portal.getScriptName() + " on map " + c.getPlayer().getMapId());
+        }
+    }
+
+
+替換：
+
+    public final void executePortalScript(final MaplePortal portal, final MapleClient c) {
+        final PortalScript script = getPortalScript(portal.getScriptName());
+
+        if (script != null) {
+            try {
+                script.enter(new PortalPlayerInteraction(c, portal));
+        if (c.getPlayer().isGM()) {
+            c.getPlayer().dropMessage(5, "[系統提示]執行傳送腳本: " + portal.getScriptName()+ " 所在地圖: " + c.getPlayer().getMapId() + " - " + c.getPlayer().getMap().getMapName());
+            }
+            } catch (Exception e) {
+                System.err.println("Error entering Portalscript: " + portal.getScriptName() + " : " + e);
+            }
+        } else {
+            System.out.println("不存在的portal腳本 : " + portal.getScriptName() + " ID : " + c.getPlayer().getMapId());
+            FileoutputUtil.log(FileoutputUtil.ScriptEx_Log, "Unhandled portal script " + portal.getScriptName() + " on map " + c.getPlayer().getMapId());
+        }
+    }

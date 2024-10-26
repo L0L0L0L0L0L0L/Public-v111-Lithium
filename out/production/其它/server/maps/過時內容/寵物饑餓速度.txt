@@ -1,0 +1,15 @@
+搜索：
+
+        if (numTimes % 7 == 0 && chr.getMount() != null && chr.getMount().canTire(now)) {
+            chr.getMount().increaseFatigue();
+        }
+        if (numTimes % 13 == 0) { //we're parsing through the characters anyway (:
+            chr.doFamiliarSchedule(now);
+
+替換：
+
+        if (numTimes % 7 == 0 && chr.getMount() != null && chr.getMount().canTire(now)) {
+            chr.getMount().increaseFatigue();
+        }
+        if (numTimes % 540 == 0) { //we're parsing through the characters anyway (:
+            chr.doFamiliarSchedule(now);

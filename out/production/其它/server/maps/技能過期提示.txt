@@ -1,0 +1,77 @@
+搜索：
+
+            pendingExpiration = null;
+            if (pendingSkills != null) {
+                client.getSession().write(MaplePacketCreator.updateSkills(pendingSkills));
+                for (Skill z : pendingSkills.keySet()) {
+                    client.getSession().write(MaplePacketCreator.serverNotice(5, "[" + SkillFactory.getSkillName(z.getId()) + "] 技能尚未恢復，無法使用。"));
+                }
+            } //not real msg
+            pendingSkills = null;
+            return;
+        }
+
+替換：
+
+            pendingExpiration = null;
+            if (pendingSkills != null) {
+            client.getSession().write(MaplePacketCreator.updateSkills(pendingSkills)); //發送刪除技能的封包
+            client.getSession().write(MaplePacketCreator.showSkillExpired(pendingSkills)); //發送技能到期提示
+            } //not real msg
+            pendingSkills = null;
+            return;
+        }
+
+搜索：
+
+    public static byte[] updateSkills(final Map<Skill, SkillEntry> update) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter(7 + (update.size() * 20));
+
+        mplew.writeShort(SendPacketOpcode.UPDATE_SKILLS.getValue());
+        mplew.write(1);
+        mplew.write(0); // A skill has been activated / deactivated?
+        mplew.writeShort(update.size());
+        for (final Entry<Skill, SkillEntry> z : update.entrySet()) {
+            mplew.writeInt(z.getKey().getId());
+            mplew.writeInt(z.getValue().skillevel);
+            mplew.writeInt(z.getValue().masterlevel);
+            PacketHelper.addExpirationTime(mplew, z.getValue().expiration);
+        }
+        mplew.write(4);
+
+        return mplew.getPacket();
+    }
+
+
+替換：
+
+    public static byte[] updateSkills(final Map<Skill, SkillEntry> update) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter(7 + (update.size() * 20));
+
+        mplew.writeShort(SendPacketOpcode.UPDATE_SKILLS.getValue());
+        mplew.write(1);
+        mplew.write(0); // A skill has been activated / deactivated?
+        mplew.writeShort(update.size());
+        for (final Entry<Skill, SkillEntry> z : update.entrySet()) {
+            mplew.writeInt(z.getKey().getId());
+            mplew.writeInt(z.getValue().skillevel);
+            mplew.writeInt(z.getValue().masterlevel);
+            PacketHelper.addExpirationTime(mplew, z.getValue().expiration);
+        }
+        mplew.write(4);
+
+        return mplew.getPacket();
+    }
+
+    public static byte[] showSkillExpired(Map<Skill, SkillEntry> update) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+        mplew.writeShort(SendPacketOpcode.SHOW_STATUS_INFO.getValue());
+        mplew.write(0x0F);
+        mplew.write(update.size()); //技能數量
+        for (Entry<Skill, SkillEntry> skills : update.entrySet()) {
+            mplew.writeInt(skills.getKey().getId());
+        }
+
+        return mplew.getPacket();
+    }

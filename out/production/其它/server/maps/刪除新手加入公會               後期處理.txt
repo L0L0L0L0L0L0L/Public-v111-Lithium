@@ -1,0 +1,37 @@
+搜索：
+
+        exp -= getNeededExp();
+        level += 1;
+        if (level == 11) {
+            addGuildMember(1); // 길드 값
+            if (this.getGuildId() != 0) {
+                dropMessage(5, "[通知]已加入初心者公會。");
+            } else {
+                dropMessage(5, "[通知]初心者公會已達到最大人数限制。");
+            }
+        }
+        if (GameConstants.isKOC(job) && level < 120 && level > 10) {
+            exp += getNeededExp() / 10;
+        }
+
+        if (level == 30) {
+            finishAchievement(2);
+        }
+        if (level == 70) {
+            finishAchievement(3);
+        }
+        if (level == 120) {
+            finishAchievement(4);
+        }
+        if (level == 200) {
+            finishAchievement(5);
+        }
+
+
+替換：
+
+        exp -= getNeededExp();
+        level += 1;
+        if (GameConstants.isKOC(job) && level < 120 && level > 10) {
+            exp += getNeededExp() / 10;
+        }

@@ -1,0 +1,81 @@
+搜索：
+
+        if (GameConstants.isMercedes(job)) {
+            final int[] ss = {20021000, 20021001, 20020002, 20020022, 20020109, 20021110, 20020111, 20020112};
+            for (int i : ss) {
+                skil = SkillFactory.getSkill(i);
+                if (skil != null) {
+                    if (getSkillLevel(skil) <= 0) { // no total
+                        list.put(skil, new SkillEntry((byte) 1, (byte) 1, -1));
+                    }
+                }
+            }
+
+
+替換：
+
+        if (GameConstants.isMercedes(job)) {
+            final int[] ss = {20020109, 20021110, 20020111, 20020112};
+            for (int i : ss) {
+                skil = SkillFactory.getSkill(i);
+                if (skil != null) {
+                    if (getSkillLevel(skil) <= 0) { // no total
+                        list.put(skil, new SkillEntry((byte) 1, (byte) 1, -1));
+                    }
+                }
+            }
+
+
+搜索：
+
+        if (GameConstants.isDemon(job)) {
+            final int[] ss1 = {30011000, 30011001, 30010002, 30010185, 30010112, 30010111, 30010110, 30010022, 30011109};
+            for (int i : ss1) {
+                skil = SkillFactory.getSkill(i);
+                if (skil != null) {
+                    if (getSkillLevel(skil) <= 0) { // no total
+                        list.put(skil, new SkillEntry((byte) 1, (byte) 1, -1));
+                    }
+                }
+            }
+
+替換：
+
+        if (GameConstants.isDemon(job)) {
+            final int[] ss1 = {30010185, 30010112, 30010111, 30010110, 30011109};
+            for (int i : ss1) {
+                skil = SkillFactory.getSkill(i);
+                if (skil != null) {
+                    if (getSkillLevel(skil) <= 0) { // no total
+                        list.put(skil, new SkillEntry((byte) 1, (byte) 1, -1));
+                    }
+                }
+            }
+
+
+
+###############################天使祝福系列技能
+
+        if (first_login && chra.getLevel() >= 30) { //yeah
+            if (chra.isGM()) { //!job lol
+                for (int i = 0; i < allJobs.length; i++) {
+                    sData.put(SkillFactory.getSkill(1085 + allJobs[i]), new SkillEntry((byte) 1, (byte) 0, -1));
+                    sData.put(SkillFactory.getSkill(1087 + allJobs[i]), new SkillEntry((byte) 1, (byte) 0, -1));
+                    sData.put(SkillFactory.getSkill(1179 + allJobs[i]), new SkillEntry((byte) 1, (byte) 0, -1));
+                }
+            } else {
+                sData.put(SkillFactory.getSkill(getSkillByJob(1085, chra.getJob())), new SkillEntry((byte) 1, (byte) 0, -1));
+                sData.put(SkillFactory.getSkill(getSkillByJob(1087, chra.getJob())), new SkillEntry((byte) 1, (byte) 0, -1));
+                sData.put(SkillFactory.getSkill(getSkillByJob(1179, chra.getJob())), new SkillEntry((byte) 1, (byte) 0, -1));
+            }
+        }
+
+#############################精靈的祝福or女皇的祝福
+
+    public static int getBOF_ForJob(final int job) {
+        return PlayerStats.getSkillByJob(12, job);
+    }
+
+    public static int getEmpress_ForJob(final int job) {
+        return PlayerStats.getSkillByJob(73, job);
+    }

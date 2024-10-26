@@ -1,0 +1,32 @@
+recvopsGMS.properties
+
+# 使用理髮卷
+# 道具ID: 2540000
+USE_COSMETIC = 0xD9
+
+# 使用重生(永恆)迷之蛋
+# 道具ID: 4280000
+USE_TREASUER_CHEST = 0xC1
+
+# 道具捕怪
+USE_CATCH_ITEM = 0x87
+
+分解機
+MAKE_EXTRACTOR = 0x16E
+
+進入範圍觸發反應堆
+TOUCH_REACTOR = 0x16A
+
+
+待驗證
+//任務更新
+UPDATE_QUEST = 0x19B
+//任務道具
+QUEST_ITEM = 0x19D
+//使用任務道具
+USE_ITEM_QUEST = 0x19E
+
+
+
+
+

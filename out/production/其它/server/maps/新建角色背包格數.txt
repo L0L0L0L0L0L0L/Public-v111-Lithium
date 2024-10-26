@@ -1,0 +1,25 @@
+搜索：
+
+            ps = con.prepareStatement("INSERT INTO inventoryslot (characterid, `equip`, `use`, `setup`, `etc`, `cash`) VALUES (?, ?, ?, ?, ?, ?)");
+            ps.setInt(1, chr.id);
+            ps.setByte(2, (byte) 94); // Eq
+            ps.setByte(3, (byte) 94); // Use
+            ps.setByte(4, (byte) 94); // Setup
+            ps.setByte(5, (byte) 94); // ETC
+            ps.setByte(6, (byte) 94); // Cash
+            ps.execute();
+            ps.close();
+
+
+替換：
+
+            ps = con.prepareStatement("INSERT INTO inventoryslot (characterid, `equip`, `use`, `setup`, `etc`, `cash`) VALUES (?, ?, ?, ?, ?, ?)");
+            ps.setInt(1, chr.id);
+            ps.setByte(2, (byte) 24); // Eq
+            ps.setByte(3, (byte) 24); // Use
+            ps.setByte(4, (byte) 24); // Setup
+            ps.setByte(5, (byte) 24); // ETC
+            ps.setByte(6, (byte) 48); // Cash
+            ps.execute();
+            ps.close();
+

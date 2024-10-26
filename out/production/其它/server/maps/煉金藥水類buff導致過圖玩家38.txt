@@ -1,0 +1,19 @@
+搜索：
+
+        if (chr.getBuffedValue(MapleBuffStat.ANGEL_ATK) != null) {
+            mask[MapleBuffStat.ANGEL_ATK.getPosition(true)] |= MapleBuffStat.ANGEL_ATK.getValue();
+            buffvalue.add(new Pair<Integer, Integer>(Integer.valueOf(chr.getBuffedValue(MapleBuffStat.ANGEL_ATK).intValue()), 2));
+            buffvalue.add(new Pair<Integer, Integer>(Integer.valueOf(chr.getTrueBuffSource(MapleBuffStat.ANGEL_ATK)), 3));
+        }
+
+
+替換：
+
+
+        if (chr.getBuffedValue(MapleBuffStat.ANGEL_ATK) != null) {
+            mask[MapleBuffStat.ANGEL_ATK.getPosition(true)] |= MapleBuffStat.ANGEL_ATK.getValue();
+            //buffvalue.add(new Pair<Integer, Integer>(Integer.valueOf(chr.getBuffedValue(MapleBuffStat.ANGEL_ATK).intValue()), 2));
+            //buffvalue.add(new Pair<Integer, Integer>(Integer.valueOf(chr.getTrueBuffSource(MapleBuffStat.ANGEL_ATK)), 3));
+        }
+
+

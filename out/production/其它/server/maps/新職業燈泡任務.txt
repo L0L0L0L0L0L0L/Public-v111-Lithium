@@ -1,0 +1,16 @@
+MapleQuest.java
+
+搜索：
+
+    private boolean checkNPCOnMap(MapleCharacter player, int npcid) {
+        //mir = 1013000
+        return (GameConstants.isEvan(player.getJob()) && npcid == 1013000) || npcid == 9000040 || npcid == 9000066 || (player.getMap() != null && player.getMap().containsNPC(npcid));
+    }
+
+
+替換：
+
+    private boolean checkNPCOnMap(MapleCharacter player, int npcid) {
+        //mir = 1013000
+        return ((GameConstants.isEvan(player.getJob())) && (npcid == 1013000)) || ((GameConstants.isDemon(player.getJob())) && (npcid == 0)) || ((GameConstants.isMercedes(player.getJob())) && (npcid == 0)) || (npcid == 2151009) || (npcid == 9010000) || ((npcid >= 2161000) && (npcid <= 2161011)) || (npcid == 9000040) || (npcid == 9000066) || (npcid == 0) || ((player.getMap() != null) && (player.getMap().containsNPC(npcid)));
+    }

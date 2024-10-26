@@ -1,0 +1,63 @@
+注意：
+
+    將 client\inventory 資料夾內的 MagicWheel.java 轉移到 client資料夾目錄
+
+
+搜索：
+
+    public MagicWheel(List<Integer> items) {
+        this.uniqueid = Randomizer.nextInt(999999);
+        this.items = items;
+        this.random = (byte) Randomizer.rand(1, 10);
+    }
+
+替換：
+
+    public MagicWheel(List<Integer> items) {
+        this.uniqueid = Randomizer.nextInt(999999);
+        this.items = items;
+        this.random = (byte) Randomizer.rand(1, 9);//超過限制會出現空值
+    }
+
+
+搜索：
+
+    public static void UseMagicWheel(LittleEndianAccessor slea, MapleClient c) {
+        byte action = slea.readByte();
+        if (action == 0x02) {//시작
+            int ivtype = slea.readInt();
+            byte slot = (byte) slea.readInt();
+            int itemid = slea.readInt();
+            int type = itemid == 4400001 ? 1 : itemid == 4400002 ? 2 : 0;
+            if (itemid == 4400001 || itemid == 4400002) {
+                MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.ETC, (byte) slot, (short) 1, false);
+                if ((!(c.getPlayer().getInventory(MapleInventoryType.USE).getNextFreeSlot() > -1))
+                        || (!(c.getPlayer().getInventory(MapleInventoryType.EQUIP).getNextFreeSlot() > -1))
+                        || (!(c.getPlayer().getInventory(MapleInventoryType.SETUP).getNextFreeSlot() > -1))
+                        || (!(c.getPlayer().getInventory(MapleInventoryType.CASH).getNextFreeSlot() > -1))
+                        || (!(c.getPlayer().getInventory(MapleInventoryType.ETC).getNextFreeSlot() > -1))) {
+                    c.getSession().write(MaplePacketCreator.magicWheelMessage((byte) 7));
+                    c.getSession().write(MaplePacketCreator.enableActions());
+                }
+
+
+替換：
+
+    public static void UseMagicWheel(LittleEndianAccessor slea, MapleClient c) {
+        byte action = slea.readByte();
+        if (action == 0x02) {//시작
+            int ivtype = slea.readInt();
+            byte slot = (byte) slea.readInt();
+            int itemid = slea.readInt();
+            int type = itemid == 4400001 ? 1 : itemid == 4400002 ? 2 : 0;
+            if (itemid == 4400000 || itemid == 4400001 || itemid == 4400002) {//支援道具ID：4400000
+                MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.ETC, (byte) slot, (short) 1, false);
+                if (c.getPlayer().getInventory(MapleInventoryType.USE).getNextFreeSlot() < 1
+                        || c.getPlayer().getInventory(MapleInventoryType.EQUIP).getNextFreeSlot() < 1
+                        || c.getPlayer().getInventory(MapleInventoryType.SETUP).getNextFreeSlot() < 1
+                        || c.getPlayer().getInventory(MapleInventoryType.CASH).getNextFreeSlot() < 1
+                        || c.getPlayer().getInventory(MapleInventoryType.ETC).getNextFreeSlot() < 1) {
+                    c.getSession().write(MaplePacketCreator.magicWheelMessage((byte) 7));
+                    c.getSession().write(MaplePacketCreator.enableActions());
+                    return;
+                }

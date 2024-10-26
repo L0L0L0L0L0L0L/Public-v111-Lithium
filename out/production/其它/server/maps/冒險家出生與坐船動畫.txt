@@ -1,0 +1,56 @@
+搜索：
+
+                } else if (chr.getMapId() == 2010000 && targetid == 104000000) {
+                    targetid = 123456789;
+                    unlock = true;
+                    warp = true;
+                } else if (chr.getMapId() == 106020001 || chr.getMapId() == 106020502) {
+                    if (targetid == (chr.getMapId() - 1)) {
+                        unlock = true;
+                        warp = true;
+                    }
+                } else if (chr.getMapId() == 0 && targetid == 10000) {
+                    targetid = 3;
+                    unlock = true;
+                    warp = true;
+
+
+替換：
+
+                } else if (chr.getMapId() == 2010000 && targetid == 104000000) {
+                    //targetid = 123456789;
+                    unlock = true;
+                    warp = true;
+                } else if (chr.getMapId() == 106020001 || chr.getMapId() == 106020502) {
+                    if (targetid == (chr.getMapId() - 1)) {
+                        unlock = true;
+                        warp = true;
+                    }
+                } else if (chr.getMapId() == 0 && targetid == 10000) {
+                    //targetid = 3;
+                    unlock = true;
+                    warp = true;
+
+搜索：
+
+                if (warp) {
+                    if (chr.getMapId() == 2010000) {
+                        final MapleMap to = ChannelServer.getInstance(c.getChannel()).getMapFactory().getMap(123456789);
+                        chr.changeMap(to, to.getPortal(0));
+                    } else {
+                        final MapleMap to = ChannelServer.getInstance(c.getChannel()).getMapFactory().getMap(targetid);
+                        chr.changeMap(to, to.getPortal(0));
+                    }
+                }
+
+替換：
+
+                if (warp) {
+                    if (chr.getMapId() == 2010000) {
+                        final MapleMap to = ChannelServer.getInstance(c.getChannel()).getMapFactory().getMap(104000000);
+                        chr.changeMap(to, to.getPortal(0));
+                    } else {
+                        final MapleMap to = ChannelServer.getInstance(c.getChannel()).getMapFactory().getMap(targetid);
+                        chr.changeMap(to, to.getPortal(0));
+                    }
+                }

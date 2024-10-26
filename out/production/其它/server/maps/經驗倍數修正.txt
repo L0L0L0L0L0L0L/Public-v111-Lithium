@@ -1,0 +1,159 @@
+搜索：
+
+        c.getPlayer().gainExp(c.getPlayer().getGachExp() * GameConstants.getExpRate(c.getPlayer().getLevel(), 8), true, true, false);
+
+替換：  
+
+        c.getPlayer().gainExp(c.getPlayer().getGachExp(), true, true, false);
+
+
+
+
+搜索：
+
+    public void gainExpR(int gain) {
+        c.getPlayer().gainExp(gain * GameConstants.getExpRate(c.getPlayer().getLevel(), 8), true, true, true);
+    }
+
+替換：
+
+    public void gainExpR(int gain) {
+        c.getPlayer().gainExp(gain * c.getChannelServer().getExpRate(), true, true, true);
+    }
+
+
+
+
+搜索：
+
+
+    public final void givePartyExp_PQ(final int maxLevel, final double mod, final List<MapleCharacter> party) {
+        for (final MapleCharacter chr : party) {
+            final int amount = (int) Math.round(GameConstants.getExpNeededForLevel(chr.getLevel() > maxLevel ? (maxLevel + ((maxLevel - chr.getLevel()) / 10)) : chr.getLevel()) / (Math.min(chr.getLevel(), maxLevel) / 5.0) / (mod * 2.0));
+            chr.gainExp(amount * GameConstants.getExpRate(c.getPlayer().getLevel(), 8), true, true, true);
+        }
+    }
+
+    public final void gainExp_PQ(final int maxLevel, final double mod) {
+        final int amount = (int) Math.round(GameConstants.getExpNeededForLevel(getPlayer().getLevel() > maxLevel ? (maxLevel + (getPlayer().getLevel() / 10)) : getPlayer().getLevel()) / (Math.min(getPlayer().getLevel(), maxLevel) / 10.0) / mod);
+        gainExp(amount * GameConstants.getExpRate(c.getPlayer().getLevel(), 8));
+    }
+
+    public final void givePartyExp_PQ(final int maxLevel, final double mod) {
+        if (getPlayer().getParty() == null || getPlayer().getParty().getMembers().size() == 1) {
+            final int amount = (int) Math.round(GameConstants.getExpNeededForLevel(getPlayer().getLevel() > maxLevel ? (maxLevel + (getPlayer().getLevel() / 10)) : getPlayer().getLevel()) / (Math.min(getPlayer().getLevel(), maxLevel) / 10.0) / mod);
+            gainExp(amount * GameConstants.getExpRate(c.getPlayer().getLevel(), 8));
+            return;
+        }
+        final int cMap = getPlayer().getMapId();
+        for (final MaplePartyCharacter chr : getPlayer().getParty().getMembers()) {
+            final MapleCharacter curChar = getChannelServer().getPlayerStorage().getCharacterById(chr.getId());
+            if (curChar != null && (curChar.getMapId() == cMap || curChar.getEventInstance() == getPlayer().getEventInstance())) {
+                final int amount = (int) Math.round(GameConstants.getExpNeededForLevel(curChar.getLevel() > maxLevel ? (maxLevel + (curChar.getLevel() / 10)) : curChar.getLevel()) / (Math.min(curChar.getLevel(), maxLevel) / 10.0) / mod);
+                curChar.gainExp(amount * GameConstants.getExpRate(c.getPlayer().getLevel(), 8), true, true, true);
+            }
+        }
+    }
+
+    public final void givePartyExp(final int amount, final List<MapleCharacter> party) {
+        for (final MapleCharacter chr : party) {
+            chr.gainExp(amount * GameConstants.getExpRate(c.getPlayer().getLevel(), 8), true, true, true);
+        }
+    }
+
+    public final void givePartyExp(final int amount) {
+        if (getPlayer().getParty() == null || getPlayer().getParty().getMembers().size() == 1) {
+            gainExp(amount * GameConstants.getExpRate(c.getPlayer().getLevel(), 8));
+            return;
+        }
+        final int cMap = getPlayer().getMapId();
+        for (final MaplePartyCharacter chr : getPlayer().getParty().getMembers()) {
+            final MapleCharacter curChar = getChannelServer().getPlayerStorage().getCharacterById(chr.getId());
+            if (curChar != null && (curChar.getMapId() == cMap || curChar.getEventInstance() == getPlayer().getEventInstance())) {
+                curChar.gainExp(amount * GameConstants.getExpRate(c.getPlayer().getLevel(), 8), true, true, true);
+            }
+        }
+    }
+
+
+
+替換：
+
+    public final void givePartyExp_PQ(final int maxLevel, final double mod, final List<MapleCharacter> party) {
+        for (final MapleCharacter chr : party) {
+            final int amount = (int) Math.round(GameConstants.getExpNeededForLevel(chr.getLevel() > maxLevel ? (maxLevel + ((maxLevel - chr.getLevel()) / 10)) : chr.getLevel()) / (Math.min(chr.getLevel(), maxLevel) / 5.0) / (mod * 2.0));
+            chr.gainExp(amount * c.getChannelServer().getExpRate(), true, true, true);
+        }
+    }
+
+    public final void gainExp_PQ(final int maxLevel, final double mod) {
+        final int amount = (int) Math.round(GameConstants.getExpNeededForLevel(getPlayer().getLevel() > maxLevel ? (maxLevel + (getPlayer().getLevel() / 10)) : getPlayer().getLevel()) / (Math.min(getPlayer().getLevel(), maxLevel) / 10.0) / mod);
+        gainExp(amount * c.getChannelServer().getExpRate());
+    }
+
+    public final void givePartyExp_PQ(final int maxLevel, final double mod) {
+        if (getPlayer().getParty() == null || getPlayer().getParty().getMembers().size() == 1) {
+            final int amount = (int) Math.round(GameConstants.getExpNeededForLevel(getPlayer().getLevel() > maxLevel ? (maxLevel + (getPlayer().getLevel() / 10)) : getPlayer().getLevel()) / (Math.min(getPlayer().getLevel(), maxLevel) / 10.0) / mod);
+            gainExp(amount * c.getChannelServer().getExpRate());
+            return;
+        }
+        final int cMap = getPlayer().getMapId();
+        for (final MaplePartyCharacter chr : getPlayer().getParty().getMembers()) {
+            final MapleCharacter curChar = getChannelServer().getPlayerStorage().getCharacterById(chr.getId());
+            if (curChar != null && (curChar.getMapId() == cMap || curChar.getEventInstance() == getPlayer().getEventInstance())) {
+                final int amount = (int) Math.round(GameConstants.getExpNeededForLevel(curChar.getLevel() > maxLevel ? (maxLevel + (curChar.getLevel() / 10)) : curChar.getLevel()) / (Math.min(curChar.getLevel(), maxLevel) / 10.0) / mod);
+                curChar.gainExp(amount * c.getChannelServer().getExpRate(), true, true, true);
+            }
+        }
+    }
+
+    public final void givePartyExp(final int amount, final List<MapleCharacter> party) {
+        for (final MapleCharacter chr : party) {
+            chr.gainExp(amount * c.getChannelServer().getExpRate(), true, true, true);
+        }
+    }
+
+    public final void givePartyExp(final int amount) {
+        if (getPlayer().getParty() == null || getPlayer().getParty().getMembers().size() == 1) {
+            gainExp(amount * c.getChannelServer().getExpRate());
+            return;
+        }
+        final int cMap = getPlayer().getMapId();
+        for (final MaplePartyCharacter chr : getPlayer().getParty().getMembers()) {
+            final MapleCharacter curChar = getChannelServer().getPlayerStorage().getCharacterById(chr.getId());
+            if (curChar != null && (curChar.getMapId() == cMap || curChar.getEventInstance() == getPlayer().getEventInstance())) {
+                curChar.gainExp(amount * c.getChannelServer().getExpRate(), true, true, true);
+            }
+        }
+    }
+
+
+
+
+搜索：
+
+            exp = (int) Math.min(Integer.MAX_VALUE, exp * attacker.getEXPMod() * attacker.getStat().expBuff / 100.0 * (attacker.getLevel() < 10 ? GameConstants.getExpRate_Below10(attacker.getJob()) : GameConstants.getExpRate(attacker.getLevel(), ChannelServer.getInstance(map.getChannel()).getExpRate())));
+
+替換：
+
+            exp = (int) Math.min(Integer.MAX_VALUE, exp * attacker.getEXPMod() * attacker.getStat().expBuff / 100.0 * (attacker.getLevel() < 10 ? GameConstants.getExpRate_Below10(attacker.getJob()) : ChannelServer.getInstance(map.getChannel()).getExpRate()));//BUFF經驗值
+
+
+
+
+搜索：
+
+            exp = ((kill + (cool * 5)) + pt) * GameConstants.getExpRate(c.getLevel(), 8);
+
+替換：
+
+            exp = ((kill + (cool * 5)) + pt) * c.getClient().getChannelServer().getExpRate();
+
+
+
+
+搜索：
+              c.gainExp(intStore * GameConstants.getExpRate(c.getLevel(), 8) * (c.getStat().questBonus) * ((c.getTrait(MapleTraitType.sense).getLevel() * 3 / 10) + 100) / 100, true, true, true);
+
+替換：
+              c.gainExp((intStore * GameConstants.getExpRate_Quest(c.getLevel()) * (c.getStat().questBonus) * ((c.getTrait(MapleTraitType.sense).getLevel() * 3 / 10) + 100) / 100), true, true, true);

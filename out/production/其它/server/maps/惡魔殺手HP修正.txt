@@ -1,0 +1,22 @@
+搜索：
+
+
+                bx = SkillFactory.getSkill(30010185);
+                bof = chra.getTotalSkillLevel(bx);
+                if (bof > 0) {
+                    eff = bx.getEffect(bof);
+                    chra.getTrait(MapleTraitType.will).addLocalExp(GameConstants.getTraitExpNeededForLevel(eff.getY()));
+                    chra.getTrait(MapleTraitType.charisma).addLocalExp(GameConstants.getTraitExpNeededForLevel(eff.getZ()));
+
+                }
+
+替換：
+
+                bx = SkillFactory.getSkill(30010185);
+                bof = chra.getTotalSkillLevel(bx);
+                if (bof > 0) {
+                    eff = bx.getEffect(bof);
+                    //chra.getTrait(MapleTraitType.will).addLocalExp(GameConstants.getTraitExpNeededForLevel(eff.getY()));
+                    chra.getTrait(MapleTraitType.charisma).addLocalExp(GameConstants.getTraitExpNeededForLevel(eff.getZ()));
+
+                }

@@ -1,0 +1,16 @@
+搜索：
+
+        if (!silent) {
+            stats.recalcLocalStats(this);
+        }
+       // System.out.println("Effect registered. Effect: " + effect.getSourceId());
+    }
+
+
+替換：
+
+        if (!silent) {
+            stats.recalcLocalStats(this);
+        }
+       System.out.println("Buff註冊. 技能ID: " + effect.getSourceId());
+    }

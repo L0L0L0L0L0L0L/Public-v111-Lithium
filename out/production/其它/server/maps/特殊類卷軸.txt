@@ -1,0 +1,370 @@
+搜索：
+
+            case USE_UPGRADE_SCROLL:
+                c.getPlayer().updateTick(slea.readInt());
+                InventoryHandler.UseUpgradeScroll(slea.readShort(), slea.readShort(), slea.readShort(), c, c.getPlayer(), slea.readByte() > 0);
+                break;
+            case USE_PROTECT_SHIELD:
+                c.getPlayer().updateTick(slea.readInt());
+                InventoryHandler.UseProtectShield(slea, c);
+                break;
+                
+            case USE_POTENTIAL_SCROLL:
+            case USE_EQUIP_SCROLL:
+                c.getPlayer().updateTick(slea.readInt());
+                InventoryHandler.UseUpgradeScroll(slea.readShort(), slea.readShort(), (short) 0, c, c.getPlayer(), slea.readByte() > 0);
+                break;
+
+
+替換：
+
+            case USE_UPGRADE_SCROLL:
+                c.getPlayer().updateTick(slea.readInt());
+                InventoryHandler.UseUpgradeScroll(slea.readShort(), slea.readShort(), slea.readShort(), c, c.getPlayer(), slea.readByte() > 0, false);
+                break;
+            case USE_PROTECT_SHIELD:
+                c.getPlayer().updateTick(slea.readInt());
+                InventoryHandler.UseProtectShield(slea, c);
+                break;
+                
+            case USE_POTENTIAL_SCROLL:
+            case USE_EQUIP_SCROLL:
+                c.getPlayer().updateTick(slea.readInt());
+                InventoryHandler.UseUpgradeScroll(slea.readShort(), slea.readShort(), (short) 0, c, c.getPlayer(), slea.readByte() > 0, false);
+                break;
+
+
+搜索：
+
+
+    public static final boolean UseUpgradeScroll(final short slot, final short dst, final short ws, final MapleClient c, final MapleCharacter chr, final boolean legendarySpirit) {
+        return UseUpgradeScroll(slot, dst, ws, c, chr, 0, legendarySpirit);
+    }
+
+    public static final boolean UseUpgradeScroll(final short slot, final short dst, final short ws, final MapleClient c, final MapleCharacter chr, final int vegas, final boolean legendarySpirit) {
+        boolean whiteScroll = false; // white scroll being used?
+        final MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        chr.setScrolledPosition((short) 0);
+        if ((ws & 2) == 2) {
+            whiteScroll = true;
+        }
+        Equip toScroll = null;
+        if (dst < 0) {
+            toScroll = (Equip) chr.getInventory(MapleInventoryType.EQUIPPED).getItem(dst);
+        } else if (legendarySpirit) {
+            toScroll = (Equip) chr.getInventory(MapleInventoryType.EQUIP).getItem(dst);
+        }
+        if (toScroll == null || c.getPlayer().hasBlockedInventory()) {
+            c.getSession().write(MaplePacketCreator.enableActions());
+            System.out.println("測試1");
+            return false;
+        }
+        final byte oldLevel = toScroll.getLevel();
+        final byte oldEnhance = toScroll.getEnhance();
+        final byte oldState = toScroll.getState();
+        final short oldFlag = toScroll.getFlag();
+        final byte oldSlots = toScroll.getUpgradeSlots();
+        boolean SAFETY = false;
+        boolean RECOVERY = false;
+        Item scroll = chr.getInventory(MapleInventoryType.USE).getItem(slot);
+        if (scroll == null) {
+            scroll = chr.getInventory(MapleInventoryType.CASH).getItem(slot);
+            if (scroll == null) {
+                c.getSession().write(InventoryPacket.getInventoryFull());
+                c.getSession().write(MaplePacketCreator.enableActions());
+                System.out.println("測試2");
+                return false;
+            }
+        }
+
+
+
+替換：
+
+    public static final boolean UseUpgradeScroll(final short slot, final short dst, final short ws, final MapleClient c, final MapleCharacter chr, final boolean legendarySpirit, final boolean cash) {
+        return UseUpgradeScroll(slot, dst, ws, c, chr, 0, legendarySpirit, cash);
+    }
+
+    public static final boolean UseUpgradeScroll(final short slot, final short dst, final short ws, final MapleClient c, final MapleCharacter chr, final int vegas, final boolean legendarySpirit, final boolean cash) {
+        boolean whiteScroll = false; // white scroll being used?
+        final MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        chr.setScrolledPosition((short) 0);
+        if ((ws & 2) == 2) {
+            whiteScroll = true;
+        }
+        Equip toScroll = null;
+        if (dst < 0) {
+            toScroll = (Equip) chr.getInventory(MapleInventoryType.EQUIPPED).getItem(dst);
+        } else if (legendarySpirit) {
+            toScroll = (Equip) chr.getInventory(MapleInventoryType.EQUIP).getItem(dst);
+        }
+        if (toScroll == null || c.getPlayer().hasBlockedInventory()) {
+            c.getSession().write(MaplePacketCreator.enableActions());
+            System.out.println("測試1");
+            return false;
+        }
+        final byte oldLevel = toScroll.getLevel();
+        final byte oldEnhance = toScroll.getEnhance();
+        final byte oldState = toScroll.getState();
+        final short oldFlag = toScroll.getFlag();
+        final byte oldSlots = toScroll.getUpgradeSlots();
+        boolean SAFETY = false;
+        boolean RECOVERY = false;
+        Item scroll = cash ? chr.getInventory(MapleInventoryType.CASH).getItem(slot) : chr.getInventory(MapleInventoryType.USE).getItem(slot);
+        if (scroll == null) {
+            scroll = cash ? chr.getInventory(MapleInventoryType.USE).getItem(slot) : chr.getInventory(MapleInventoryType.CASH).getItem(slot);
+            if (scroll == null) {
+                c.getSession().write(InventoryPacket.getInventoryFull());
+                c.getSession().write(MaplePacketCreator.enableActions());
+                System.out.println("測試2");
+                return false;
+            }
+        }
+        if (scroll.getItemId() == 5064200 || scroll.getItemId() == 2049600 || scroll.getItemId() == 2049601 || scroll.getItemId() == 2049604) {
+            int success = ii.getScrollSuccess(scroll.getItemId());
+            if (scroll.getItemId() == 5064200) {
+                success = 100;
+            }
+            if (Randomizer.nextInt(100) < success) {
+                Equip template = (Equip) ii.getEquipById(toScroll.getItemId());
+                toScroll.setStr(template.getStr());
+                toScroll.setDex(template.getDex());
+                toScroll.setInt(template.getInt());
+                toScroll.setLuk(template.getLuk());
+                toScroll.setAcc(template.getAcc());
+                toScroll.setAvoid(template.getAvoid());
+                toScroll.setSpeed(template.getSpeed());
+                toScroll.setJump(template.getJump());
+                toScroll.setEnhance(template.getEnhance());
+                toScroll.setItemEXP(template.getItemEXP());
+                toScroll.setHp(template.getHp());
+                toScroll.setMp(template.getMp());
+                toScroll.setLevel(template.getLevel());
+                toScroll.setWatk(template.getWatk());
+                toScroll.setMatk(template.getMatk());
+                toScroll.setWdef(template.getWdef());
+                toScroll.setMdef(template.getMdef());
+                toScroll.setUpgradeSlots(template.getUpgradeSlots());
+                toScroll.setViciousHammer(template.getViciousHammer());
+                toScroll.setIncSkill(template.getIncSkill());
+                if (ItemFlag.PROTECT.check(oldFlag)) { //裝備保護
+                    toScroll.setFlag((short) (toScroll.getFlag() - ItemFlag.PROTECT.getValue()));
+                }
+                if (ItemFlag.RECOVERY.check(oldFlag)) { //卷軸保護
+                    toScroll.setFlag((short) (toScroll.getFlag() - ItemFlag.RECOVERY.getValue()));
+                }
+                if (scroll.getItemId() != 5064200) {
+                    MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.USE, scroll.getPosition(), (short) 1, false, false);    
+                }
+                c.getSession().write(InventoryPacket.scrolledItem(scroll, toScroll, false, false));
+                chr.getMap().broadcastMessage(chr, EtcPacket.getScrollEffect(c.getPlayer().getId(), ScrollResult.SUCCESS, legendarySpirit ? true : false, false), true);//回真成功
+                c.getSession().write(MaplePacketCreator.enableActions());
+                return false;
+            } else {
+                    if (scroll.getItemId() != 5064200) {
+                    if (ItemFlag.RECOVERY.check(oldFlag)) { //卷軸保護
+                        toScroll.setFlag((short) (toScroll.getFlag() - ItemFlag.RECOVERY.getValue()));
+                        chr.dropMessage(5, "由於卷軸保護的效果，卷軸" + ii.getName(scroll.getItemId()) + "沒有損壞。");
+                    } else {
+                        MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.USE, scroll.getPosition(), (short) 1, false, false);
+                    }
+                }
+                if (Randomizer.nextInt(100) < (100 - success)) {
+                    if (ItemFlag.PROTECT.check(oldFlag)) {//裝備保護
+                        toScroll.setFlag((short) (toScroll.getFlag() - ItemFlag.PROTECT.getValue()));
+                        c.getSession().write(InventoryPacket.scrolledItem(scroll, toScroll, false, false));
+                        chr.getMap().broadcastMessage(chr, EtcPacket.getScrollEffect(c.getPlayer().getId(), ScrollResult.FAIL, legendarySpirit ? true : false, false), true);//回真失敗
+                    } else {
+                        c.getSession().write(InventoryPacket.scrolledItem(scroll, toScroll, true, false));
+                        if (dst < 0) {
+                            chr.getInventory(MapleInventoryType.EQUIPPED).removeItem(toScroll.getPosition());
+                        } else {
+                            chr.getInventory(MapleInventoryType.EQUIP).removeItem(toScroll.getPosition());
+                        }
+                        chr.getMap().broadcastMessage(chr, EtcPacket.getScrollEffect(c.getPlayer().getId(), ScrollResult.CURSE, legendarySpirit ? true : false, false), true);//裝備被破壞
+                    }
+                } else {
+                    if (ItemFlag.PROTECT.check(oldFlag)) {//裝備保護
+                            toScroll.setFlag((short) (toScroll.getFlag() - ItemFlag.PROTECT.getValue()));
+                    }
+                    c.getSession().write(InventoryPacket.scrolledItem(scroll, toScroll, false, false));
+                    chr.getMap().broadcastMessage(chr, EtcPacket.getScrollEffect(c.getPlayer().getId(), ScrollResult.FAIL, legendarySpirit ? true : false, false), true);//回真失敗
+                }
+            }
+            c.getSession().write(MaplePacketCreator.enableActions());
+            return false;
+        }
+
+
+
+
+搜索：
+
+    public final boolean canScroll(final int scrollid, final int itemid) {
+        return (scrollid / 100) % 100 == (itemid / 10000) % 100;
+    }
+
+
+替換：
+
+    public final boolean canScroll(final int scrollid, final int itemid) {
+        return (scrollid / 100) % 100 == (itemid / 10000) % 100;
+    }
+
+    public int getScrollSuccess(int itemId) {
+        if (itemId / 10000 != 204 || getEquipStats(itemId) == null || !getEquipStats(itemId).containsKey("success")) {
+            return 0;
+        }
+        return (getEquipStats(itemId).get("success"));
+    }
+
+
+搜索：
+
+            case 5300000:
+            case 5300001:
+            case 5300002: { // Cash morphs
+                final MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+                ii.getItemEffect(itemId).applyTo(c.getPlayer());
+                used = true;
+                break;
+            }
+
+替換：
+
+            case 5300000:
+            case 5300001:
+            case 5300002: { // Cash morphs
+                final MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+                ii.getItemEffect(itemId).applyTo(c.getPlayer());
+                used = true;
+                break;
+            }
+            case 5064200: { // 完美回真卡
+                slea.readInt();
+                final byte dst = (byte) slea.readShort();
+                Item item = c.getPlayer().getInventory(MapleInventoryType.EQUIPPED).getItem(dst);
+                slea.readByte();
+                short src = (short) c.getPlayer().getInventory(MapleInventoryType.CASH).findPostionById(5064200);
+                if (item != null && item.getType() == 1) {
+                    used = UseUpgradeScroll(src, dst, (byte) 0, c, c.getPlayer(), false, true);
+                }
+                used = true;
+                break;
+            }
+
+
+搜索：
+
+            case 5610001:
+            case 5610000: { // Vega 30
+                slea.readInt(); // Inventory type, always eq
+                final short dst = (short) slea.readInt();
+                slea.readInt(); // Inventory type, always use
+                final short src = (short) slea.readInt();
+                used = UseUpgradeScroll(src, dst, (short) 2, c, c.getPlayer(), itemId, false); //cannot use ws with vega but we dont care
+                cc = used;
+                break;
+            }
+
+替換：
+
+            case 5610001:
+            case 5610000: { // Vega 30
+                slea.readInt(); // Inventory type, always eq
+                final short dst = (short) slea.readInt();
+                slea.readInt(); // Inventory type, always use
+                final short src = (short) slea.readInt();
+                used = UseUpgradeScroll(src, dst, (short) 2, c, c.getPlayer(), itemId, true, false); //cannot use ws with vega but we dont care
+                cc = used;
+                break;
+            }
+
+
+
+搜索：
+
+    public int countById(int itemId) {
+        int possesed = 0;
+        for (Item item : inventory.values()) {
+            if (item.getItemId() == itemId) {
+                possesed += item.getQuantity();
+            }
+        }
+        return possesed;
+    }
+
+替換：
+
+    public int countById(int itemId) {
+        int possesed = 0;
+        for (Item item : inventory.values()) {
+            if (item.getItemId() == itemId) {
+                possesed += item.getQuantity();
+            }
+        }
+        return possesed;
+    }
+
+    public int findPostionById(int itemId) {
+        int possesed = 0;
+        for (Item item : inventory.values()) {
+            if (item.getItemId() == itemId) {
+                possesed = item.getPosition();
+                break;
+            }
+        }
+        return possesed;
+    }
+
+
+搜索：
+
+        Equip scrolled = (Equip) ii.scrollEquipWithId(toScroll, scroll, whiteScroll, chr, vegas);
+        ScrollResult scrollSuccess;
+        if (scrolled == null) {
+            scrollSuccess = Equip.ScrollResult.CURSE;
+        } else if (scrolled.getLevel() > oldLevel || scrolled.getEnhance() > oldEnhance || scrolled.getState() > oldState || scrolled.getFlag() > oldFlag) {
+            scrollSuccess = Equip.ScrollResult.SUCCESS;
+        } else if ((GameConstants.isCleanSlate(scroll.getItemId()) && scrolled.getUpgradeSlots() > oldSlots)) {
+            scrollSuccess = Equip.ScrollResult.SUCCESS;
+        } else {
+            scrollSuccess = Equip.ScrollResult.FAIL;
+            if (ItemFlag.RECOVERY.check(toScroll.getFlag())) {
+                RECOVERY = true;
+            }
+        }
+        // Update
+        if (RECOVERY) {
+            chr.dropMessage(5, "由於卷軸保護的效果，卷軸" + ii.getName(scroll.getItemId()) + "沒有損壞。");
+        } else {
+            chr.getInventory(GameConstants.getInventoryType(scroll.getItemId())).removeItem(scroll.getPosition(), (short) 1, false);
+        }
+
+
+替換：
+
+
+        Equip scrolled = (Equip) ii.scrollEquipWithId(toScroll, scroll, whiteScroll, chr, vegas);
+        ScrollResult scrollSuccess;
+        if (scrolled == null) {
+            scrollSuccess = Equip.ScrollResult.CURSE;
+            if (ItemFlag.RECOVERY.check(toScroll.getFlag())) {//卷軸保護
+                RECOVERY = true;
+            }
+        } else if (scrolled.getLevel() > oldLevel || scrolled.getEnhance() > oldEnhance || scrolled.getState() > oldState || scrolled.getFlag() > oldFlag) {
+            scrollSuccess = Equip.ScrollResult.SUCCESS;
+        } else if ((GameConstants.isCleanSlate(scroll.getItemId()) && scrolled.getUpgradeSlots() > oldSlots)) {
+            scrollSuccess = Equip.ScrollResult.SUCCESS;
+        } else {
+            scrollSuccess = Equip.ScrollResult.FAIL;
+            if (ItemFlag.RECOVERY.check(toScroll.getFlag())) {
+                RECOVERY = true;
+            }
+        }
+        // Update
+        if (RECOVERY) {
+            chr.dropMessage(5, "由於卷軸保護的效果，卷軸" + ii.getName(scroll.getItemId()) + "沒有損壞。");
+        } else {
+            chr.getInventory(GameConstants.getInventoryType(scroll.getItemId())).removeItem(scroll.getPosition(), (short) 1, false);
+        }

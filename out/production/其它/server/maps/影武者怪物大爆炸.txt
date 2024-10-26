@@ -1,0 +1,147 @@
+搜索：
+
+    public static final int[] blockedSkills = {4341003};
+    public static final String[] RESERVED = {"Rental", "Donor", "MapleNews"};
+
+替換：
+
+    public static final int[] blockedSkills = {};
+    public static final String[] RESERVED = {"Rental", "Donor", "MapleNews"};
+
+
+
+MobHandler.java
+
+搜索：
+
+    public static final void MobBomb(final LittleEndianAccessor slea, final MapleCharacter chr) {
+        final MapleMap map = chr.getMap();       
+        int randdmg = Randomizer.nextInt(5);
+        final MapleMonster mobfrom = map.getMonsterByOid(slea.readInt());   
+        slea.readInt();//x
+        slea.readInt();//y     
+        final Skill skill = SkillFactory.getSkill(4341003);                            
+        final MapleStatEffect eff = skill.getEffect(chr.getSkillLevel(skill));
+        double damage = eff.getDamage() * chr.getStat().getCurrentMaxBaseDamage() / (95.0 + randdmg);        
+        map.broadcastMessage(MaplePacketCreator.showMonsterBomb(mobfrom.getObjectId(),chr.getId()));
+        MapleMonster mob; 
+        if (mobfrom.getBuff(MonsterStatus.MONSTER_BOMB) != null) {        
+        for (MapleMapObject mo : map.getMapObjectsInRange(mobfrom.getPosition(), 28000, Arrays.asList(MapleMapObjectType.MONSTER))) {      
+            mob = (MapleMonster) mo;            
+            map.broadcastMessage(MobPacket.damageMonster(mob.getObjectId(), (int) damage));
+            mob.damage(chr, (int) damage, false);        
+            chr.checkMonsterAggro(mob);
+            if (!mob.isAlive()) {
+            map.broadcastMessage(MobPacket.killMonster(mob.getObjectId(), 1));        
+            }
+          }
+        if (!map.getMapObjectsInRange(mobfrom.getPosition(), 28000, Arrays.asList(MapleMapObjectType.PLAYER)).isEmpty()) {//플레이어가있따면  
+            map.broadcastMessage(MaplePacketCreator.showrealbomb(mobfrom.getId())); 
+            map.broadcastMessage(chr, EtcPacket.damagePlayer2(0, mobfrom.getId(), chr.getId(), ((int)damage/5), 0, (byte) 0, 0, false, 0, 0, 0, 0), false);                      
+            chr.addHP((int)-(damage/5));
+            //chr.dropMessage(6, "몬스터봄의 폭발로 " + ((int)damage/5) + "의 데미지를 입었습니다");
+        }        
+       }
+    }  
+
+
+替換：
+
+    public static final void MobBomb(final LittleEndianAccessor slea, final MapleCharacter chr) {
+        final MapleMap map = chr.getMap();
+        int randdmg = Randomizer.nextInt(5);
+        final MapleMonster mobfrom = map.getMonsterByOid(slea.readInt());
+        slea.readInt();//x
+        slea.readInt();//y
+        final Skill skill = SkillFactory.getSkill(4341003);
+        final MapleStatEffect eff = skill.getEffect(chr.getSkillLevel(skill));
+        double damage = eff.getDamage() * chr.getStat().getCurrentMaxBaseDamage() / (95.0 + randdmg);
+
+        MapleMonster mob;
+        if (mobfrom.getBuff(MonsterStatus.MONSTER_BOMB) != null) {
+        for (MapleMapObject mo : map.getMapObjectsInRange(mobfrom.getPosition(), 28000, Arrays.asList(MapleMapObjectType.MONSTER))) {      
+            mob = (MapleMonster) mo;
+            map.broadcastMessage(MobPacket.damageMonster(mob.getObjectId(), (int) damage));
+            mob.damage(chr, (int) damage, false);
+          }
+       }
+    }
+
+
+搜索：
+
+            case 4341003: //monster bomb               
+                chr.setKeyDownSkill_Time(0);
+                chr.getMap().broadcastMessage(chr, EtcPacket.skillCancel(chr, skillid), false);
+                chr.getMap().broadcastMessage(MaplePacketCreator.showbomb(chr, 4341003));
+
+替換：
+
+            case 4341003: //怪物大爆炸
+                chr.setKeyDownSkill_Time(0);
+                chr.getMap().broadcastMessage(chr, EtcPacket.skillCancel(chr, skillid), false);
+
+
+搜索：
+
+    PVP_TRANSFORM,
+    LOAD_TEAM,
+    SHOW_BOMB,
+
+
+替換：
+
+    PVP_TRANSFORM,
+    LOAD_TEAM,
+
+
+
+搜索删除：
+
+
+        public static byte[] showbomb(MapleCharacter from, int skillId) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+        mplew.writeShort(SendPacketOpcode.SHOW_BOMB.getValue());
+        mplew.writeInt(from.getId());
+        mplew.writeInt(skillId);
+        mplew.writeInt(0);
+        mplew.writeInt(0);
+        mplew.writeInt(0);
+        mplew.writeInt(0);
+
+        return mplew.getPacket();
+    }
+
+
+搜索刪除：
+
+
+        public static byte[] showMonsterBomb(int mobi, int chrid) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+        mplew.writeShort(SendPacketOpcode.MONSTER_BOMB.getValue());
+        mplew.writeInt(mobi);
+        mplew.writeInt(4341003);//스킬아이디
+        mplew.writeInt(chrid);//캐릭터아이디가 유력함
+        mplew.writeShort(0);//터질때 딜레이시간 3000이면 3초뒤에 폭발함
+        return mplew.getPacket();
+    } 
+
+
+
+搜索刪除：
+
+
+    public static byte[] showrealbomb(int mobid) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+        mplew.writeShort(SendPacketOpcode.SHOW_ITEM_GAIN_INCHAT.getValue());
+        mplew.write(7);
+        mplew.writeInt(4341003);//스킬아이디
+        mplew.writeInt(4341003);
+        mplew.writeInt(4341003);        
+        mplew.writeInt(4341003);  
+        mplew.writeInt(4341003);          
+        return mplew.getPacket();
+    }

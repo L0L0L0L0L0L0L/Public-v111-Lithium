@@ -1,0 +1,87 @@
+搜索：
+
+    public void changeSingleSkillLevel(final Skill skill, int newLevel, byte newMasterlevel, long expiration) {
+        final Map<Skill, SkillEntry> list = new HashMap<Skill, SkillEntry>();
+        boolean hasRecovery = false, recalculate = false;
+        if (changeSkillData(skill, newLevel, newMasterlevel, expiration)) { // no loop, only 1
+            list.put(skill, new SkillEntry(newLevel, newMasterlevel, expiration));
+            if (GameConstants.isRecoveryIncSkill(skill.getId())) {
+                hasRecovery = true;
+            }
+            if (skill.getId() < 80000000) {
+                recalculate = true;
+            }
+        }
+        if (list.isEmpty()) { // nothing is changed
+            return;
+        }
+        client.getSession().write(MaplePacketCreator.updateSkills(list));
+        reUpdateStat(hasRecovery, recalculate);
+    }
+
+替換：
+
+    public void changeSingleSkillLevel(final Skill skill, int newLevel, byte newMasterlevel, long expiration) {
+        final Map<Skill, SkillEntry> list = new HashMap<Skill, SkillEntry>();
+        boolean hasRecovery = false, recalculate = false;
+        if (changeSkillData(skill, newLevel, newMasterlevel, expiration)) { // no loop, only 1
+            list.put(skill, new SkillEntry(newLevel, newMasterlevel, expiration + (3600000 * 12))); //添加技能的顯示的時間
+            if (GameConstants.isRecoveryIncSkill(skill.getId())) {
+                hasRecovery = true;
+            }
+            if (skill.getId() < 80000000) {
+                recalculate = true;
+            }
+        }
+        if (list.isEmpty()) { // nothing is changed
+            return;
+        }
+        client.getSession().write(MaplePacketCreator.updateSkills(list));
+        reUpdateStat(hasRecovery, recalculate);
+    }
+
+
+搜索：
+
+    public static final void addSkillInfo(final MaplePacketLittleEndianWriter mplew, final MapleCharacter chr) { // 0x100
+        final Map<Skill, SkillEntry> skills = chr.getSkills();
+        mplew.write(1);
+        mplew.writeShort(skills.size());
+        for (Entry<Skill, SkillEntry> skill : skills.entrySet()) {
+            mplew.writeInt(skill.getKey().getId());
+            if (skill.getKey().getId() == 80000000 || skill.getKey().getId() == 80000001 || skill.getKey().getId() == 80001040) {//顯示傳授技能的角色
+                mplew.writeInt(skill.getValue().teachId);
+            } else if (skill.getKey().getId() == 110 || skill.getKey().getId() == 20021110 || skill.getKey().getId() == 30010112) {//過濾已傳授技能的角色
+                mplew.writeInt(skill.getValue().teachId > 0 ? skill.getValue().teachId : skill.getValue().skillevel);
+            } else {
+                mplew.writeInt(skill.getValue().skillevel);
+            }
+            addExpirationTime(mplew, skill.getValue().expiration);
+            if (skill.getKey().isFourthJob()) {
+                mplew.writeInt(skill.getValue().masterlevel);
+            }
+        }
+    }
+
+
+替換：
+
+    public static final void addSkillInfo(final MaplePacketLittleEndianWriter mplew, final MapleCharacter chr) { // 0x100
+        final Map<Skill, SkillEntry> skills = chr.getSkills();
+        mplew.write(1);
+        mplew.writeShort(skills.size());
+        for (Entry<Skill, SkillEntry> skill : skills.entrySet()) {
+            mplew.writeInt(skill.getKey().getId());
+            if (skill.getKey().getId() == 80000000 || skill.getKey().getId() == 80000001 || skill.getKey().getId() == 80001040) {//顯示傳授技能的角色
+                mplew.writeInt(skill.getValue().teachId);
+            } else if (skill.getKey().getId() == 110 || skill.getKey().getId() == 20021110 || skill.getKey().getId() == 30010112) {//過濾已傳授技能的角色
+                mplew.writeInt(skill.getValue().teachId > 0 ? skill.getValue().teachId : skill.getValue().skillevel);
+            } else {
+                mplew.writeInt(skill.getValue().skillevel);
+            }
+            addExpirationTime(mplew, skill.getValue().expiration + (3600000 * 12)); //上線載入技能顯示的時間
+            if (skill.getKey().isFourthJob()) {
+                mplew.writeInt(skill.getValue().masterlevel);
+            }
+        }
+    }

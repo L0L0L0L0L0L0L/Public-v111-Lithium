@@ -1,0 +1,119 @@
+搜索：
+
+                case 35111013:
+                case 5111007:
+                case 5211007:
+                case 5311005:
+                case 5320007:
+                    ret.statups.put(MapleBuffStat.DICE_ROLL, 0);
+                    break;
+
+替換：
+
+                case 35111013:
+                case 5111007:
+                case 5211007:
+                case 5311005:
+                case 5320007:
+                    ret.statups.put(MapleBuffStat.DICE_ROLL, 0);
+                    break;
+                case 5311004://幸運木桶
+                    ret.statups.put(MapleBuffStat.BARREL_ROLL, 0);
+                    break;
+
+
+
+搜索：
+
+    DARK_METAMORPHOSIS(0x800, 6), // mob count
+
+    //1, unknown
+    SPIRIT_SURGE(0x2000, 6),
+
+替換：
+
+    DARK_METAMORPHOSIS(0x800, 6), // mob count
+    BARREL_ROLL(0x1000, 6),//幸運木桶
+    //1, unknown
+    SPIRIT_SURGE(0x2000, 6),
+
+
+
+
+搜索：
+
+                    applyto.dropMessage(5, "幸運骰子點數 [" + diceid + "] 獲得隨機的加持。");
+                    localstatups = new EnumMap<MapleBuffStat, Integer>(MapleBuffStat.class);
+                    localstatups.put(MapleBuffStat.DICE_ROLL, diceid);
+                    applyto.getClient().getSession().write(BuffPacket.giveDice(diceid, tempsource, localDuration, localstatups));
+                    showEffect = false;
+                }
+                normal = false;
+                break;
+            }
+
+替換：
+
+                    applyto.dropMessage(5, "幸運骰子點數 [" + diceid + "] 獲得隨機的加持。");
+                    localstatups = new EnumMap<MapleBuffStat, Integer>(MapleBuffStat.class);
+                    localstatups.put(MapleBuffStat.DICE_ROLL, diceid);
+                    applyto.getClient().getSession().write(BuffPacket.giveDice(diceid, tempsource, localDuration, localstatups));
+                    showEffect = false;
+                }
+                normal = false;
+                break;
+            }
+            case 5311004: {
+                final int zz = Randomizer.nextInt(4) + 1;
+                applyto.getMap().broadcastMessage(applyto, EffectPacket.showDiceEffect(applyto.getId(), sourceid, zz, -1, (int) level), false);
+                applyto.getClient().getSession().write(EffectPacket.showOwnDiceEffect(sourceid, zz, -1, (int) level));
+                localstatups = new EnumMap<MapleBuffStat, Integer>(MapleBuffStat.class);
+                localstatups.put(MapleBuffStat.BARREL_ROLL, zz);
+                break;
+            }
+
+
+
+搜索：
+
+                            if (eff != null && eff.makeChanceResult()) {
+                                final MonsterStatusEffect monsterStatusEffect = new MonsterStatusEffect(MonsterStatus.SPEED, eff.getX(), 3121007, null, false);
+                                monster.applyStatus(player, monsterStatusEffect, false, eff.getY() * 1000, true, eff);
+                            }
+                        }
+
+替換：
+
+
+                            if (eff != null && eff.makeChanceResult()) {
+                                final MonsterStatusEffect monsterStatusEffect = new MonsterStatusEffect(MonsterStatus.SPEED, eff.getX(), 3121007, null, false);
+                                monster.applyStatus(player, monsterStatusEffect, false, eff.getY() * 1000, true, eff);
+                            }
+                        }
+                        if (player.getJob() == 531 || player.getJob() == 532) { //
+                            if (player.getBuffedValue(MapleBuffStat.BARREL_ROLL) != null) {
+                            final int zz = player.getBuffedValue(MapleBuffStat.BARREL_ROLL);
+                            //int c = player.getBuffSource(MapleBuffStat.BARREL_ROLL);
+                            MonsterStatusEffect mobEff = null;
+                            final Skill skill = SkillFactory.getSkill(5311004);
+                            MapleStatEffect eff = skill.getEffect(player.getTotalSkillLevel(skill));
+                            if (zz == 1) {//凍結
+                                mobEff = new MonsterStatusEffect(MonsterStatus.FREEZE, 1, skill.getId(), null, false);
+                               }
+                            if (zz == 2) {//昏迷
+                                mobEff = new MonsterStatusEffect(MonsterStatus.STUN, 1, skill.getId(), null, false);
+                               }
+                            if (zz == 3) {//減速
+                                mobEff = new MonsterStatusEffect(MonsterStatus.SPEED, -10, skill.getId(), null, false);
+                               }
+                            if (zz == 4) {//黑暗
+                                mobEff = new MonsterStatusEffect(MonsterStatus.DARKNESS, 1, skill.getId(), null, false);
+                               }
+                            if (mobEff != null && !monster.getStats().isBoss()) {
+                                int deleted = (int) Math.floor(Math.random() * 3);
+                                if (deleted == 0) {
+                                    monster.applyStatus(player, mobEff, false, 4000, true, eff);
+                                    }
+                                }
+                            }
+                        }

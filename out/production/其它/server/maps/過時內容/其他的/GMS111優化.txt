@@ -1,0 +1,34 @@
+搜索：
+
+	final MapleClient client = (MapleClient) session.getAttribute(MapleClient.CLIENT_KEY);
+
+	if (decoderState.packetlength == -1) {
+	    if (in.remaining() >= 4) {
+		final int packetHeader = in.getInt();
+		if (!client.getReceiveCrypto().checkPacket(packetHeader)) {
+		    session.close();
+		    return false;
+		}
+		decoderState.packetlength = MapleAESOFB.getPacketLength(packetHeader);
+	    } else {
+		return false;
+	    }
+	}
+
+
+替換：
+
+	final MapleClient client = (MapleClient) session.getAttribute(MapleClient.CLIENT_KEY);
+
+	if (decoderState.packetlength == -1) {
+	    if (in.remaining() >= 4) {
+		final int packetHeader = in.getInt();
+		/*if (!client.getReceiveCrypto().checkPacket(packetHeader)) {
+		    session.close();
+		    return false;
+		}*/
+		decoderState.packetlength = MapleAESOFB.getPacketLength(packetHeader);
+	    } else {
+		return false;
+	    }
+	}

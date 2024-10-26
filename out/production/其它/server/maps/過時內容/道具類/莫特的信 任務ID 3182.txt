@@ -1,0 +1,18 @@
+搜索：
+
+                case 2430159:
+                    MapleQuest.getInstance(3182).forceComplete(c.getPlayer(), 2161004);
+                    MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.USE, slot, (byte) 1, false);
+                    break;
+
+替換：
+
+                case 2430159:
+                    if (c.getPlayer().getMapId() != 211060400) {
+                        c.getPlayer().dropMessage(5, "必須要在莫特面前使用此道具。");
+                    } else {
+                        c.getPlayer().getQuestNAdd(MapleQuest.getInstance(3182)).setCustomData("211060400");//給與完成任務條件
+                        c.getPlayer().updateQuest(c.getPlayer().getQuest(MapleQuest.getInstance(3182)), true);//刷新當前任務
+                        MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.USE, slot, (byte) 1, false);
+                    }
+                    break;

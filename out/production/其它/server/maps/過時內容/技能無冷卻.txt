@@ -1,0 +1,39 @@
+搜索：
+
+
+ public final int getCooldown(final MapleCharacter chra) {
+        if (chra.getStat().coolTimeR > 0) {
+            return Math.max(0, ((info.get(MapleStatInfo.cooltime) * (100 - (chra.getStat().coolTimeR / 100))) - chra.getStat().reduceCooltime));
+        }
+        return Math.max(0, (info.get(MapleStatInfo.cooltime) - chra.getStat().reduceCooltime));
+    }
+
+
+替换：
+
+ public final int getCooldown(final MapleCharacter chra) {
+        if (chra.getStat().coolTimeR > 0) {
+            return Math.max(0, ((info.get(MapleStatInfo.cooltime) * (100 - (chra.getStat().coolTimeR / 100))) * chra.getStat().reduceCooltime));
+        }
+        return Math.max(0, (info.get(MapleStatInfo.cooltime) * chra.getStat().reduceCooltime));
+    }
+
+
+
+
+
+
+
+
+
+
+    public static void addCoolDownInfo(MaplePacketLittleEndianWriter mplew, MapleCharacter chr) {
+        List<MapleCoolDownValueHolder> cooldowns = chr.getCooldowns();
+        mplew.writeShort(cooldowns.size());
+        for (MapleCoolDownValueHolder cooling : cooldowns) {
+            mplew.writeInt(cooling.skillId);
+            int timeLeft = (int) (cooling.length + cooling.startTime - System.currentTimeMillis());
+            mplew.writeInt(timeLeft / 1000); //V.103修改为int
+            //System.out.println("技能冷却 - 技能ID: " + cooling.skillId + " 剩余时间: " + (timeLeft / 1000) + " 秒");
+        }
+    }

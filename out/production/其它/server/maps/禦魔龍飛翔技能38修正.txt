@@ -1,0 +1,15 @@
+搜索：
+
+        if (chr.getBuffedValue(MapleBuffStat.SOARING) != null) {
+            mask[MapleBuffStat.SOARING.getPosition(true)] |= MapleBuffStat.SOARING.getValue();
+            buffvalue.add(new Pair<>(chr.getBuffedValue(MapleBuffStat.SOARING), 2));
+            buffvalue.add(new Pair<>(chr.getTrueBuffSource(MapleBuffStat.SOARING), 3));
+        }
+
+替換：
+
+        if (chr.getBuffedValue(MapleBuffStat.SOARING) != null) {
+            mask[MapleBuffStat.SOARING.getPosition(true)] |= MapleBuffStat.SOARING.getValue();
+            //buffvalue.add(new Pair<>(chr.getBuffedValue(MapleBuffStat.SOARING), 2));
+            //buffvalue.add(new Pair<>(chr.getTrueBuffSource(MapleBuffStat.SOARING), 3));
+        }

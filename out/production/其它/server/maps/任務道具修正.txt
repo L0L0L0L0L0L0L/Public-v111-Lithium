@@ -1,0 +1,172 @@
+recvops包頭
+
+搜索：
+
+# 任務道具
+QUEST_ITEM = 0x999
+
+# 使用任務道具
+USE_ITEM_QUEST = 0x999
+
+替換：
+
+# 任務道具
+QUEST_ITEM = 0x19E
+
+# 使用任務道具
+USE_ITEM_QUEST = 0x1A0
+
+
+源碼部分
+
+搜索：
+
+    //QUEST_ITEM, //header -> questid(int) -> 1/0(byte, open or close)
+    USE_ITEM_QUEST,
+
+
+
+替換：
+
+    QUEST_ITEM,
+    USE_ITEM_QUEST,
+
+
+
+搜索：
+
+
+            case USE_ITEM_QUEST:
+                NPCHandler.UseItemQuest(slea, c);
+                break;
+
+
+替換：
+
+            case USE_ITEM_QUEST:
+                NPCHandler.UseItemQuest(slea, c);
+                break;
+            case QUEST_ITEM:
+                NPCHandler.QuestItem(slea, c);
+                break;
+
+
+
+
+搜索：
+
+    public static final void UseItemQuest(final LittleEndianAccessor slea, final MapleClient c) {
+        final short slot = slea.readShort();
+        final int itemId = slea.readInt();
+        final Item item = c.getPlayer().getInventory(MapleInventoryType.ETC).getItem(slot);
+        final int qid = slea.readInt();
+        final MapleQuest quest = MapleQuest.getInstance(qid);
+        final MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        Pair<Integer, List<Integer>> questItemInfo = null;
+        boolean found = false;
+        for (Item i : c.getPlayer().getInventory(MapleInventoryType.ETC)) {
+            if (i.getItemId() / 10000 == 422) {
+                questItemInfo = ii.questItemInfo(i.getItemId());
+                if (questItemInfo != null && questItemInfo.getLeft() == qid && questItemInfo.getRight() != null && questItemInfo.getRight().contains(itemId)) {
+                    found = true;
+                    break; //i believe it's any order
+                }
+            }
+        }
+        if (quest != null && found && item != null && item.getQuantity() > 0 && item.getItemId() == itemId) {
+            final int newData = slea.readInt();
+            final MapleQuestStatus stats = c.getPlayer().getQuestNoAdd(quest);
+            if (stats != null && stats.getStatus() == 1) {
+                stats.setCustomData(String.valueOf(newData));
+                c.getPlayer().updateQuest(stats, true);
+                MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.ETC, slot, (short) 1, false);
+            }
+        }
+    }
+
+
+替換：
+
+    public static final void UseItemQuest(final LittleEndianAccessor slea, final MapleClient c) {
+        slea.readByte();
+        final short slot = slea.readByte();
+        slea.readByte();
+        final int itemId = slea.readInt();
+        final Item item = c.getPlayer().getInventory(MapleInventoryType.ETC).getItem(slot);
+        final MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        int qid = ii.questItemInfo(itemId).left;
+        final MapleQuest quest = MapleQuest.getInstance(qid);
+
+        if (quest != null && item != null && item.getQuantity() > 0) {
+
+            final MapleQuestStatus stats = c.getPlayer().getQuestNoAdd(quest);
+            if (stats != null && stats.getStatus() == 1) {
+                if (stats.getCustomData()== null){
+                    stats.setCustomData(String.valueOf(0));
+                }
+                int num = 100;
+                stats.setCustomData(String.valueOf(Long.parseLong(stats.getCustomData()) + num));
+                c.getPlayer().updateQuest(stats, true);
+                MapleInventoryManipulator.removeFromSlot(c, MapleInventoryType.ETC, slot, (short) 1, false);
+                c.announce(MaplePacketCreator.enableActions());
+            }
+        }
+    }
+
+    public static final void QuestItem(final LittleEndianAccessor slea, final MapleClient c) {
+        final int qid = slea.readShort();
+        final MapleQuest quest = MapleQuest.getInstance(qid);
+        final MapleQuestStatus stats = c.getPlayer().getQuestNoAdd(quest);
+        c.getPlayer().updateQuest(stats, true);
+        c.announce(MaplePacketCreator.enableActions());
+    }
+
+
+
+搜索：
+
+
+            if (attacker.getInventory(MapleInventoryType.EQUIPPED).findById(1122017) != null && attacker.getPendantExp() > 0 || attacker.getInventory(MapleInventoryType.EQUIPPED).findById(1122156) != null && attacker.getPendantExp() > 0) {
+                Equipment_Bonus_EXP += (int) exp / 10 * attacker.getPendantExp();
+            }
+	    attacker.getTrait(MapleTraitType.charisma).addExp(stats.getCharismaEXP(), attacker);
+            attacker.gainExpMonster(exp, true, highestDamage, pty, Class_Bonus_EXP, Equipment_Bonus_EXP, Premium_Bonus_EXP, stats.isPartyBonus(), stats.getPartyBonusRate());
+        }
+        attacker.mobKilled(getId(), lastskillID);
+    }
+
+
+替換：
+
+
+            if (attacker.getInventory(MapleInventoryType.EQUIPPED).findById(1122017) != null && attacker.getPendantExp() > 0 || attacker.getInventory(MapleInventoryType.EQUIPPED).findById(1122156) != null && attacker.getPendantExp() > 0) {
+                Equipment_Bonus_EXP += (int) exp / 10 * attacker.getPendantExp();
+            }
+            if ((attacker.getQuestStatus(20522) == 1 || attacker.getQuestStatus(20526) == 1) && attacker.getQuestStatus(20514) == 1 && attacker.itemQuantity(4220137) > 0) {
+                final int mobexp = Integer.parseInt(attacker.getQuestNAdd(MapleQuest.getInstance(20514)).getCustomData()) + exp;
+                attacker.getQuestNAdd(MapleQuest.getInstance(20514)).setCustomData(mobexp + "");
+                attacker.updateQuest(attacker.getQuestNAdd(MapleQuest.getInstance(20514)), true);
+                exp = (int) (exp * 0.9);
+            }
+            if (attacker.getQuestStatus(23961) == 1 && attacker.getQuestStatus(23980) == 1 && attacker.itemQuantity(4220178) > 0) {
+                final int mobexp = Integer.parseInt(attacker.getQuestNAdd(MapleQuest.getInstance(23980)).getCustomData()) + exp;
+                attacker.getQuestNAdd(MapleQuest.getInstance(23980)).setCustomData(mobexp + "");
+                attacker.updateQuest(attacker.getQuestNAdd(MapleQuest.getInstance(23980)), true);
+                exp = (int) (exp * 0.9);
+            }
+            if (attacker.getQuestStatus(23968) == 1 && attacker.getQuestStatus(23981) == 1 && attacker.itemQuantity(4220179) > 0) {
+                final int mobexp = Integer.parseInt(attacker.getQuestNAdd(MapleQuest.getInstance(23981)).getCustomData()) + exp;
+                attacker.getQuestNAdd(MapleQuest.getInstance(23981)).setCustomData(mobexp + "");
+                attacker.updateQuest(attacker.getQuestNAdd(MapleQuest.getInstance(23981)), true);
+                exp = (int) (exp * 0.9);
+            }
+	    attacker.getTrait(MapleTraitType.charisma).addExp(stats.getCharismaEXP(), attacker);
+            attacker.gainExpMonster(exp, true, highestDamage, pty, Class_Bonus_EXP, Equipment_Bonus_EXP, Premium_Bonus_EXP, stats.isPartyBonus(), stats.getPartyBonusRate());
+        }
+        attacker.mobKilled(getId(), lastskillID);
+    }
+
+
+頁首添加：
+
+import server.quest.MapleQuest;

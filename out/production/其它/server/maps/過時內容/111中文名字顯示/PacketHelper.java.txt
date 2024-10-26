@@ -1,0 +1,33 @@
+搜索：
+
+    public static final void addCharStats(final MaplePacketLittleEndianWriter mplew, final MapleCharacter chr) {
+        //63 B7 00 00 //alphaeta
+        //41 6C 70 68 61 45 74 61 00 00 00 00 00 
+        mplew.writeInt(chr.getId()); // character id
+        mplew.writeAsciiString(chr.getName(), 13);
+        mplew.write(chr.getGender()); // gender (0 = male, 1 = female)
+
+
+
+替換：
+
+
+    public static int getlength(String str){
+        int i,t=0;
+            byte[] bt = str.getBytes();
+            for (i=1;i<=bt.length;i++){
+            if (bt[i-1]<0) {t=t+2;i++;}
+                else t=t+1; 
+            }
+        return t;
+   }
+
+    public static final void addCharStats(final MaplePacketLittleEndianWriter mplew, final MapleCharacter chr) {
+        //63 B7 00 00 //alphaeta
+        //41 6C 70 68 61 45 74 61 00 00 00 00 00 
+        mplew.writeInt(chr.getId()); // character id
+        mplew.writeAsciiString(chr.getName());
+        for (int x = getlength(chr.getName()); x < 13; x++) {
+            mplew.write(0);
+        }
+        mplew.write(chr.getGender()); // gender (0 = male, 1 = female)

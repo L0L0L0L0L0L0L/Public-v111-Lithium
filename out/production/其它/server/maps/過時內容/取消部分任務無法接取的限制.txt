@@ -1,0 +1,39 @@
+搜索：
+
+    public void start(MapleCharacter c, int npc) {
+        if ((autoStart || checkNPCOnMap(c, npc)) && canStart(c, npc)) {//某些任務無法接取的限制
+            for (MapleQuestAction a : startActs) {
+                if (!a.checkEnd(c, null)) { //just in case
+                    return;
+                }
+            }
+            for (MapleQuestAction a : startActs) {
+                a.runStart(c, null);
+            }
+            if (!customend) {
+                forceStart(c, npc, null);
+            } else {
+                NPCScriptManager.getInstance().endQuest(c.getClient(), npc, getId(), true);
+            }
+        }
+    }
+
+替換：
+
+    public void start(MapleCharacter c, int npc) {
+        //if ((autoStart || checkNPCOnMap(c, npc)) && canStart(c, npc)) {//取消部分任務無法接取的限制
+            for (MapleQuestAction a : startActs) {
+                if (!a.checkEnd(c, null)) { //just in case
+                    return;
+                }
+            }
+            for (MapleQuestAction a : startActs) {
+                a.runStart(c, null);
+            }
+            if (!customend) {
+                forceStart(c, npc, null);
+            } else {
+                NPCScriptManager.getInstance().endQuest(c.getClient(), npc, getId(), true);
+            }
+        //}
+    }

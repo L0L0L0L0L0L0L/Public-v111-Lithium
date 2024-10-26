@@ -1,0 +1,19 @@
+搜索：
+
+    public boolean canComplete(MapleCharacter c, Integer npcid) {
+        if (c.getQuest(this).getStatus() != 1) {
+            return false;
+        }
+	if (blocked && !c.isGM()) {
+	    return false;
+	}
+
+替換：
+
+    public boolean canComplete(MapleCharacter c, Integer npcid) {
+        if (c.getQuest(this).getStatus() != 1) {
+            return false;
+        }
+	if (blocked && !c.isGM() && this.id != 23205) {//惡魔任務-除掉警備兵！
+	    return false;
+	}

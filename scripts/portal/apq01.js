@@ -1,0 +1,19 @@
+/*
+	名字:	隱藏地圖
+	地圖:	階段 1 - 魔鏡
+	描述:	670010200
+*/
+
+function enter(pi) {
+	var eim = pi.getPlayer().getEventInstance();
+	if (eim.getProperty("stage0a") == 1) {
+		pi.getPlayer().changeMap(pi.getMap(670010301), pi.getMap(670010301).getPortal(1)); //階段 2 - 心弦(黃昏)
+		return true;
+		}
+	if (eim.getProperty("stage0") < 2) {
+		pi.getPlayer().changeMap(pi.getMap(670010200), pi.getMap(670010200).getPortal(16));
+		return true;
+		}
+		pi.getClient().getSession().write(Packages.tools.packet.MaplePacketCreator.serverNotice(6, "The portal is not opened yet."));
+		return false;
+}

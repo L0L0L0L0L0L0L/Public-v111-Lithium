@@ -1,0 +1,11 @@
+搜索：
+
+        if (skillid == 23111008) { //spirits, hack
+            skillid += Randomizer.nextInt(2);
+        }
+
+替換：
+
+        if (skillid == 23111008) { //spirits, hack
+            skillid += Randomizer.nextInt(3);
+        }

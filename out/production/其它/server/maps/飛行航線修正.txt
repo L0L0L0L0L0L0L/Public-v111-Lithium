@@ -1,0 +1,37 @@
+搜索：
+
+        if (chr.getJob() < 3200 || chr.getJob() > 3212) {
+            chr.cancelEffectFromBuffStat(MapleBuffStat.AURA);
+        }
+
+
+替換：
+
+        if (chr.getJob() < 3200 || chr.getJob() > 3212) {
+            chr.cancelEffectFromBuffStat(MapleBuffStat.AURA);
+        }
+        int inmap[] = {200110000, 200110001, 200110010, 200110011, 200110020, 200110021, 200110030, 200110031, 200110040, 200110041, 200110050, 200110051, 200110060, 200110061, 200110070, 200110071};
+        int tomap[] = {200000111, 104020110, 200000100, 240000110, 200000121, 220000110, 200000151, 260000100, 200000141, 250000100, 200000170, 310000010, 200000161, 130000210, 310000010, 104020130};
+        int Buff = chr.getBuffSource(MapleBuffStat.WDEF);
+        int Time = (Buff == 80001027) ? (3 * 60 * 1000) : (2 * 60 * 1000);//設置不能超過4分鐘
+            for (int i = 0; i < inmap.length; i++)
+            if (chr.getMapId() == inmap[i]) {
+                int y = i;
+
+                chr.getClient().getSession().write(EtcPacket.getClock(Time / 1000));
+
+                Timer.PingTimer.getInstance().schedule(new Runnable() {
+
+            @Override
+            public void run() {
+
+                        final MapleMap to = ChannelServer.getInstance(1).getMapFactory().getMap(tomap[y]);
+                        chr.changeMap(to, to.getPortal(0));
+                        }
+                    }, Time);
+                }
+            }
+
+頁首：
+
+import server.Timer;

@@ -1,0 +1,32 @@
+        handleProfessionTool(chra);
+        int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+        for (Item item : chra.getInventory(MapleInventoryType.CASH).newList()) {
+            if (item.getItemId() / 100000 == 52) {
+                if (expMod < 3 && (item.getItemId() == 5211060 || item.getItemId() == 5211050 || item.getItemId() == 5211051 || item.getItemId() == 5211052 || item.getItemId() == 5211053 || item.getItemId() == 5211054)) {
+                    expMod = 3.0;//overwrite
+                } else if (expMod < 2 && (item.getItemId() == 5210000 || item.getItemId() == 5210001 || item.getItemId() == 5210002 || item.getItemId() == 5210003 || item.getItemId() == 5210004 || item.getItemId() == 5210005 || item.getItemId() == 5211061 || item.getItemId() == 5211000 || item.getItemId() == 5211001 || item.getItemId() == 5211002 || item.getItemId() == 5211003 || item.getItemId() == 5211046 || item.getItemId() == 5211047 || item.getItemId() == 5211048 || item.getItemId() == 5211049)) {
+                    expMod = 2.0;
+                } else if (expMod < 1.5 && (item.getItemId() == 5211077 || item.getItemId() == 5211078 || item.getItemId() == 5211079 || item.getItemId() == 5211068)) {
+                    expMod = 1.5;
+                } else if (expMod < 1.2 && (item.getItemId() == 5211071 || item.getItemId() == 5211072 || item.getItemId() == 5211073 || item.getItemId() == 5211074 || item.getItemId() == 5211075 || item.getItemId() == 5211076 || item.getItemId() == 5211067)) {
+                    expMod = 1.2;
+                }
+            } else if (dropMod == 1 && item.getItemId() / 10000 == 536) {
+                if (item.getItemId() == 5360000 || item.getItemId() == 5360009 || item.getItemId() == 5360010 || item.getItemId() == 5360011 || item.getItemId() == 5360012 || item.getItemId() == 5360013 || item.getItemId() == 5360014 || item.getItemId() == 5360017 || item.getItemId() == 5360050 || item.getItemId() == 5360053 || item.getItemId() == 5360042 || item.getItemId() == 5360052) {
+                    dropMod = 2;
+                }
+            } else if (item.getItemId() == 5650000) {
+                hasPartyBonus = true;
+            } else if (item.getItemId() == 5590001) {
+                levelBonus = 10;
+            } else if (levelBonus == 0 && item.getItemId() == 5590000) {
+                levelBonus = 5;
+            } else if (item.getItemId() == 5710000) {
+                questBonus = 2;
+            } else if (item.getItemId() == 5340000) {
+                canFish = true;
+            } else if (item.getItemId() == 5340001) {
+                canFish = true;
+                canFishVIP = true;
+            }
+        }

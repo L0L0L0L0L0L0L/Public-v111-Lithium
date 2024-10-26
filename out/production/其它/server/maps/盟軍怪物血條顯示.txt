@@ -1,0 +1,23 @@
+搜索：
+
+                if (sponge.get() == null && hp > 0) {
+                    switch (stats.getHPDisplayType()) {
+                        case 0:
+                            map.broadcastMessage(MobPacket.showBossHP(this), this.getTruePosition());
+                            break;
+                        case 1:
+                            map.broadcastMessage(from, MobPacket.damageFriendlyMob(this, damage, true), false);
+                            break;
+                        case 2:
+
+替換：
+
+                if (sponge.get() == null && hp > 0) {
+                    switch (stats.getHPDisplayType()) {
+                        case 0:
+                            map.broadcastMessage(MobPacket.showBossHP(this), this.getTruePosition());
+                            break;
+                        case 1:
+                            map.broadcastMessage(MobPacket.damageFriendlyMob(this, damage, true));//顯示怪物扣血與剩餘血量
+                            break;
+                        case 2:

@@ -1,0 +1,53 @@
+搜索：
+
+pvpExp, wdef, mdef, trueMastery;
+
+替換：
+
+
+pvpExp, wdef, mdef, trueMastery, incMaxDF;
+
+
+搜索：
+
+        mpconReduce = 0;
+        mpconPercent = 100;
+
+替換：
+
+        mpconReduce = 0;
+        mpconPercent = 100;
+        incMaxDF = 0;
+
+
+搜索：
+
+            if (equip.getItemId() / 10000 == 166 && equip.getAndroid() != null && chra.getAndroid() == null) {
+                chra.setAndroid(equip.getAndroid());
+            }
+
+替換：
+
+            if (equip.getItemId() / 10000 == 166 && equip.getAndroid() != null && chra.getAndroid() == null) {
+                chra.setAndroid(equip.getAndroid());
+            }
+            //恶魔杀手的盾牌加的Mp单独计算
+            if (equip.getItemId() / 1000 == 1099) {
+                incMaxDF += equip.getMp();
+            }
+
+搜索：
+
+
+        chra.changeSkillLevel_Skip(sData, false);
+        if (GameConstants.isDemon(chra.getJob())) {
+            localmaxmp = GameConstants.getMPByJob(chra.getJob());
+        }
+
+替換：
+
+        chra.changeSkillLevel_Skip(sData, false);
+        if (GameConstants.isDemon(chra.getJob())) {
+            localmaxmp = GameConstants.getMPByJob(chra.getJob());
+            localmaxmp += incMaxDF;
+        }

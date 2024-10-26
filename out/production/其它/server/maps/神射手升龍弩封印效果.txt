@@ -1,0 +1,18 @@
+搜索：
+
+                case 2211004: // il seal
+                case 2111004: // fp seal
+                case 12111002: // cygnus seal               
+                case 90001005:
+                    ret.monsterStatus.put(MonsterStatus.SEAL, 1);
+                    break;
+
+替換：
+
+                case 2211004: // il seal
+                case 2111004: // fp seal
+                case 12111002: // cygnus seal
+                case 3211004: //神射手-升龍弩
+                case 90001005:
+                    ret.monsterStatus.put(MonsterStatus.SEAL, 1);
+                    break;

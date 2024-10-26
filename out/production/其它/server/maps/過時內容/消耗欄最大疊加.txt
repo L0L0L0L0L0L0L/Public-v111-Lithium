@@ -1,0 +1,7 @@
+    public final short getSlotMax(final int itemId) {
+        final ItemInformation i = getItemInformation(itemId);
+        if (i == null) {
+            return 0;
+        }
+        return (short) 9999;
+    }

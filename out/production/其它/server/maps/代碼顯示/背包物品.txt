@@ -1,0 +1,28 @@
+搜索：
+
+            if ((olddstQ + oldsrcQ) > slotMax) {
+                c.getSession().write(InventoryPacket.moveAndMergeWithRestInventoryItem(type, src, dst, (short) ((olddstQ + oldsrcQ) - slotMax), slotMax, bag, switchSrcDst, bothBag));
+            } else {
+                c.getSession().write(InventoryPacket.moveAndMergeInventoryItem(type, src, dst, ((Item) c.getPlayer().getInventory(type).getItem(dst)).getQuantity(), bag, switchSrcDst, bothBag));
+            }
+        } else {
+            c.getSession().write(InventoryPacket.moveInventoryItem(type, switchSrcDst ? dst : src, switchSrcDst ? src : dst, eqIndicator, bag, bothBag));
+        }
+    }
+
+
+替換：
+
+
+            if ((olddstQ + oldsrcQ) > slotMax) {
+                c.getSession().write(InventoryPacket.moveAndMergeWithRestInventoryItem(type, src, dst, (short) ((olddstQ + oldsrcQ) - slotMax), slotMax, bag, switchSrcDst, bothBag));
+            } else {
+                c.getSession().write(InventoryPacket.moveAndMergeInventoryItem(type, src, dst, ((Item) c.getPlayer().getInventory(type).getItem(dst)).getQuantity(), bag, switchSrcDst, bothBag));
+            }
+        } else {
+            if (c.getPlayer().isGM()) {
+                c.getPlayer().dropMessage(6, "[系統提示]背包物品ID " + source.getItemId());
+            }
+            c.getSession().write(InventoryPacket.moveInventoryItem(type, switchSrcDst ? dst : src, switchSrcDst ? src : dst, eqIndicator, bag, bothBag));
+        }
+    }
