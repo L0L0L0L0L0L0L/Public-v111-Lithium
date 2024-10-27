@@ -49,8 +49,8 @@ public class ServerConstants {
     
     public static String event = "";
     
-    public static String ip = "25.52.1.26";
-    public static String host = "25.52.1.26";
+    public static String ip = "127.0.0.1";
+    public static String host = "127.0.0.1";
     public static int channelcount = 2;
 
     public static String TIMEZONE; //時區設定
