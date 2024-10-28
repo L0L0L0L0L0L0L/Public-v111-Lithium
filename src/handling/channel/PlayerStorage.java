@@ -76,7 +76,7 @@ public class PlayerStorage {
             rL.unlock();
         }
     }
-    
+
     public final void registerPlayer(final MapleCharacter chr) {
         wL.lock();
         try {

@@ -331,7 +331,7 @@ public static class Expedition extends CommandExecute {
             setStat(c.getPlayer(), getStat(c.getPlayer()) + change);
             c.getPlayer().setRemainingAp((short) (c.getPlayer().getRemainingAp() - change));
             c.getPlayer().updateSingleStat(MapleStat.AVAILABLEAP, c.getPlayer().getRemainingAp());
-            c.getPlayer().dropMessage(5, StringUtil.makeEnumHumanReadable(stat.name()) + "to" + change + "It went up that much.");
+            c.getPlayer().dropMessage(5, StringUtil.makeEnumHumanReadable(stat.name()).toUpperCase() + " went up by " + change);
             return 1;
         }
     }
