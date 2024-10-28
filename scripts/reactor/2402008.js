@@ -5,8 +5,7 @@
 */
 
 function act() {
-	rm.dropItems();
+    rm.dropSingleItem(4032512); // Drops "Primary Clue of the Case"
 }
-
 
 //4032512		案件的蛛絲馬跡
