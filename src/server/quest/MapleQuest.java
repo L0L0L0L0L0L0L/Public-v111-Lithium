@@ -71,12 +71,9 @@ public class MapleQuest implements Serializable {
                     ret.customend = true;
                     break;
                 case mob:
-                    req.getDataStore().parallelStream().forEach(mob -> { //If parallel throws problems, just delete the method in the line.
+                    for (Pair<Integer, Integer> mob : req.getDataStore()) {
                         ret.relevantMobs.put(mob.left, mob.right);
-                    });
-                    break;
-                default:
-                    break;
+                    }
             }
             if (rse.getInt("type") == 0) {
                 ret.startReqs.add(req);
