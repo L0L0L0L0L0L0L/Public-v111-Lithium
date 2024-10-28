@@ -62,6 +62,21 @@ public class PlayerStorage {
         }
     }
 
+    public final ArrayList<MapleCharacter> getAllNonGMCharacters() {
+        rL.lock();
+        try {
+            ArrayList<MapleCharacter> nonGMCharacters = new ArrayList<>();
+            for (MapleCharacter chr : idToChar.values()) {
+                if (!chr.isGM()) {
+                    nonGMCharacters.add(chr);
+                }
+            }
+            return nonGMCharacters;
+        } finally {
+            rL.unlock();
+        }
+    }
+    
     public final void registerPlayer(final MapleCharacter chr) {
         wL.lock();
         try {

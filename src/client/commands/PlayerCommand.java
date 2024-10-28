@@ -377,12 +377,19 @@ public static class Expedition extends CommandExecute {
 
     public static class online extends CommandExecute {
 
-
         public int execute(MapleClient c, String[] splitted) {
-            for (ChannelServer ch : ChannelServer.getAllInstances()) {
-                c.getPlayer().dropMessage(6, "channel " + ch.getChannel() + " (" + ch.getPlayerStorage().getAllCharacters().size() + "number of people) : " + ch.getPlayerStorage().getOnlinePlayers(true));
+            if (!c.getPlayer().isGM()) {
+                for (ChannelServer ch : ChannelServer.getAllInstances()) {
+                    c.getPlayer().dropMessage(6, "Channel " + ch.getChannel() + " (" + ch.getPlayerStorage().getAllNonGMCharacters().size() + " players): " + ch.getPlayerStorage().getOnlinePlayers(false));
+                }
+                return 1;
+            } else {
+                for (ChannelServer ch : ChannelServer.getAllInstances()) {
+                    c.getPlayer().dropMessage(6, "Channel " + ch.getChannel() + " (" + ch.getPlayerStorage().getAllCharacters().size() + " players): " + ch.getPlayerStorage().getOnlinePlayers(true));
+                }
+                return 1;
             }
-            return 1;
+
         }
     }
     
