@@ -2102,7 +2102,7 @@ public class InventoryHandler {
                             c.getPlayer().forceReAddItem_NoUpdate(item, MapleInventoryType.EQUIP);
                             MapleInventoryManipulator.addById(c, 2430112, (short) 1, "Cube" + " on " + FileoutputUtil.CurrentReadable_Date());
                             used = true;
-                            Reveal(item, c, false);
+                            Reveal(item, c, false, 0);
                         } else {
                             c.getPlayer().dropMessage(5, "This item's Potential cannot be reset.");
                         }
@@ -2127,6 +2127,7 @@ public class InventoryHandler {
                             c.getPlayer().forceReAddItem_NoUpdate(item, MapleInventoryType.EQUIP);
                             MapleInventoryManipulator.addById(c, 2430112, (short) 1, "Cube" + " on " + FileoutputUtil.CurrentReadable_Date());
                             used = true;
+                            Reveal(item, c, false, 1);
                         } else {
                             c.getPlayer().dropMessage(5, "This item's Potential cannot be reset.");
                         }
@@ -2151,6 +2152,7 @@ public class InventoryHandler {
                             c.getPlayer().forceReAddItem_NoUpdate(item, MapleInventoryType.EQUIP);
                             MapleInventoryManipulator.addById(c, 2430481, (short) 1, "Cube" + " on " + FileoutputUtil.CurrentReadable_Date());
                             used = true;
+                            Reveal(item, c, false, 2);
                         } else {
                             c.getPlayer().dropMessage(5, "This item's Potential cannot be reset.");
                         }
@@ -3829,38 +3831,48 @@ public class InventoryHandler {
         return used;// && itemId != 5041001 && itemId != 5040004;
     }
 
-    public static final void Reveal(Item id, final MapleClient c, boolean bonus) {
+    public static final void Reveal(Item id, final MapleClient c, boolean bonus, int type) {
         final Equip eqq = (Equip) id;
         final MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
         final int reqLevel = ii.getReqLevel(eqq.getItemId()) / 10;
         final List<List<StructItemOption>> pots = new LinkedList<>(ii.getAllPotentialInfo().values());
         int new_state = Math.abs(eqq.getPotential1());
-        if (new_state < 17) { // incase overflow
+
+        if (new_state < 17) {
             new_state = 17;
-        } else if (new_state > 20)
-        {
+        } else if (new_state > 20) {
             new_state = 20;
         }
-        int lines = 2; // default
-        if (eqq.getPotential2() != 0) {
-            lines++;
+
+        int lines = 3;
+
+        if (eqq.getPotential3() == 0) {
+            lines = 2;
+
+            if (type != 0) {
+                if (type == 1 && Math.random() <= 0.1) {
+                    lines = 3;
+                } else if (type == 2 && Math.random() <= 0.25) {
+                    lines = 3;
+                }
+            }
         }
+
         while (eqq.getState() != new_state) {
-            //31001 = haste, 31002 = door, 31003 = se, 31004 = hb, 41005 = combat orders, 41006 = advanced blessing, 41007 = speed infusion
-            for (int i = 0; i < lines; i++) { // minimum 2 lines, max 5
+            for (int i = 0; i < lines; i++) {
                 boolean rewarded = false;
                 while (!rewarded) {
                     StructItemOption pot = pots.get(Randomizer.nextInt(pots.size())).get(reqLevel);
 
-                    if (pot != null && pot.reqLevel / 10 <= reqLevel && GameConstants.optionTypeFits(pot.optionType, eqq.getItemId()) && GameConstants.potentialIDFits(pot.opID, new_state, i)) { //optionType
-                        //have to research optionType before making this truely official-like
-                        if (pot.opID < 60001)
-                        {
+                    if (pot != null && pot.reqLevel / 10 <= reqLevel
+                            && GameConstants.optionTypeFits(pot.optionType, eqq.getItemId())
+                            && GameConstants.potentialIDFits(pot.opID, new_state, i)) {
+                        if (pot.opID < 60001) {
                             if (i == 0) {
                                 eqq.setPotential1(pot.opID);
                             } else if (i == 1) {
                                 eqq.setPotential2(pot.opID);
-                            } else if (i == 2) {
+                            } else if (i == 2 && lines == 3) {
                                 eqq.setPotential3(pot.opID);
                             }
                             rewarded = true;
@@ -3869,8 +3881,8 @@ public class InventoryHandler {
                 }
             }
         }
-        c.getPlayer().getTrait(MapleTrait.MapleTraitType.insight)
-                .addExp(8 , c.getPlayer());
+
+        c.getPlayer().getTrait(MapleTrait.MapleTraitType.insight).addExp(8, c.getPlayer());
         c.getPlayer().getMap().broadcastMessage(EtcPacket.showMagnifyingEffect(c.getPlayer().getId(), eqq.getPosition()));
         c.getPlayer().forceReAddItem(id, MapleInventoryType.EQUIP);
         c.getSession().write(MaplePacketCreator.enableActions());

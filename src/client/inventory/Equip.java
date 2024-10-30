@@ -453,52 +453,65 @@ public class Equip extends Item implements Serializable {
     }
 
     public void renewPotential(int type) {
-        final int rand = getState() == 17 ? 3 : getState() == 18 ? 2 : getState() == 19 ? 1 : 1;
+        final int rand = getState() == 17 ? 3 : getState() == 18 ? 2 : 1;
         int rank = 0;
+
         if (type == 0 || type == 1 || type == 3) {
             switch (getState()) {
-                case 17:
-                    if (Math.ceil(Math.random() * 100.0D) <= 5 && getState() != (type == 3 ? 20 : 19)) {
-                        rank = -(getState() + 1);
+                case 17: // Epic
+                    if (Math.ceil(Math.random() * 100.0) <= 5 && getState() != 19) { // 5% for epic
+                        // For types 0 and 1, limit increase to rank 19 (Unique)
+                        if (type == 3 || getState() + 1 < 19) {
+                            rank = -(getState() + 1);
+                        } else {
+                            rank = -19;
+                        }
                     } else {
                         rank = -(getState());
                     }
                     break;
-                case 18:
-                    if (Math.ceil(Math.random() * 100.0D) <= 3 && getState() != (type == 3 ? 20 : 19)) {
-                        rank = -(getState() + 1);
+                case 18: // Unique
+                    if (Math.ceil(Math.random() * 100.0) <= 3 && getState() != 20) { // 3% for unique
+                        // For type 3 only, allow increase to rank 20 (Legendary)
+                        if (type == 3) {
+                            rank = -(getState() + 1);
+                        } else {
+                            rank = -19;
+                        }
                     } else {
                         rank = -(getState());
                     }
                     break;
-                case 19:
-                    if (Math.ceil(Math.random() * 100.0D) <= 1 && getState() != (type == 3 ? 20 : 19)) {
-                        rank = -(getState() + 1);
+                case 19: // Unique, capped for types 0 and 1
+                    if (Math.ceil(Math.random() * 100.0) <= 2 && type == 3) { // 2% for legendary (super cube only)
+                        rank = -20; // Type 3 can advance to Legendary
                     } else {
-                        rank = -(getState());
+                        rank = -19; // Type 0 and 1 capped at 19
                     }
                     break;
                 case 20:
-                    rank = -(getState());
+                    rank = -20;
                     break;
                 default:
                     rank = -(getState());
                     break;
             }
         } else {
+            // type 2 and type 4: set directly to fixed ranks 18 and 20 (some potential scrolls use these types)
             if (type == 2) {
-                rank = -18;
+                rank = -18; // Unique rank for type 2
             } else if (type == 4) {
-                rank = -20;
+                rank = -20; // Legendary rank for type 4
             } else {
                 rank = -(getState());
             }
         }
-        //final int rand = getState() == 17 ? 3 : getState() == 18 ? 2 : getState() == 19 ? 1 : 1;
-        //final int rank = type == 2 ? -18 : type == 4 ? -20 : (Randomizer.isSuccess(rand) && getState() != (type == 3 ? 20 : 19) ? -(getState() + 1) : -(getState())); // 4 % chance to up 1 tier
+
         setPotential1(rank);
-        setPotential2((getPotential3() > 0 || (type == 1 || type == 3) ? rank : 0));
-        setPotential3(0);
+        setPotential2(rank);
+        if (getPotential3() != 0) {
+            setPotential3(rank);
+        }
     }
 
     public int getIncSkill() {

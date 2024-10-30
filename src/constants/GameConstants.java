@@ -39,6 +39,7 @@ import java.util.Map;
 import server.MapleItemInformationProvider;
 import server.MapleStatEffect;
 import server.Randomizer;
+import server.StructItemOption;
 import server.maps.MapleMapObjectType;
 import tools.FileoutputUtil;
 import tools.packet.EtcPacket;
@@ -3247,6 +3248,8 @@ public static double maxViewRangeSq() {
         }
     }
 
+
+
     public static boolean optionTypeFits(final int optionType, final int itemId) {
         switch (optionType) {
             case 10: // weapons
@@ -4744,5 +4747,53 @@ public static double maxViewRangeSq() {
         if (nEquip.getPotential3() != 0) {
             nEquip.setPotential3(LegendlyP3);
         }
+    }
+
+    public static String resolvePotentialID(final int itemID, final int potID){
+        final MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+        int eqLevel = ii.getReqLevel(itemID); //TODO: Check for invalid itemID
+        int potLevel;
+        final List<StructItemOption> potInfo = MapleItemInformationProvider.getInstance().getPotentialInfo(potID);
+        //gets the "real potential level"
+        if(eqLevel == 0){
+            potLevel = 1;
+        } else {
+            potLevel = (eqLevel+1)/10;
+            potLevel++;
+        }
+
+        if(potID == 0){
+            return "No potential";
+        } else if (potID < 0){
+            return "Hidden potential";
+        }
+        StructItemOption st = potInfo.get(potLevel-1);
+
+        String sb = st.opString;
+        for(int i=0;i<st.opString.length();i++){
+            //# denotes the beginning of the parameter name that needs to be replaced, e.g. "Weapon DEF: +#incPDD"
+            if(st.opString.charAt(i) == '#'){
+                int j = i + 2;
+                while((j < st.opString.length()) && st.opString.substring(i+1, j).matches("^[a-zA-Z]+$")){
+                    j++;
+                }
+                String curParam = st.opString.substring(i,j);
+                String curParamStripped;
+                //get rid of any trailing percent signs on the parameter name
+                if(j != st.opString.length() || st.opString.charAt(st.opString.length()-1) == '%'){ //hacky
+                    curParamStripped = curParam.substring(1, curParam.length()-1);
+                } else {
+                    curParamStripped = curParam.substring(1);
+                }
+
+                String paramValue = Integer.toString(st.get(curParamStripped));
+
+                if(curParam.charAt(curParam.length()-1) == '%'){
+                    paramValue = paramValue.concat("%");
+                }
+                sb = sb.replace(curParam, paramValue);
+            }
+        }
+        return sb;
     }
 }
