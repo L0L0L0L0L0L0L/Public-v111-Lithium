@@ -339,6 +339,44 @@ public class SuperGMCommand {
         }
     }
 
+    public static class GiveBPoint extends CommandExecute {
+
+        @Override
+        public int execute(MapleClient c, String[] splitted) {
+            if (splitted.length < 3) {
+                c.getPlayer().dropMessage(6, "Need playername and amount.");
+                return 0;
+            }
+            MapleCharacter chrs = c.getChannelServer().getPlayerStorage().getCharacterByName(splitted[1]);
+            if (chrs == null) {
+                c.getPlayer().dropMessage(6, "Make sure they are in the correct channel");
+            } else {
+                chrs.setBPoints(chrs.getBPoints() + Integer.parseInt(splitted[2]));
+                c.getPlayer().dropMessage(6, splitted[1] + " has " + chrs.getBPoints() + " Boss Points, after giving " + splitted[2] + ".");
+            }
+            return 1;
+        }
+    }
+
+    public static class GivePQP extends CommandExecute {
+
+        @Override
+        public int execute(MapleClient c, String[] splitted) {
+            if (splitted.length < 3) {
+                c.getPlayer().dropMessage(6, "Need playername and amount.");
+                return 0;
+            }
+            MapleCharacter chrs = c.getChannelServer().getPlayerStorage().getCharacterByName(splitted[1]);
+            if (chrs == null) {
+                c.getPlayer().dropMessage(6, "Make sure they are in the correct channel");
+            } else {
+                chrs.setPQPoints(chrs.getPQPoints() + Integer.parseInt(splitted[2]));
+                c.getPlayer().dropMessage(6, splitted[1] + " has " + chrs.getPQPoints() + " PQ Points, after giving " + splitted[2] + ".");
+            }
+            return 1;
+        }
+    }
+
     public static class GiveVPoint extends CommandExecute {
 
         @Override
@@ -357,6 +395,7 @@ public class SuperGMCommand {
             return 1;
         }
     }
+
     public static class Monitor extends CommandExecute {
 
         @Override
@@ -1142,6 +1181,32 @@ public class SuperGMCommand {
                 return 0;
             }
             c.getPlayer().setPoints(c.getPlayer().getPoints() + Integer.parseInt(splitted[1]));
+            return 1;
+        }
+    }
+
+    public static class GainPQP extends CommandExecute {
+
+        @Override
+        public int execute(MapleClient c, String[] splitted) {
+            if (splitted.length < 2) {
+                c.getPlayer().dropMessage(5, "Need amount.");
+                return 0;
+            }
+            c.getPlayer().setPQPoints(c.getPlayer().getPQPoints() + Integer.parseInt(splitted[1]));
+            return 1;
+        }
+    }
+
+    public static class GainBP extends CommandExecute {
+
+        @Override
+        public int execute(MapleClient c, String[] splitted) {
+            if (splitted.length < 2) {
+                c.getPlayer().dropMessage(5, "Need amount.");
+                return 0;
+            }
+            c.getPlayer().setBPoints(c.getPlayer().getBPoints() + Integer.parseInt(splitted[1]));
             return 1;
         }
     }

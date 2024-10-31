@@ -497,6 +497,35 @@ public class GMCommand {
             }
         }
 
+    public static class GiveAllEventPoints extends CommandExecute {
+
+        @Override
+        public int execute(MapleClient c, String[] splitted) {
+            try {
+                final MapleMap from = c.getPlayer().getMap();
+                for (MapleCharacter person : from.getCharactersThreadsafe()) {
+                    if (person.getGMLevel() < 4) {
+                        person.gainEventPoints(1);
+                        if (person.getLastVote() >= 4) {
+                            person.setEventAch(c.getPlayer().getEventAch() + 1);
+                            person.dropMessage(6, "[Daily] You have gained an Event Participation Achievement.");
+                        } else {
+                            person.dropMessage(5, "[Daily] You must vote 4 times first to get the achievement.");
+                        }
+                        person.dropMessage(6, "You have gained 1 Event Participation Point for being part of the Event!");
+                        person.dropMessage(6, "Type @eventpoints to redeem your points!");
+                    } else {
+                        person.dropMessage(6, "Everyone has gotten an Event Point.");
+                    }
+                }
+            } catch (Exception e) {
+                c.getPlayer().dropMessage(5, "Error: " + e.getMessage());
+                return 0; //assume drunk GM
+            }
+            return 1;
+        }
+    }
+
         public static class RemoveNPCs extends CommandExecute {
 
             @Override
@@ -505,6 +534,7 @@ public class GMCommand {
                 return 1;
             }
         }
+
 
         public static class Notice extends CommandExecute {
 

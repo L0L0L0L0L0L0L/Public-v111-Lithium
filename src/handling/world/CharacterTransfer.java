@@ -52,7 +52,7 @@ public class CharacterTransfer implements Externalizable {
     public int characterid, accountid, exp, fame, pvpExp, pvpPoints,
             meso, hair, face, demonMarking, mapid, guildid, 
             partyid, messengerid, ACash, MaplePoints,
-            mount_itemid, mount_exp, points, vpoints, marriageId, maxhp, maxmp, hp, mp,
+            mount_itemid, mount_exp, points, vpoints, bpoints, pqpoints, marriageId, maxhp, maxmp, hp, mp,
             familyid, seniorid, junior1, junior2, currentrep, totalrep, battleshipHP, gachexp, guildContribution, totalWins, totalLosses;
     public byte channel, gender, gmLevel, guildrank, alliancerank, clonez,
             fairyExp, buddysize, world, initialSpawnPoint, skinColor, mount_level, mount_Fatigue, subcategory;
@@ -77,7 +77,7 @@ public class CharacterTransfer implements Externalizable {
     public final Map<Integer, SkillEntry> Skills = new LinkedHashMap<Integer, SkillEntry>(); // Skillid instead of Skill.java, as it's huge. Cant be transporting Skill.java and MapleStatEffect.java
     /*Start of Custom Feature*/
     /*All custom shit declare here*/
-    public int reborns, apstorage;
+    public int reborns, apstorage, lastvote, eventach, eventpoints;
     /*End of Custom Feature*/
     public CharacterTransfer() {
         boxed = new ArrayList();
@@ -100,6 +100,7 @@ public class CharacterTransfer implements Externalizable {
         this.ACash = chr.getCSPoints(1);
         this.MaplePoints = chr.getCSPoints(2);
         this.vpoints = chr.getVPoints();
+        this.lastvote = chr.getLastVote();
         this.name = chr.getName();
         this.fame = chr.getFame();
         this.gender = (byte) chr.getGender();
@@ -124,6 +125,8 @@ public class CharacterTransfer implements Externalizable {
         /*Start of Custom Feature*/
         this.reborns = chr.getReborns();
         this.apstorage = chr.getAPS();
+        this.eventach = chr.getEventAch();
+        this.eventpoints = chr.getEventPoints();
         /*End of Custom Feature*/
         this.skinColor = chr.getSkinColor();
         this.job = chr.getJob();
@@ -140,6 +143,8 @@ public class CharacterTransfer implements Externalizable {
         this.alliancerank = (byte) chr.getAllianceRank();
         this.gmLevel = (byte) chr.getGMLevel();
         this.points = chr.getPoints();
+        this.bpoints = chr.getBPoints();
+        this.pqpoints = chr.getPQPoints();
         this.fairyExp = chr.getFairyExp();
         this.clonez = chr.getNumClones();
         this.petStore = chr.getPetStores();
@@ -284,6 +289,9 @@ public class CharacterTransfer implements Externalizable {
         this.gmLevel = in.readByte();
         this.points = in.readInt();
         this.vpoints = in.readInt();
+        this.lastvote = in.readInt();
+        this.bpoints = in.readInt();
+        this.pqpoints = in.readInt();
         if (in.readByte() == 1) {
             this.BlessOfFairy = in.readUTF();
         } else {
@@ -334,6 +342,8 @@ public class CharacterTransfer implements Externalizable {
         this.reborns = in.readInt();
         this.apstorage = in.readInt();
         this.pcdate = in.readLong();
+        this.eventach = in.readInt();
+        this.eventpoints = in.readInt();
         /*End of Custom Feature*/
         
         final int mbooksize = in.readShort();
@@ -506,6 +516,9 @@ public class CharacterTransfer implements Externalizable {
         out.writeByte(this.gmLevel);
         out.writeInt(this.points);
         out.writeInt(this.vpoints);
+        out.writeInt(this.lastvote);
+        out.writeInt(this.bpoints);
+        out.writeInt(this.pqpoints);
         out.writeByte(this.BlessOfFairy == null ? 0 : 1);
         if (this.BlessOfFairy != null) {
             out.writeUTF(this.BlessOfFairy);
@@ -554,6 +567,8 @@ public class CharacterTransfer implements Externalizable {
         out.writeInt(this.reborns);
         out.writeInt(this.apstorage);
         out.writeLong(this.pcdate);
+        out.writeInt(this.eventach);
+        out.writeInt(this.eventpoints);
         /*End of Custom Feature*/
 
         out.writeShort(this.mbook.size());

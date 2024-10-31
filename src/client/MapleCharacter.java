@@ -148,7 +148,7 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
             world, fairyExp, numClones, subcategory;
     private short level, mulung_energy, combo, force, availableCP, fatigue, totalCP, hpApUsed, job, remainingAp, scrolledPosition;
     private int accountid, id, meso, exp, hair, face, demonMarking, mapid, fame, pvpExp, pvpPoints, totalWins, totalLosses,
-            guildid = 0, fallcounter, maplepoints, acash, chair, itemEffect, points, vpoints, teachskill,
+            guildid = 0, fallcounter, maplepoints, acash, chair, itemEffect, points, bpoints, pqpoints, vpoints, lastvote, teachskill,
             rank = 1, rankMove = 0, jobRank = 1, jobRankMove = 0, marriageId, marriageItemId, dotHP,
             currentrep, totalrep, coconutteam, followid, battleshipHP, gachexp, challenge, guildContribution = 0;
     private Point old;
@@ -231,7 +231,7 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
     private static int[] ariantroomslot = new int[1]; // AriantPQ
     /*Start of Custom Feature*/
     /*All custom shit declare here*/
-    private int reborns, apstorage;
+    private int reborns, apstorage, eventpoints, eventach;
     private boolean quickmoved = false;
     private int timeo = 0;
     private MagicWheel wheel;
@@ -399,6 +399,9 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
                 ret.maplepoints = rs.getInt("mPoints");
                 ret.points = rs.getInt("points");
                 ret.vpoints = rs.getInt("vpoints");
+                ret.bpoints = rs.getInt("bpoints");
+                ret.pqpoints = rs.getInt("pqpoints");
+                ret.lastvote = rs.getInt("lastvote");
             }
         } catch (SQLException e) {
             System.err.println("Error getting character default" + e);
@@ -470,6 +473,9 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
         ret.allianceRank = ct.alliancerank;
         ret.points = ct.points;
         ret.vpoints = ct.vpoints;
+        ret.lastvote = ct.lastvote;
+        ret.bpoints = ct.bpoints;
+        ret.pqpoints = ct.pqpoints;
         ret.fairyExp = ct.fairyExp;
         ret.marriageId = ct.marriageId;
         ret.currentrep = ct.currentrep;
@@ -481,6 +487,7 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
         ret.reborns = ct.reborns;
         ret.apstorage = ct.apstorage;
         ret.pcdate = ct.pcdate;
+        ret.eventpoints = ct.eventpoints;
         /*End of Custom Feature*/
         ret.makeMFC(ct.familyid, ct.seniorid, ct.junior1, ct.junior2);
         if (ret.guildid > 0) {
@@ -746,6 +753,7 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
             ret.apstorage = rs.getInt("apstorage");
             ret.plusMeso = rs.getLong("plusMeso");
             ret.chairp = rs.getLong("ChairPoint");
+            ret.eventpoints = rs.getInt("eventpoints");
             /*End of Custom Features*/
             for (MapleTrait t : ret.traits.values()) {
                 t.setExp(rs.getInt(t.getType().name()));
@@ -881,6 +889,9 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
                     ret.maplepoints = rs.getInt("mPoints");
                     ret.points = rs.getInt("points");
                     ret.vpoints = rs.getInt("vpoints");
+                    ret.bpoints = rs.getInt("bpoints");
+                    ret.pqpoints = rs.getInt("pqpoints");
+                    ret.lastvote = rs.getInt("lastvote");
 
                     if (rs.getTimestamp("lastlogon") != null) {
                         final Calendar cal = Calendar.getInstance();
@@ -1412,7 +1423,7 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
             con.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
             con.setAutoCommit(false);
 
-            ps = con.prepareStatement("UPDATE characters SET level = ?, fame = ?, str = ?, dex = ?, luk = ?, `int` = ?, exp = ?, hp = ?, mp = ?, maxhp = ?, maxmp = ?, sp = ?, ap = ?, gm = ?, skincolor = ?, gender = ?, job = ?, hair = ?, face = ?, demonMarking = ?, map = ?, meso = ?, hpApUsed = ?, spawnpoint = ?, party = ?, buddyCapacity = ?, pets = ?, subcategory = ?, marriageId = ?, currentrep = ?, totalrep = ?, gachexp = ?, fatigue = ?, charm = ?, charisma = ?, craft = ?, insight = ?, sense = ?, will = ?, totalwins = ?, totallosses = ?, pvpExp = ?, pvpPoints = ?, reborns = ?, apstorage = ?, name = ?, plusMeso = ?, ChairPoint = ? WHERE id = ?", DatabaseConnection.RETURN_GENERATED_KEYS);
+            ps = con.prepareStatement("UPDATE characters SET level = ?, fame = ?, str = ?, dex = ?, luk = ?, `int` = ?, exp = ?, hp = ?, mp = ?, maxhp = ?, maxmp = ?, sp = ?, ap = ?, gm = ?, skincolor = ?, gender = ?, job = ?, hair = ?, face = ?, demonMarking = ?, map = ?, meso = ?, hpApUsed = ?, spawnpoint = ?, party = ?, buddyCapacity = ?, pets = ?, subcategory = ?, marriageId = ?, currentrep = ?, totalrep = ?, gachexp = ?, fatigue = ?, charm = ?, charisma = ?, craft = ?, insight = ?, sense = ?, will = ?, totalwins = ?, totallosses = ?, pvpExp = ?, pvpPoints = ?, reborns = ?, apstorage = ?, name = ?, plusMeso = ?, ChairPoint = ?, , eventpoints = ?, , eventach = ? WHERE id = ?", DatabaseConnection.RETURN_GENERATED_KEYS);
             ps.setInt(1, level);
             ps.setInt(2, fame);
             ps.setShort(3, stats.getStr());
@@ -1497,7 +1508,9 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
             ps.setString(46, name);
             ps.setLong(47, plusMeso);
             ps.setLong(48, chairp);
-            ps.setInt(49, id);
+            ps.setInt(49, eventpoints);
+            ps.setInt(50, eventach);
+            ps.setInt(51, id);
             if (ps.executeUpdate() < 1) {
                 ps.close();
                 throw new DatabaseException("Character not in database (" + id + ")");
@@ -1725,12 +1738,15 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
                 ps.close();
             }
 
-            ps = con.prepareStatement("UPDATE accounts SET `ACash` = ?, `mPoints` = ?, `points` = ?, `vpoints` = ? WHERE id = ?");
+            ps = con.prepareStatement("UPDATE accounts SET `ACash` = ?, `mPoints` = ?, `points` = ?, `vpoints`, `bpoints` = ?, `pqpoints` = ?, `lastvote` = ? WHERE id = ?");
             ps.setInt(1, acash);
             ps.setInt(2, maplepoints);
             ps.setInt(3, points);
             ps.setInt(4, vpoints);
-            ps.setInt(5, client.getAccID());
+            ps.setInt(5, bpoints);
+            ps.setInt(6, pqpoints);
+            ps.setInt(7, lastvote);
+            ps.setInt(8, client.getAccID());
             ps.executeUpdate();
             ps.close();
 
@@ -8677,6 +8693,51 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
         }
         pendantExp = 0;
     }
+
+    public void setLastVote(int p) {
+        this.lastvote = p;
+    }
+
+    public int getLastVote() {
+        return lastvote;
+    }
+
+    public int getEventPoints() {
+        return eventpoints;
+    }
+
+    public void gainEventPoints(int ep) {
+        eventpoints += ep;
+    }
+
+    public int getEventAch() {
+        return eventach;
+    }
+
+    public void setEventAch(int ach) {
+        eventach = ach;
+    }
+
+    public void gainEventAch(int ach) {
+        eventach += ach;
+    }
+
+    public void setBPoints(int p) {
+        this.bpoints = p;
+    }
+
+    public int getBPoints() {
+        return bpoints;
+    }
+
+    public void setPQPoints(int p) {
+        this.pqpoints = p;
+    }
+
+    public int getPQPoints() {
+        return pqpoints;
+    }
+
     /*End of Custom Feature*/
 
     public boolean isDma() {
@@ -8774,5 +8835,38 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
 
     public void setAutoLoot(boolean check) {
         autoloot = check;
+    }
+
+    public String getAccountName() {
+        return client.getAccountName();
+    }
+
+    public void takeOutVotePoints() {
+        try {
+            Connection con = DatabaseConnection.getConnection();
+            PreparedStatement ps = con.prepareStatement("SELECT name, pendingvp, pendingdaily FROM dc_votes WHERE `name` = ?");
+            ps.setString(1, getAccountName());
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                int amount = rs.getInt("pendingvp");
+                int daily = rs.getInt("pendingdaily");
+                if (amount + daily >= 1) {
+                    setVPoints(getVPoints() + amount);
+                    setLastVote(getLastVote() + amount + daily);
+                    dropMessage(6, "[Vote] You have just recieved " + (amount) + " Vote Points");
+                } else {
+                    dropMessage(6, "[Vote] You have no Vote Points pending.");
+                }
+            }
+            rs.close();
+            ps.close();
+            ps = con.prepareStatement("UPDATE dc_votes SET pendingvp = 0, pendingdaily = 0 WHERE `name` = ?");
+            ps.setString(1, getAccountName());
+            ps.execute();
+            ps.close();
+        } catch (SQLException e) {
+            System.err.println("Unable to retrieve votes" + e);
+            dropMessage(6, "[Vote] YOU HAVE COLLECTED ALL OF YOUR VP.");
+        }
     }
 }
