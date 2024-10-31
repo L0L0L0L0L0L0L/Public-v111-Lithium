@@ -3807,7 +3807,7 @@ public class InventoryHandler {
                 if (!FieldLimitType.VipRock.check(c.getPlayer().getMap().getFieldLimit()) && !FieldLimitType.VipRock.check(target.getFieldLimit()) && !c.getPlayer().isInBlockedMap()) { //Makes sure this map doesn't have a forced return map
                     c.getPlayer().changeMap(target, target.getPortal(0));
                     used = false;
-                    c.getPlayer().getQuestNAdd(MapleQuest.getInstance(GameConstants.TELETIME)).setCustomData(String.valueOf(System.currentTimeMillis() + (5 * 60 * 1000)));
+                    c.getPlayer().getQuestNAdd(MapleQuest.getInstance(GameConstants.TELETIME)).setCustomData(String.valueOf(System.currentTimeMillis() + (1 * 60 * 1000))); // changed from 5 to 1 minute for alpha
                 } else {
                     c.getPlayer().dropMessage(1, "You cannot go to that place.");
                 }

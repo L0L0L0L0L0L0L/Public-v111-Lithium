@@ -377,6 +377,25 @@ public class SuperGMCommand {
         }
     }
 
+    public static class GiveJQP extends CommandExecute {
+
+        @Override
+        public int execute(MapleClient c, String[] splitted) {
+            if (splitted.length < 3) {
+                c.getPlayer().dropMessage(6, "Need playername and amount.");
+                return 0;
+            }
+            MapleCharacter chrs = c.getChannelServer().getPlayerStorage().getCharacterByName(splitted[1]);
+            if (chrs == null) {
+                c.getPlayer().dropMessage(6, "Make sure they are in the correct channel");
+            } else {
+                chrs.setJQpoints(chrs.getJQPoints() + Integer.parseInt(splitted[2]));
+                c.getPlayer().dropMessage(6, splitted[1] + " has " + chrs.getJQPoints() + " JQ Points, after giving " + splitted[2] + ".");
+            }
+            return 1;
+        }
+    }
+
     public static class GiveVPoint extends CommandExecute {
 
         @Override
@@ -1207,6 +1226,19 @@ public class SuperGMCommand {
                 return 0;
             }
             c.getPlayer().setBPoints(c.getPlayer().getBPoints() + Integer.parseInt(splitted[1]));
+            return 1;
+        }
+    }
+
+    public static class GainJQP extends CommandExecute {
+
+        @Override
+        public int execute(MapleClient c, String[] splitted) {
+            if (splitted.length < 2) {
+                c.getPlayer().dropMessage(5, "Need amount.");
+                return 0;
+            }
+            c.getPlayer().setJQpoints(c.getPlayer().getJQPoints() + Integer.parseInt(splitted[1]));
             return 1;
         }
     }

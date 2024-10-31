@@ -19,6 +19,7 @@ import server.maps.FieldLimitType;
 
 import server.maps.MapleMap;
 import server.maps.SavedLocationType;
+import tools.FileoutputUtil;
 import tools.StringUtil;
 import tools.packet.MaplePacketCreator;
 
@@ -35,57 +36,57 @@ public class PlayerCommand {
             NPCScriptManager.getInstance().dispose(c);
             c.getSession().write(MaplePacketCreator.enableActions());
             return 1;
-        }    
+        }
     }
-    
-       public static class transfer extends CommandExecute {
+
+    public static class transfer extends CommandExecute {
 
         public int execute(MapleClient c, String[] splitted) {
             NPCScriptManager.getInstance().start(c, 1012000);
             return 1;
         }
     }
-    
-public static class Expedition extends CommandExecute {
+
+    public static class Expedition extends CommandExecute {
 
         @Override
         public int execute(MapleClient c, String[] splitted) {
             if (c.getPlayer().getMapId() == 280030000 || c.getPlayer().getMapId() == 280030001 || //자쿰맵
-                c.getPlayer().getMapId() == 240060200 || c.getPlayer().getMapId() == 240060201) //혼테일맵
+                    c.getPlayer().getMapId() == 240060200 || c.getPlayer().getMapId() == 240060201) //혼테일맵
             {
-            MapleCharacter victim = c.getChannelServer().getPlayerStorage().getCharacterByName(splitted[1]);
+                MapleCharacter victim = c.getChannelServer().getPlayerStorage().getCharacterByName(splitted[1]);
             /*if (victim.getLevel() < 200) {
                 c.getPlayer().dropMessage(6, "You cannot summon characters below level 200.");
                 return 0;                
             }*/
-            if (victim != null) {
-                if ((c.getPlayer().getGMLevel() < 2 && (victim.isInBlockedMap() || victim.getGMLevel() > 1))) { //GM High level users cannot be summoned
-                    c.getPlayer().dropMessage(6, "Please try again.");
-                    return 0;
+                if (victim != null) {
+                    if ((c.getPlayer().getGMLevel() < 2 && (victim.isInBlockedMap() || victim.getGMLevel() > 1))) { //GM High level users cannot be summoned
+                        c.getPlayer().dropMessage(6, "Please try again.");
+                        return 0;
+                    }
+                    victim.changeMap(c.getPlayer().getMap(), c.getPlayer().getMap().findClosestPortal(c.getPlayer().getTruePosition()));
+                } else {
+                    int ch = World.Find.findChannel(splitted[1]);
+                    if (ch < 0) { //Channel error
+                        c.getPlayer().dropMessage(6, "Please try again.");
+                        return 0;
+                    }
+                    victim = ChannelServer.getInstance(ch).getPlayerStorage().getCharacterByName(splitted[1]);
+                    if (victim == null || (c.getPlayer().getGMLevel() < 2 && (victim.isInBlockedMap() || victim.getGMLevel() > 1))) { //GM High level users cannot be summoned
+                        c.getPlayer().dropMessage(6, "Please try again.");
+                        return 0;
+                    }
+                    c.getPlayer().dropMessage(6, "The user is moving channels.");
+                    victim.dropMessage(6, "Moving channels.");
+                    if (victim.getMapId() != c.getPlayer().getMapId()) {
+                        final MapleMap mapp = victim.getClient().getChannelServer().getMapFactory().getMap(c.getPlayer().getMapId());
+                        victim.changeMap(mapp, mapp.findClosestPortal(c.getPlayer().getTruePosition()));
+                    }
+                    victim.changeChannel(c.getChannel());
+                    c.getPlayer().dropMessage(6, splitted[1] + "Summons a user.");
                 }
-                victim.changeMap(c.getPlayer().getMap(), c.getPlayer().getMap().findClosestPortal(c.getPlayer().getTruePosition()));
             } else {
-                int ch = World.Find.findChannel(splitted[1]);
-                if (ch < 0) { //Channel error
-                    c.getPlayer().dropMessage(6, "Please try again.");
-                    return 0;
-                }
-                victim = ChannelServer.getInstance(ch).getPlayerStorage().getCharacterByName(splitted[1]);
-                if (victim == null || (c.getPlayer().getGMLevel() < 2 && (victim.isInBlockedMap() || victim.getGMLevel() > 1))) { //GM High level users cannot be summoned
-                    c.getPlayer().dropMessage(6, "Please try again.");
-                    return 0;
-                }
-                c.getPlayer().dropMessage(6, "The user is moving channels.");
-                victim.dropMessage(6, "Moving channels.");
-                if (victim.getMapId() != c.getPlayer().getMapId()) {
-                    final MapleMap mapp = victim.getClient().getChannelServer().getMapFactory().getMap(c.getPlayer().getMapId());
-                    victim.changeMap(mapp, mapp.findClosestPortal(c.getPlayer().getTruePosition()));
-                }
-                victim.changeChannel(c.getChannel());
-                c.getPlayer().dropMessage(6, splitted[1] + "Summons a user.");
-            }
-            } else {
-                c.getPlayer().dropMessage(6, "You cannot summon outside of the boss map.");                
+                c.getPlayer().dropMessage(6, "You cannot summon outside of the boss map.");
                 return 0;
             }
             return 1;
@@ -209,6 +210,9 @@ public static class Expedition extends CommandExecute {
             c.getPlayer().dropMessage(5, "@recruit: examples (kpq, hpq, lpq, etc)");
             c.getPlayer().dropMessage(5, "@Expedition Summon: @Expedition Summon Username - You can summon by entering the user name that was logged out in the boss map.");
             c.getPlayer().dropMessage(5, "@str,dex,int,luk: example (@str amount)");
+            c.getPlayer().dropMessage(5, "@check: example (@check player name)");
+            c.getPlayer().dropMessage(5, "@stats: shows you extra stats");
+            c.getPlayer().dropMessage(5, "@burning");
             return 1;
         }
     }
@@ -223,6 +227,9 @@ public static class Expedition extends CommandExecute {
             c.getPlayer().dropMessage(5, "@recruit: examples (kpq, hpq, lpq, etc)");
             c.getPlayer().dropMessage(5, "@Expedition Summon: @Expedition Summon Username - You can summon by entering the user name that was logged out in the boss map.");
             c.getPlayer().dropMessage(5, "@str,dex,int,luk: example (@str amount)");
+            c.getPlayer().dropMessage(5, "@check: shows you extra info)");
+            c.getPlayer().dropMessage(5, "@stats: shows you extra stats");
+            c.getPlayer().dropMessage(5, "@burning: opens burn npc");
             return 1;
         }
     }
@@ -340,13 +347,13 @@ public static class Expedition extends CommandExecute {
 
         protected int npc = -1;
         private static int[] npcs = { //Ish yur job to make sure these are in order and correct ;(
-            9270035,
-            9010017,
-            9000000,
-            9000030,
-            9010000,
-            9000085,
-            9000018};
+                9270035,
+                9010017,
+                9000000,
+                9000030,
+                9010000,
+                9000085,
+                9000018};
 
         @Override
         public int execute(MapleClient c, String[] splitted) {
@@ -392,8 +399,8 @@ public static class Expedition extends CommandExecute {
 
         }
     }
-    
-  public static class Damage extends CommandExecute {
+
+    public static class Damage extends CommandExecute {
 
         public int execute(MapleClient c, String[] splitted) {
             if (!c.getPlayer().isDma()) {
@@ -406,8 +413,8 @@ public static class Expedition extends CommandExecute {
             return 1;
         }
     }
-    
-public static class TopUp extends CommandExecute {
+
+    public static class TopUp extends CommandExecute {
 
         public int execute(MapleClient c, String[] splitted) {
             if (c.getPlayer().getLevel() < 20) {
@@ -430,11 +437,12 @@ public static class TopUp extends CommandExecute {
             return 1;
         }
     }
-              public static class save extends CommandExecute {
+
+    public static class save extends CommandExecute {
         public int execute(MapleClient c, String[] splitted) {
             for (ChannelServer ch : ChannelServer.getAllInstances())
-            for (MapleCharacter chr : ch.getPlayerStorage().getAllCharacters())
-            chr.saveToDB(true, true);
+                for (MapleCharacter chr : ch.getPlayerStorage().getAllCharacters())
+                    chr.saveToDB(true, true);
             World.Guild.save();
             World.Alliance.save();
             World.Family.save();
@@ -506,6 +514,51 @@ public static class TopUp extends CommandExecute {
         }
     }
 
+    public static class Burning extends CommandExecute {
+
+        @Override
+        public int execute(MapleClient c, String[] splitted) {
+            NPCScriptManager.getInstance().start(c, 2082015);
+            return 1;
+        }
+    }
+
+    public static class Check extends CommandExecute {
+
+        @Override
+        public int execute(MapleClient c, String[] splitted) {
+            c.getPlayer().dropMessage(6, "You currently have " + c.getPlayer().getCSPoints(1) + " NX.");
+            c.getPlayer().dropMessage(6, "You currently have " + c.getPlayer().getMeso() + " Mesos.");
+            c.getPlayer().dropMessage(6, "You currently have " + c.getPlayer().getFame() + " Fame.");
+            c.getPlayer().dropMessage(6, "You currently have " + c.getPlayer().getPoints() + " Donor Points.");
+            c.getPlayer().dropMessage(6, "You currently have " + c.getPlayer().getVPoints() + " voting points.");
+            c.getPlayer().dropMessage(6, "You currently have " + c.getPlayer().getPQPoints() + " PQ Points.");
+            c.getPlayer().dropMessage(6, "You currently have " + c.getPlayer().getBPoints() + " Boss Points.");
+            c.getPlayer().dropMessage(6, "You currently have " + c.getPlayer().getEventPoints() + " Event Points.");
+            c.getPlayer().dropMessage(6, "The time is currently " + FileoutputUtil.CurrentReadable_TimeGMT() + " GMT.");
+            c.removeClickedNPC();
+            NPCScriptManager.getInstance().dispose(c);
+            c.getSession().write(MaplePacketCreator.enableActions());
+            return 1;
+        }
+    }
+
+    public static class Stats extends CommandExecute {
+        @Override
+        public int execute(MapleClient c, String[] splitted) {
+            c.getPlayer().dropMessage(6, "Extra stats for character ID " + c.getPlayer().getName() + ":");
+            c.getPlayer().dropMessage(6, "Base HP: " + c.getPlayer().getStat().getMaxHp());
+            c.getPlayer().dropMessage(6, "Base MP: " + c.getPlayer().getStat().getMaxMp());
+            c.getPlayer().dropMessage(6, "Physical Attack Total: " + c.getPlayer().getStat().getTotalWatk());
+            c.getPlayer().dropMessage(6, "Magical Attack Total: " + c.getPlayer().getStat().getTotalMagic());
+            c.getPlayer().dropMessage(6, "Boss Damage Total: " + (int) Math.floor(c.getPlayer().getStat().bossdam_r) + "%");
+            c.getPlayer().dropMessage(6, "Ignore Enemy DEF Total: " + Math.round(c.getPlayer().getStat().ignoreTargetDEF) + "%");
+            // c.getPlayer().dropMessage(6, "EXP/Meso/Drop Rate: " + c.getPlayer().getStat().getExpBuff() + "% / " + c.getPlayer().getStat().getMesoBuff() + "% / " + c.getPlayer().getStat().getDropBuff() + "%");
+            return 1;
+        }
+    }
+
+
     public static class OfferEquip extends OfferCommand {
 
         public OfferEquip() {
@@ -539,5 +592,6 @@ public static class TopUp extends CommandExecute {
         public OfferCash() {
             invType = 5;
         }
+
     }
 }

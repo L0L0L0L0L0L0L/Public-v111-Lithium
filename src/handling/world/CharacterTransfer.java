@@ -52,7 +52,7 @@ public class CharacterTransfer implements Externalizable {
     public int characterid, accountid, exp, fame, pvpExp, pvpPoints,
             meso, hair, face, demonMarking, mapid, guildid, 
             partyid, messengerid, ACash, MaplePoints,
-            mount_itemid, mount_exp, points, vpoints, bpoints, pqpoints, marriageId, maxhp, maxmp, hp, mp,
+            mount_itemid, mount_exp, points, vpoints, bpoints, pqpoints, jqpoints, marriageId, maxhp, maxmp, hp, mp,
             familyid, seniorid, junior1, junior2, currentrep, totalrep, battleshipHP, gachexp, guildContribution, totalWins, totalLosses;
     public byte channel, gender, gmLevel, guildrank, alliancerank, clonez,
             fairyExp, buddysize, world, initialSpawnPoint, skinColor, mount_level, mount_Fatigue, subcategory;
@@ -145,6 +145,7 @@ public class CharacterTransfer implements Externalizable {
         this.points = chr.getPoints();
         this.bpoints = chr.getBPoints();
         this.pqpoints = chr.getPQPoints();
+        this.jqpoints = chr.getJQPoints();
         this.fairyExp = chr.getFairyExp();
         this.clonez = chr.getNumClones();
         this.petStore = chr.getPetStores();
@@ -292,6 +293,7 @@ public class CharacterTransfer implements Externalizable {
         this.lastvote = in.readInt();
         this.bpoints = in.readInt();
         this.pqpoints = in.readInt();
+        this.jqpoints = in.readInt();
         if (in.readByte() == 1) {
             this.BlessOfFairy = in.readUTF();
         } else {
@@ -519,6 +521,7 @@ public class CharacterTransfer implements Externalizable {
         out.writeInt(this.lastvote);
         out.writeInt(this.bpoints);
         out.writeInt(this.pqpoints);
+        out.writeInt(this.jqpoints);
         out.writeByte(this.BlessOfFairy == null ? 0 : 1);
         if (this.BlessOfFairy != null) {
             out.writeUTF(this.BlessOfFairy);

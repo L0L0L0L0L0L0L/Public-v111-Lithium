@@ -148,7 +148,7 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
             world, fairyExp, numClones, subcategory;
     private short level, mulung_energy, combo, force, availableCP, fatigue, totalCP, hpApUsed, job, remainingAp, scrolledPosition;
     private int accountid, id, meso, exp, hair, face, demonMarking, mapid, fame, pvpExp, pvpPoints, totalWins, totalLosses,
-            guildid = 0, fallcounter, maplepoints, acash, chair, itemEffect, points, bpoints, pqpoints, vpoints, lastvote, teachskill,
+            guildid = 0, fallcounter, maplepoints, acash, chair, itemEffect, points, bpoints, pqpoints, jqpoints, vpoints, lastvote, teachskill,
             rank = 1, rankMove = 0, jobRank = 1, jobRankMove = 0, marriageId, marriageItemId, dotHP,
             currentrep, totalrep, coconutteam, followid, battleshipHP, gachexp, challenge, guildContribution = 0;
     private Point old;
@@ -245,6 +245,8 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
     private boolean autoloot;
 
     private int allgainnx = 0;
+    private int burning;
+    private int checkburning;
     /*End of Custom Feature*/
 
     private MapleCharacter(final boolean ChannelServer) {
@@ -401,6 +403,7 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
                 ret.vpoints = rs.getInt("vpoints");
                 ret.bpoints = rs.getInt("bpoints");
                 ret.pqpoints = rs.getInt("pqpoints");
+                ret.jqpoints = rs.getInt("jqpoints");
                 ret.lastvote = rs.getInt("lastvote");
             }
         } catch (SQLException e) {
@@ -476,6 +479,7 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
         ret.lastvote = ct.lastvote;
         ret.bpoints = ct.bpoints;
         ret.pqpoints = ct.pqpoints;
+        ret.jqpoints = ct.jqpoints;
         ret.fairyExp = ct.fairyExp;
         ret.marriageId = ct.marriageId;
         ret.currentrep = ct.currentrep;
@@ -672,6 +676,7 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
     public static void setAriantSlotRoom(int room, int slot) {
         ariantroomslot[room] = slot;
     }
+
     public static MapleCharacter loadCharFromDB(int charid, MapleClient client, boolean channelserver) {
         final MapleCharacter ret = new MapleCharacter(channelserver);
         ret.client = client;
@@ -754,6 +759,7 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
             ret.plusMeso = rs.getLong("plusMeso");
             ret.chairp = rs.getLong("ChairPoint");
             ret.eventpoints = rs.getInt("eventpoints");
+            ret.burning = rs.getInt("burning");
             /*End of Custom Features*/
             for (MapleTrait t : ret.traits.values()) {
                 t.setExp(rs.getInt(t.getType().name()));
@@ -891,6 +897,7 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
                     ret.vpoints = rs.getInt("vpoints");
                     ret.bpoints = rs.getInt("bpoints");
                     ret.pqpoints = rs.getInt("pqpoints");
+                    ret.jqpoints = rs.getInt("jqpoints");
                     ret.lastvote = rs.getInt("lastvote");
 
                     if (rs.getTimestamp("lastlogon") != null) {
@@ -1423,7 +1430,7 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
             con.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
             con.setAutoCommit(false);
 
-            ps = con.prepareStatement("UPDATE characters SET level = ?, fame = ?, str = ?, dex = ?, luk = ?, `int` = ?, exp = ?, hp = ?, mp = ?, maxhp = ?, maxmp = ?, sp = ?, ap = ?, gm = ?, skincolor = ?, gender = ?, job = ?, hair = ?, face = ?, demonMarking = ?, map = ?, meso = ?, hpApUsed = ?, spawnpoint = ?, party = ?, buddyCapacity = ?, pets = ?, subcategory = ?, marriageId = ?, currentrep = ?, totalrep = ?, gachexp = ?, fatigue = ?, charm = ?, charisma = ?, craft = ?, insight = ?, sense = ?, will = ?, totalwins = ?, totallosses = ?, pvpExp = ?, pvpPoints = ?, reborns = ?, apstorage = ?, name = ?, plusMeso = ?, ChairPoint = ?, , eventpoints = ?, , eventach = ? WHERE id = ?", DatabaseConnection.RETURN_GENERATED_KEYS);
+            ps = con.prepareStatement("UPDATE characters SET level = ?, fame = ?, str = ?, dex = ?, luk = ?, `int` = ?, exp = ?, hp = ?, mp = ?, maxhp = ?, maxmp = ?, sp = ?, ap = ?, gm = ?, skincolor = ?, gender = ?, job = ?, hair = ?, face = ?, demonMarking = ?, map = ?, meso = ?, hpApUsed = ?, spawnpoint = ?, party = ?, buddyCapacity = ?, pets = ?, subcategory = ?, marriageId = ?, currentrep = ?, totalrep = ?, gachexp = ?, fatigue = ?, charm = ?, charisma = ?, craft = ?, insight = ?, sense = ?, will = ?, totalwins = ?, totallosses = ?, pvpExp = ?, pvpPoints = ?, reborns = ?, apstorage = ?, name = ?, plusMeso = ?, ChairPoint = ?,  eventpoints = ?, eventach = ?, burning = ? WHERE id = ?", DatabaseConnection.RETURN_GENERATED_KEYS);
             ps.setInt(1, level);
             ps.setInt(2, fame);
             ps.setShort(3, stats.getStr());
@@ -1510,7 +1517,8 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
             ps.setLong(48, chairp);
             ps.setInt(49, eventpoints);
             ps.setInt(50, eventach);
-            ps.setInt(51, id);
+            ps.setInt(51, burning);
+            ps.setInt(52, id);
             if (ps.executeUpdate() < 1) {
                 ps.close();
                 throw new DatabaseException("Character not in database (" + id + ")");
@@ -1738,15 +1746,16 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
                 ps.close();
             }
 
-            ps = con.prepareStatement("UPDATE accounts SET `ACash` = ?, `mPoints` = ?, `points` = ?, `vpoints`, `bpoints` = ?, `pqpoints` = ?, `lastvote` = ? WHERE id = ?");
+            ps = con.prepareStatement("UPDATE accounts SET `ACash` = ?, `mPoints` = ?, `points` = ?, `vpoints` = ?, `bpoints` = ?, `pqpoints` = ?, `jqpoints` = ?, `lastvote` = ? WHERE id = ?");
             ps.setInt(1, acash);
             ps.setInt(2, maplepoints);
             ps.setInt(3, points);
             ps.setInt(4, vpoints);
             ps.setInt(5, bpoints);
             ps.setInt(6, pqpoints);
-            ps.setInt(7, lastvote);
-            ps.setInt(8, client.getAccID());
+            ps.setInt(7, jqpoints);
+            ps.setInt(8, lastvote);
+            ps.setInt(9, client.getAccID());
             ps.executeUpdate();
             ps.close();
 
@@ -3922,27 +3931,26 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
         client.getSession().write(MaplePacketCreator.updatePlayerStats(statup, itemReaction, this));
     }
 
-     public void gainExp(final int total, final boolean show, final boolean inChat, final boolean white) {
+    public void gainExp(final int total, final boolean show, final boolean inChat, final boolean white) {
         try {
             int prevexp = getExp();
             int needed = getNeededExp();
+
             if (total > 0) {
-                stats.checkEquipLevels(this, total); //gms like
+                stats.checkEquipLevels(this, total); // gms like
             }
+
             if ((level >= 240 || (GameConstants.isKOC(job) && level >= 240))) {
                 setExp(0);
-                //if (exp + total > needed) {
-                //    setExp(needed);
-                //} else {
-                //    exp += total;
-                //}
             } else {
                 boolean leveled = false;
                 long tot = exp + total;
+
                 if (tot >= needed) {
                     exp += total;
                     levelUp();
                     leveled = true;
+
                     if ((level >= 240 || (GameConstants.isKOC(job) && level >= 240)) && !isIntern()) {
                         setExp(0);
                     } else {
@@ -3954,12 +3962,19 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
                 } else {
                     exp += total;
                 }
+
+                if (isburning() && !isMaxBurning()) {
+                    levelUp();
+                    levelUp();
+                }
+
                 if (total > 0) {
                     familyRep(prevexp, needed, leveled);
                 }
             }
+
             if (total != 0) {
-                if (exp < 0) { // After adding, and negative
+                if (exp < 0) {
                     if (total > 0) {
                         setExp(needed);
                     } else if (total < 0) {
@@ -3972,10 +3987,9 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
                 }
             }
         } catch (Exception e) {
-            FileoutputUtil.outputFileError(FileoutputUtil.ScriptEx_Log, e); //all jobs throw errors :(
+            FileoutputUtil.outputFileError(FileoutputUtil.ScriptEx_Log, e); // all jobs throw errors :(
         }
     }
-
     public void familyRep(int prevexp, int needed, boolean leveled) {
         if (mfc != null) {
             int onepercent = needed / 100;
@@ -4124,6 +4138,25 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
     public boolean hasGmLevel(int level) {
         return gmLevel >= level;
     }
+
+    // burning stuff
+    public boolean isburning() {
+        return (burning == 1 || burning == 2);
+    }
+
+    public int Hasburning() {
+        return burning;
+    }
+
+    public boolean isMaxBurning() {
+        return level > 120;
+    }
+
+    public void setburning(int level) {
+        this.burning += level;
+    }
+
+    // end of burning
 
     public int getAveragePartyLevel() {
         int averageLevel = 0, size = 0;
@@ -5046,6 +5079,23 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
     @Override
     public void setObjectId(int id) {
         throw new UnsupportedOperationException();
+    }
+
+    // burning Check
+    public int CheckBurning() {
+        try {
+            Connection con = DatabaseConnection.getConnection();
+            PreparedStatement ps = con.prepareStatement("SELECT MAX(burning) as burning FROM characters WHERE accountid = ? AND name != ? AND burning > 0");
+            ps.setInt(1, accountid);
+            ps.setString(2, name);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                this.checkburning = rs.getInt("burning");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return this.checkburning;
     }
 
     public MapleStorage getStorage() {
@@ -8732,6 +8782,20 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
 
     public void setPQPoints(int p) {
         this.pqpoints = p;
+        if (this.pqpoints >= 1) {
+            finishAchievement(1);
+        }
+    }
+
+    public void setJQpoints(int p) {
+        this.jqpoints = p;
+        if (this.jqpoints >= 1) {
+            finishAchievement(1);
+        }
+    }
+
+    public int getJQPoints() {
+        return jqpoints;
     }
 
     public int getPQPoints() {

@@ -71,7 +71,7 @@ public class ChannelServer { // 채널 설정
     private int expRate, mesoRate, dropRate, cashRate = 3, traitRate = 1;
     private short port = 8484;
     private static final short DEFAULT_PORT = 8585;
-    private boolean isBurning = false;
+    private boolean isDoubleXP = false;
     public static int cshopNpc;
     private int channel, running_MerchantID = 0, flags = 0;
     private String serverMessage, ip, serverName;
@@ -209,12 +209,12 @@ public class ChannelServer { // 채널 설정
 
     }
 
-    public boolean isBurning() {
-        return isBurning;
+    public boolean isDoubleXP() {
+        return isDoubleXP;
     }
 
-    public void setBurning(boolean a) {
-        isBurning = a;
+    public void setDoubleXP(boolean a) {
+        isDoubleXP = a;
     }
 
     public final String getServerMessage() {

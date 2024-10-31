@@ -284,14 +284,14 @@ public class AdminCommand {
         }
     }
 
-    public static class ToggleBurning extends CommandExecute {
+    public static class ToggleDouble extends CommandExecute {
 
         @Override
         public int execute(MapleClient c, String[] splitted) {
             boolean isBurning = false;
-            // Check if any channel is burning
+            // Check if any channel is using Double exp event
             for (ChannelServer cs : ChannelServer.getAllInstances()) {
-                if (cs.isBurning()) {
+                if (cs.isDoubleXP()) {
                     isBurning = true;
                     break;
                 }
@@ -300,15 +300,15 @@ public class AdminCommand {
             if (!isBurning) {
                 // Enable Double Exp Event on all channels
                 for (ChannelServer cs : ChannelServer.getAllInstances()) {
-                    cs.setBurning(true);
+                    cs.setDoubleXP(true);
                 }
                 c.getPlayer().dropMessage(1, "Double Exp Event enabled on all channels.");
                 World.Broadcast.broadcastMessage(MaplePacketCreator.serverNotice(6, "Double Exp event is ongoing on all channels."));
                 World.Broadcast.broadcastMessage(MaplePacketCreator.serverNotice(6, "During the event period, you will receive double the experience points."));
             } else {
-                // Disable burning mode on all channels
+                // Disable Double exp Event on all channels
                 for (ChannelServer cs : ChannelServer.getAllInstances()) {
-                    cs.setBurning(false);
+                    cs.setDoubleXP(false);
                 }
                 c.getPlayer().dropMessage(1, "Double Exp Event disabled on all channels.");
                 World.Broadcast.broadcastMessage(MaplePacketCreator.serverNotice(6, "Double Exp event has ended on all channels."));

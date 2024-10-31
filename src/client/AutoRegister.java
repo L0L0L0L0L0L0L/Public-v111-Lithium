@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 public class AutoRegister {
     
     private static int ENABLE_IP_COUNT = 2;
+
     public static int checkAccount(MapleClient account, String name, String password) {
         Connection connect = DatabaseConnection.getConnection();
         PreparedStatement query = null;
