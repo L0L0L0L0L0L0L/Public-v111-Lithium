@@ -418,10 +418,10 @@ public class InternCommand {
             builder.append(" /");
             builder.append(other.getStat().getCurrentMaxHp());
 
-                builder.append(" || MP : ");
-                builder.append(other.getStat().getMp());
-                builder.append(" /");
-                builder.append(other.getStat().getCurrentMaxMp(other.getJob()));
+            builder.append(" || MP : ");
+            builder.append(other.getStat().getMp());
+            builder.append(" /");
+            builder.append(other.getStat().getCurrentMaxMp(other.getJob()));
 
             builder.append(" || BattleshipHP : ");
             builder.append(other.currentBattleshipHP());
@@ -1333,6 +1333,25 @@ public class InternCommand {
                     map.killMonster(mob, c.getPlayer(), false, false, (byte) 1);
                 }
             }
+            return 1;
+        }
+    }
+
+    public static class BuffMap extends CommandExecute {
+
+        @Override
+        public int execute(MapleClient c, String[] params) {
+            MapleCharacter player = c.getPlayer();
+
+            int[] skillIds = {9101001, 9101002, 9101003, 9101008, 1005};
+
+            for (int skillId : skillIds) {
+                Skill skill = SkillFactory.getSkill(skillId);
+                if (skill != null) {
+                    skill.getEffect(skill.getMaxLevel()).applyTo(player);
+                }
+            }
+
             return 1;
         }
     }
