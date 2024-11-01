@@ -38,7 +38,7 @@ function action(mode, type, selection) {
 					cm.sendNextPrevS("#b...Who...?! Is it a ghost???");
 					break;
 				case 2:
-					cm.sendNextPrev("Sorry for scaring you. I am Luton, the knight guarding the castle. I died a long time ago but became a ghost and now wander the castle.");
+					cm.sendNextPrev("Sorry for scaring you. I am Luden, the knight guarding the castle. I died a long time ago but became a ghost and now wander the castle.");
 					break;
 				case 3:
 					cm.sendNextPrev("#bWhy are you still here as a ghost? Is there something you need to guard?");

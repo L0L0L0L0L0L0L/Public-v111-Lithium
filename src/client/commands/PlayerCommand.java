@@ -514,14 +514,14 @@ public class PlayerCommand {
         }
     }
 
-    public static class Burning extends CommandExecute {
-
-        @Override
-        public int execute(MapleClient c, String[] splitted) {
-            NPCScriptManager.getInstance().start(c, 2082015);
-            return 1;
-        }
-    }
+//    public static class Burning extends CommandExecute {
+//
+//        @Override
+//        public int execute(MapleClient c, String[] splitted) {
+//            NPCScriptManager.getInstance().start(c, 2082015);
+//            return 1;
+//        }
+//    }
 
     public static class Check extends CommandExecute {
 
