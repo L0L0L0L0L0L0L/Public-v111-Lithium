@@ -1014,7 +1014,17 @@ public abstract class AbstractPlayerInteraction {
     }
 
     public final boolean dojoAgent_NextMap(final boolean dojo, final boolean fromresting) {
-        return Event_DojoAgent.warpNextMap(c.getPlayer(), fromresting, c.getPlayer().getMap());
+        if (dojo) {
+            return Event_DojoAgent.warpNextMap(c.getPlayer(), fromresting, c.getPlayer().getMap());
+        }
+        return Event_DojoAgent.warpNextMap_Agent(c.getPlayer(), fromresting);
+    }
+
+    public final boolean dojoAgent_NextMap(final boolean dojo, final boolean fromresting, final int mapid) {
+        if (dojo) {
+            return Event_DojoAgent.warpNextMap(c.getPlayer(), fromresting, getMap(mapid));
+        }
+        return Event_DojoAgent.warpNextMap_Agent(c.getPlayer(), fromresting);
     }
 
     public final int dojo_getPts() {

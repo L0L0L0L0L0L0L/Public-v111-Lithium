@@ -237,7 +237,11 @@ public class MaplePacketCreator {
         }
         return mplew.getPacket();
     }
-    
+
+    public static byte[] Mulung_Pts(int recv, int total) {
+        return showQuestMsg(new StringBuilder().append("You have received ").append(recv).append(" training points, for the accumulated total of ").append(total).append(" training points.").toString());
+    }
+
     //<editor-fold defaultstate="collapsed" desc="InventoryPacket">
     public static class InventoryPacket {
 
@@ -1052,6 +1056,10 @@ public class MaplePacketCreator {
 
             return mplew.getPacket();
         }
+
+         public static byte[] Mulung_Pts(int recv, int total) {
+           return showQuestMsg(new StringBuilder().append("You have received ").append(recv).append(" training points, for the accumulated total of ").append(total).append(" training points.").toString());
+       }
 
         public static byte[] GainEXP_Monster(final int gain, final boolean white, final int partyinc, final int Class_Bonus_EXP, final int Equipment_Bonus_EXP, final int Premium_Bonus_EXP, final int ElfBonus) {
             final MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();

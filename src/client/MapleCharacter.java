@@ -4316,6 +4316,25 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
         return meso + plusMeso;
     }
 
+    // for dojo and other bs
+    public void setCData(int questid, int points) {
+        final MapleQuestStatus record = client.getPlayer().getQuestNAdd(MapleQuest.getInstance(questid));
+
+        if (record.getCustomData() != null) {
+            record.setCustomData(String.valueOf(points + Integer.parseInt(record.getCustomData())));
+        } else {
+            record.setCustomData(String.valueOf(points)); // First time
+        }
+    }
+
+    public int getCData(MapleCharacter sai, int questid) {
+        final MapleQuestStatus record = sai.getQuestNAdd(MapleQuest.getInstance(questid));
+        if (record.getCustomData() != null) {
+            return Integer.parseInt(record.getCustomData());
+        }
+        return 0;
+    }
+
     public final int[] getSavedLocations() {
         return savedLocations;
     }

@@ -20,7 +20,8 @@
  */
 package scripting;
 
-import client.Battler;
+import client.*;
+
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Connection;
@@ -31,18 +32,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import client.inventory.Equip;
-import client.Skill;
 import client.inventory.Item;
-import client.MapleCharacter;
-import client.MapleCharacterUtil;
 import constants.GameConstants;
 import client.inventory.ItemFlag;
-import client.MapleClient;
 import client.inventory.MapleInventory;
 import client.inventory.MapleInventoryType;
-import client.SkillFactory;
-import client.SkillEntry;
-import client.MapleStat;
 import constants.BattleConstants;
 import constants.BattleConstants.MobExp;
 import constants.BattleConstants.PokedexEntry;
@@ -2675,6 +2669,16 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
     }
 
     /*Start of Custom Features*/
+
+    // for dojo and other bs
+    public int getCData(MapleCharacter sai, int questid) {
+        final MapleQuestStatus record = sai.getQuestNAdd(MapleQuest.getInstance(questid));
+        if (record.getCustomData() != null) {
+            return Integer.parseInt(record.getCustomData());
+        }
+        return 0;
+    }
+
     public void gainAPS(int gain) {
         getPlayer().gainAPS(gain);
     }

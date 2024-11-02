@@ -97,10 +97,12 @@ public class Event_DojoAgent {
     // 925022400 ~ 925022409
     // 925023000 ~ 925023009
     // 925023600 ~ 925023609
+
     public static boolean warpNextMap(final MapleCharacter c, final boolean fromResting, final MapleMap currentmap) {
         try {
             final int temp = (currentmap.getId() - 925000000) / 100;
             final int thisStage = (int) (temp - ((temp / 100) * 100));
+            final int points = getDojoPoints(thisStage);
             final ChannelServer ch = c.getClient().getChannelServer();
             final MapleMap deadMap = ch.getMapFactory().getMap(925020002);
             if (!c.isAlive()) { //shouldn't happen
@@ -110,38 +112,149 @@ public class Event_DojoAgent {
             final MapleMap map = ch.getMapFactory().getMap(currentmap.getId() + 100);
             if (!fromResting && map != null) {
                 clearMap(currentmap, true);
+                if (c.getParty() != null && c.getParty().getMembers().size() > 1) {
+                    for (MaplePartyCharacter mem : c.getParty().getMembers()) {
+                        MapleCharacter chr = currentmap.getCharacterById(mem.getId());
+                        if (chr != null) {
+                            final int point = (points * 3);
+                            c.getTrait(MapleTraitType.will).addExp(points, c);
+                            chr.modifyCSPoints(1, point * 4, true);
+                            final int dojo = chr.getIntRecord(GameConstants.DOJO) + point;
+                            chr.getQuestNAdd(MapleQuest.getInstance(GameConstants.DOJO)).setCustomData(String.valueOf(dojo));
+                            chr.getClient().getSession().write(MaplePacketCreator.Mulung_Pts(point, dojo));
+                        }
+                    }
+                } else {
+                    final int point = (points * 4);
+                    c.getTrait(MapleTraitType.will).addExp(points, c);
+                    c.modifyCSPoints(1, point * 4, true);
+                    final int dojo = c.getIntRecord(GameConstants.DOJO) + point;
+                    c.getQuestNAdd(MapleQuest.getInstance(GameConstants.DOJO)).setCustomData(String.valueOf(dojo));
+                    c.getClient().getSession().write(MaplePacketCreator.Mulung_Pts(point, dojo));
+                }
+
             }
-            if (currentmap.getId() >= 925024700 && currentmap.getId() <= 925024709) {//47樓
+            if (currentmap.getId() >= 925023800 && currentmap.getId() <= 925023814) {
                 final MapleMap lastMap = ch.getMapFactory().getMap(925020003);
-                c.changeMap(lastMap, lastMap.getPortal(1));
-                c.modifyCSPoints(1, 5000, true);
+
+                if (c.getParty() != null && c.getParty().getMembers().size() > 1) {
+                    for (MaplePartyCharacter mem : c.getParty().getMembers()) {
+                        MapleCharacter chr = currentmap.getCharacterById(mem.getId());
+                        if (chr != null) {
+                            if (!chr.isAlive()) {
+                                chr.addHP(50);
+                            }
+                            chr.changeMap(lastMap, lastMap.getPortal(1));
+                            final int point = (points * 3);
+                            c.getTrait(MapleTraitType.will).addExp(points, c);
+                            final int dojo = chr.getIntRecord(GameConstants.DOJO) + point;
+                            chr.getQuestNAdd(MapleQuest.getInstance(GameConstants.DOJO)).setCustomData(String.valueOf(dojo));
+                            chr.getClient().getSession().write(MaplePacketCreator.Mulung_Pts(point, dojo));
+                            chr.modifyCSPoints(1, 5000, true);
+                        }
+                    }
+                } else {
+                    c.changeMap(lastMap, lastMap.getPortal(1));
+                    final int point = (points * 4);
+                    c.getTrait(MapleTraitType.will).addExp(points, c);
+                    final int dojo = c.getIntRecord(GameConstants.DOJO) + point;
+                    c.getQuestNAdd(MapleQuest.getInstance(GameConstants.DOJO)).setCustomData(String.valueOf(dojo));
+                    c.getClient().getSession().write(MaplePacketCreator.Mulung_Pts(point, dojo));
+                    c.modifyCSPoints(1, currentmap.getCharactersSize() > 1 ? 5000 : 7500, true);
+                }
                 return true;
             }
+
             //final int nextmapid = 925020000 + ((thisStage + 1) * 100);
             if (map != null && map.getCharactersSize() == 0) {
                 clearMap(map, false);
-                c.changeMap(map, map.getPortal(0));
+                if (c.getParty() != null) {
+                    for (MaplePartyCharacter mem : c.getParty().getMembers()) {
+                        MapleCharacter chr = currentmap.getCharacterById(mem.getId());
+                        if (chr != null) {
+                            if (!chr.isAlive()) {
+                                chr.addHP(50);
+                            }
+                            chr.changeMap(map, map.getPortal(0));
+                        }
+                    }
+                } else {
+                    c.changeMap(map, map.getPortal(0));
+                }
                 spawnMonster(c, map, thisStage + 1);
                 return true;
-            } else if (map != null) { //出現地圖有人的情況
+            } else if (map != null) { //wtf, find a new map
                 int basemap = currentmap.getId() / 100 * 100 + 100;
                 for (int x = 0; x < 10; x++) {
                     MapleMap mapz = ch.getMapFactory().getMap(basemap + x);
                     if (mapz.getCharactersSize() == 0) {
                         clearMap(mapz, false);
-                        c.changeMap(mapz, mapz.getPortal(0));
+                        if (c.getParty() != null) {
+                            for (MaplePartyCharacter mem : c.getParty().getMembers()) {
+                                MapleCharacter chr = currentmap.getCharacterById(mem.getId());
+                                if (chr != null) {
+                                    if (!chr.isAlive()) {
+                                        chr.addHP(50);
+                                    }
+                                    chr.changeMap(mapz, mapz.getPortal(0));
+                                }
+                            }
+                        } else {
+                            c.changeMap(mapz, mapz.getPortal(0));
+                        }
                         spawnMonster(c, mapz, thisStage + 1);
                         return true;
                     }
                 }
             }
             final MapleMap mappz = ch.getMapFactory().getMap(925020001);
-            c.dropMessage(5, "An error has occurred and you shall be brought to the beginning.");
-            c.changeMap(mappz, mappz.getPortal(0));
-
+            if (c.getParty() != null) {
+                for (MaplePartyCharacter mem : c.getParty().getMembers()) {
+                    MapleCharacter chr = currentmap.getCharacterById(mem.getId());
+                    if (chr != null) {
+                        chr.dropMessage(5, "An error has occurred and you shall be brought to the beginning.");
+                        chr.changeMap(mappz, mappz.getPortal(0));
+                    }
+                }
+            } else {
+                c.dropMessage(5, "An error has occurred and you shall be brought to the beginning.");
+                c.changeMap(mappz, mappz.getPortal(0));
+            }
         } catch (Exception rm) {
             rm.printStackTrace();
             FileoutputUtil.outputFileError(FileoutputUtil.PacketEx_Log, rm);
+        }
+
+        return false;
+    }
+
+    public static boolean warpNextMap_Agent(final MapleCharacter c, final boolean fromResting) {
+        final int currentmap = c.getMapId();
+        final int thisStage = (currentmap - baseAgentMapId) / 100;
+
+        MapleMap map = c.getMap();
+        if (map.getSpawnedMonstersOnMap() > 0) {
+            return false;
+        }
+        if (!fromResting) {
+            clearMap(map, true);
+            c.modifyCSPoints(1, 40, true);
+        }
+        final ChannelServer ch = c.getClient().getChannelServer();
+        if (currentmap >= 970032700 && currentmap <= 970032800) {
+            map = ch.getMapFactory().getMap(baseAgentMapId);
+            c.changeMap(map, map.getPortal(0));
+            return true;
+        }
+        final int nextmapid = baseAgentMapId + ((thisStage + 1) * 100);
+        for (int i = nextmapid; i < nextmapid + 7; i++) {
+            map = ch.getMapFactory().getMap(i);
+            if (map.getCharactersSize() == 0) {
+                clearMap(map, false);
+                c.changeMap(map, map.getPortal(0));
+                map.respawn(true);
+                return true;
+            }
         }
         return false;
     }
@@ -153,6 +266,53 @@ public class Event_DojoAgent {
             }
         }
         map.resetFully();
+    }
+
+    private static final int getDojoPoints(final int stage) {
+
+        switch (stage) {
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+            case 5:
+                return 1;
+            case 7:
+            case 8:
+            case 9:
+            case 10:
+            case 11:
+                return 2;
+            case 13:
+            case 14:
+            case 15:
+            case 16:
+            case 17:
+                return 3;
+            case 19:
+            case 20:
+            case 21:
+            case 22:
+            case 23:
+                return 4;
+            case 25:
+            case 26:
+            case 27:
+            case 28:
+            case 29:
+                return 5;
+            case 31:
+            case 32:
+            case 33:
+            case 34:
+            case 35:
+                return 6;
+            case 37:
+            case 38:
+                return 7;
+            default:
+                return 0;
+        }
     }
 
     private static final void spawnMonster(final MapleCharacter c, final MapleMap map, final int stage) {
