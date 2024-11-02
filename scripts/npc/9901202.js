@@ -1,6 +1,8 @@
-importPackage(Packages.tools);
+importPackage(Packages.tools.packet);
 importPackage(Packages.constants);
 importPackage(Packages.handling.channel.handler);
+importPackage(Packages.server)
+importPackage(Packages.handling)
 
 var miracleCube = 5062000;
 var premiumCube = 5062001;
@@ -12,6 +14,10 @@ var selectedItem;
 var itemId = -1;
 var status;
 var selectedCube;
+
+function showFireworkEffect(itemId) {
+    return cm.getPlayer().getMap().broadcastMessage(EtcPacket.showPotentialReset(false, cm.getPlayer().getId(), true, itemId));
+}
 
 function getCubeFragment(cube) {
     const fragments = {
@@ -37,6 +43,24 @@ function getPotentialName(itemId, pot) {
     return GameConstants.resolvePotentialID(itemId, pot);
 }
 
+function getPotentialTier(item) {
+    var state = item.getState();
+
+    var finalString = "";
+
+    if (state == 17) finalString = "#bRare#k";
+    if (state == 18) finalString = "#dEpic#k";
+    if (state == 19) finalString = "#rUnique#k";
+    if (state == 20) finalString = "#gLegendary#k";
+
+    return finalString;
+}
+
+function getItemNameById(itemId) {
+    const itemProvider = Packages.server.MapleItemInformationProvider.getInstance();
+    return itemProvider.getName(itemId);
+}
+
 function start() {
     status = -1;
     action(1, 0, 0);
@@ -51,7 +75,7 @@ function action(mode, type, selection) {
     }
 
     if (status == 0) {
-        cm.sendNext("Hello! I'm here to help you with #rcubing#k. \r\n#L100#I want to Cube!#l");
+        cm.sendNext("Hello! I'm here to help you with #rcubing#k. \r\n#L100#I want to cube!#l");
     } else if (status == 1) {
         selectedOption = selection;
 
@@ -133,6 +157,7 @@ function action(mode, type, selection) {
         }
 
         cube(selectedItem, selectedCube);
+        showFireworkEffect(itemId);
         showPotentials();
     } else if (status == 4) {
           if (mode == 1) { // If "Yes" was selected, loop back to continue cubing
@@ -143,12 +168,9 @@ function action(mode, type, selection) {
               }
               // Continue cubing
               cube(selectedItem, selectedCube);
+              showFireworkEffect(itemId);
               showPotentials();
               status = 3; // Reset status to keep looping at showPotentials
-          } else {
-              // User chose to stop cubing
-              cm.sendOk("Thank you for cubing. Good luck with your potentials!");
-              cm.dispose();
           }
       }
 }
@@ -158,12 +180,13 @@ function action(mode, type, selection) {
 function cube(item, cube) {
     var isValid = true;
     var type = getCubeType(cube)
+
     if (cube == miracleCube) {
         if (item.getState() >= 17 && item.getState() < 20) {
             item.renewPotential(0);
         } else {
             isValid = false;
-            cm.sendSimple("You may not use this cube on an legendary item.")
+            cm.sendSimple("You may not use this cube on a legendary item.")
         }
 
     } else if (cube == premiumCube) {
@@ -171,7 +194,7 @@ function cube(item, cube) {
             item.renewPotential(1);
         } else {
             isValid = false;
-            cm.sendSimple("You may not use this cube on an legendary item.")
+            cm.sendSimple("You may not use this cube on a legendary item.")
         }
 
     } else {
@@ -188,9 +211,13 @@ function cube(item, cube) {
 }
 
 function showPotentials() {
+
     cm.sendNext("Cubing successful! \r\n\r\n" +
-        "1. " + getPotentialName(selectedItem.getItemId(), selectedItem.getPotential1()) + "\r\n" +
-        "2. " + getPotentialName(selectedItem.getItemId(), selectedItem.getPotential2()) + "\r\n" +
-        "3. " + (selectedItem.getPotential3() ? getPotentialName(selectedItem.getItemId(), selectedItem.getPotential3()) : "None") + "\r\n\r\n" +
-        "Do you want to keep going?");
+    "\r\n Your " + getPotentialTier(selectedItem) + " " + getItemNameById(itemId) + " now has the following potentials:\r\n" +
+    "\r\n1. " + getPotentialName(selectedItem.getItemId(), selectedItem.getPotential1()) + "\r\n" +
+    "2. " + getPotentialName(selectedItem.getItemId(), selectedItem.getPotential2()) + "\r\n" +
+    "3. " + (selectedItem.getPotential3() ? getPotentialName(selectedItem.getItemId(), selectedItem.getPotential3()) : "None") + "\r\n\r\n" +
+    "Do you want to keep going?");
+
+    // You have " + cm.getPlayer().getItemQuantity(itemId, false) + " " + getItemNameById(selectedCube) + " left." getItemQuantity is always returning 1 for some reason. Fix later
 }
