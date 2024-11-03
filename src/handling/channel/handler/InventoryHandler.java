@@ -2438,15 +2438,17 @@ public class InventoryHandler {
                     c.getPlayer().dropMessage(1, "You may not use this until level 30.");
                     break;
                 }
-                int teye = (itemId - 5152100) * 100;
-                if (teye >= 0) {
-                    c.getPlayer().setFace(c.getPlayer().getGender() == 0 ? teye + 20000 : teye + 21000);
-                    c.getPlayer().updateSingleStat(MapleStat.FACE, c.getPlayer().getFace());
-                    c.getPlayer().equipChanged();
-                    used = true;
-                } else {
-                    c.getPlayer().dropMessage(1, "An error occurred when using daily contact lenses.");
-                }
+
+                int currentFace = c.getPlayer().getFace();
+                int genderBaseFace = c.getPlayer().getGender() == 0 ? 20000 : 21000;
+                int eyeColorOffset = (itemId - 5152100) * 100;
+
+                int newFace = genderBaseFace + eyeColorOffset + (currentFace % 100);
+
+                c.getPlayer().setFace(newFace);
+                c.getPlayer().updateSingleStat(MapleStat.FACE, c.getPlayer().getFace());
+                c.getPlayer().equipChanged();
+                used = true;
                 break;
             }
             case 5070000: { // Megaphone
