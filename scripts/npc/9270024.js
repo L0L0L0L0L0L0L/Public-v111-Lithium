@@ -30,7 +30,7 @@ function action(mode, type, selection) {
 
 	switch (status) {
 		case 0:
-			var chat = "Welcome to the Central Business District, I’m Kelvin. With our membership card, you can enjoy our professional services!#b";
+			var chat = "Welcome to the Central Business District, I'm Kelvin. With our membership card, you can enjoy our professional services!#b";
 			chat += "\r\n#L1##v5152057##t5152057#";
 			cm.sendSimple(chat);
 			break;
@@ -49,7 +49,7 @@ function action(mode, type, selection) {
 				cm.dispose();
 				return;
 			}
-			cm.sendOk("Sorry, you don’t have the required membership card. We can’t assist you without it.");
+			cm.sendOk("Sorry, you don't have the required membership card. We can't assist you without it.");
 			cm.dispose();
 	}
 }
