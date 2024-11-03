@@ -67,6 +67,7 @@ function start() {
 }
 
 function action(mode, type, selection) {
+
     if (mode == 1) {
         status++;
     } else {
@@ -92,7 +93,7 @@ function action(mode, type, selection) {
                 }
 
                 itemId = it.getItemId();
-                slot.push(i); // Store valid slot index
+                slot.push(i);
                 canCube = true;
                 selStr += "#L" + (slot.length - 1) + "##v" + itemId + "##t" + itemId + "##l\r\n";
             }
@@ -118,6 +119,9 @@ function action(mode, type, selection) {
         var selectedSlot = slot[selection];
         selectedItem = inv.getItem(selectedSlot);
         itemId = selectedItem.getItemId();
+        var miracleCount = cm.getPlayer().getItemQuantity(miracleCube, false);
+        var premiumCount = cm.getPlayer().getItemQuantity(premiumCube, false);
+        var superCount = cm.getPlayer().getItemQuantity(superCube, false);
 
         if (selectedItem == null) {
             cm.sendOk("The selected item could not be found.");
@@ -127,13 +131,13 @@ function action(mode, type, selection) {
 
         var availableCubes = "";
         if (cm.haveItem(miracleCube, 1)) {
-            availableCubes += "#L1##v" + miracleCube + "# Miracle Cube\r\n";
+            availableCubes += "#L1##v" + miracleCube + "# Miracle Cube (" + miracleCount +" left)\r\n";
         }
         if (cm.haveItem(premiumCube, 1)) {
-            availableCubes += "#L2##v" + premiumCube + "# Premium Miracle Cube\r\n";
+            availableCubes += "#L2##v" + premiumCube + "# Premium Miracle Cube (" + premiumCount +" left)\r\n";
         }
         if (cm.haveItem(superCube, 1)) {
-            availableCubes += "#L3##v" + superCube + "# Super Miracle Cube\r\n";
+            availableCubes += "#L3##v" + superCube + "# Super Miracle Cube (" + superCount +" left)\r\n";
         }
 
         if (availableCubes === "") {
@@ -143,7 +147,6 @@ function action(mode, type, selection) {
             cm.sendSimple("Choose the cube you want to use:\r\n\r\n" + availableCubes);
         }
     } else if (status == 3) {
-        // User has selected a cube type
         if (selection == 1 && cm.haveItem(miracleCube, 1)) {
             selectedCube = miracleCube;
         } else if (selection == 2 && cm.haveItem(premiumCube, 1)) {
@@ -157,25 +160,21 @@ function action(mode, type, selection) {
         }
 
         cube(selectedItem, selectedCube);
-        showFireworkEffect(itemId);
         showPotentials();
     } else if (status == 4) {
-          if (mode == 1) { // If "Yes" was selected, loop back to continue cubing
+          if (mode == 1) {
               if (!cm.haveItem(selectedCube, 1)) {
                   cm.sendOk("It looks like you don't have any more of the selected cube.");
                   cm.dispose();
                   return;
               }
-              // Continue cubing
+
               cube(selectedItem, selectedCube);
-              showFireworkEffect(itemId);
               showPotentials();
-              status = 3; // Reset status to keep looping at showPotentials
+              status = 3;
           }
       }
 }
-
-
 
 function cube(item, cube) {
     var isValid = true;
@@ -204,6 +203,7 @@ function cube(item, cube) {
     if (isValid) {
         cm.gainItem(cube, -1);
         cm.gainItem(getCubeFragment(cube), 1);
+        showFireworkEffect(itemId);
         return InventoryHandler.Reveal(item, cm.getClient(), false, type);
     } else {
         cm.dispose();
@@ -211,12 +211,13 @@ function cube(item, cube) {
 }
 
 function showPotentials() {
-
-    cm.sendNext("Cubing successful! \r\n\r\n" +
-    "\r\n Your " + getPotentialTier(selectedItem) + " " + getItemNameById(itemId) + " now has the following potentials:\r\n" +
+    var plural = cm.getPlayer().getItemQuantity(selectedCube, false) > 1 ? "s" : "";
+    cm.sendNext("#eCubing successful!#n \r\n\r\n" +
+    "\r\n Your " + getPotentialTier(selectedItem) + " " + getItemNameById(itemId) + " now has the following potentials:\r\n\r\n" +
     "\r\n1. " + getPotentialName(selectedItem.getItemId(), selectedItem.getPotential1()) + "\r\n" +
     "2. " + getPotentialName(selectedItem.getItemId(), selectedItem.getPotential2()) + "\r\n" +
-    "3. " + (selectedItem.getPotential3() ? getPotentialName(selectedItem.getItemId(), selectedItem.getPotential3()) : "None") + "\r\n\r\n" +
+    "3. " + (selectedItem.getPotential3() ? getPotentialName(selectedItem.getItemId(), selectedItem.getPotential3()) : "None") + "\r\n\r\n\r\n" +
+    "You have #e" + cm.getPlayer().getItemQuantity(selectedCube, false) + "#n " + getItemNameById(selectedCube) + plural + " remaining." + "\r\n" +
     "Do you want to keep going?");
 
     // You have " + cm.getPlayer().getItemQuantity(itemId, false) + " " + getItemNameById(selectedCube) + " left." getItemQuantity is always returning 1 for some reason. Fix later

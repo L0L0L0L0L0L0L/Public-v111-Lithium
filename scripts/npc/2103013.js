@@ -49,10 +49,11 @@ function action(mode, type, selection) {
 				cm.sendYesNo("Are you sure you want to leave #b#m" + cm.getPlayer().getMap().getId() + "##k?");
 			}
 			if (cm.getPlayer().getMap().getId() == 926010000) {
-				var chat = "#e<Party Quest: Knight's Pyramid>#n\r\n\r\nIn the Pharaoh Yeti's tomb, to survive, you must eliminate all the threatening monsters and ultimately uncover the secrets of the treasure. However, taking Knight's treasure easily is not allowed.\r\n\r\n－#eParty Members#n: 2 \r\n－#elevel#n: 40 - 200#b";
-				chat += "\r\n#L0#Enter the Pyramid";
-				chat += "\r\n#L1#Yeti Pharaoh Tomb";
-				chat += "\r\n#L2#Exchange for <Pharaoh Guardian> Medal";
+				var chat = "#eParty Quest: Nett's Pyramid#n\r\n\r\nIn the Pharaoh Yetis tomb, to survive, you must eliminate all the threatening monsters and ultimately uncover the secrets inside. However, taking Nett's treasure will not be easy.\r\n\r\n-#eParty Members#n: 2 \r\n-#elevel#n: 40 - 200#b";
+               chat += "\r\n#L0#Enter the Pyramid";
+               chat += "\r\n#L1#Yeti Pharaoh Tomb";
+               chat += "\r\n#L2#Exchange for Pharaoh Guardian Medal";
+
 				cm.sendSimple(chat);
 			}
 			break;
@@ -97,7 +98,7 @@ function action(mode, type, selection) {
 					return;
 				}
 				if (cm.getPlayer().itemQuantity(1142142) || cm.getPlayer().hasEquipped(1142142)) {
-					cm.sendOk("Oh! Cute adventurer! You already have a <Pharaoh Guardian> Medal.");
+					cm.sendOk("Oh! Cute adventurer! You already have a Pharaoh Guardian Medal.");
 					cm.dispose();
 					return;
 				}
