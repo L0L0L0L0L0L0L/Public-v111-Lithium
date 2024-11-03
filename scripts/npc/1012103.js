@@ -43,7 +43,7 @@ function action(mode, type, selection) {
 
 				for (var i = 0; i < hair.length; i++)
 					hair[i] = hair[i] + parseInt(cm.getPlayer().getHair() % 10); // Get the current hair color
-				cm.sendStyle("With our special machine, you can preview how you’ll look with your new hairstyle. Choose the one you like.", hair);
+				cm.sendStyle("With our special machine, you can preview how you'll look with your new hairstyle. Choose the one you like.", hair);
 			}
 			if (selection > 0) {
 				var color = parseInt(cm.getPlayer().getHair() / 10) * 10;
