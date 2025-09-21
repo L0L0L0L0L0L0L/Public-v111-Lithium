@@ -1,5 +1,6 @@
 package server;
 
+import client.MapleCharacter;
 import client.SkillFactory;
 import client.inventory.MapleInventoryIdentifier;
 import client.commands.SuperGMCommand;
@@ -15,14 +16,15 @@ import handling.login.LoginServer;
 import handling.cashshop.CashShopServer;
 import handling.login.LoginInformationProvider;
 import handling.world.World;
-import java.sql.SQLException;
+
+import java.sql.*;
+
 import database.DatabaseConnection;
 import handling.world.family.MapleFamily;
 import handling.world.guild.MapleGuild;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+
 import java.util.Calendar;
+import java.util.List;
 import java.util.TimeZone;
 import server.Timer.*;
 import server.events.MapleOxQuizFactory;
@@ -35,6 +37,7 @@ import server.quest.MapleQuest;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import tools.HairAndEye;
 
@@ -119,7 +122,8 @@ public class Start {
         System.out.print("Loading [4], please wait.......");
         CashShopServer.run_startup_configurations();
         CheatTimer.getInstance().register(AutobanManager.getInstance(), 60000);
-        Timer.WorldTimer.getInstance().register(new AutoSaver(), 1000 * 60 * 5);
+        System.out.println(YELLOW + "[AutoSaver] Registering optimized AutoSaver..." + RESET);
+        Timer.WorldTimer.getInstance().register(new OptimizedAutoSaver(), 1000 * 60 * 3); // 3 minutes
         World.registerRespawn();
         //ChannelServer.getInstance(1).getMapFactory().getMap(910000000).spawnRandDrop(); //start it off
         ShutdownServer.registerMBean();
@@ -188,19 +192,48 @@ public class Start {
         }       
     }
 
-    public static class AutoSaver implements Runnable {
+    public static class OptimizedAutoSaver implements Runnable {
+        private final AtomicInteger saveCounter = new AtomicInteger(0);
+        private volatile boolean isRunning = false;
+
         @Override
         public void run() {
-            System.out.println("Auto Saving characters" );
+            if (isRunning) {
+                System.out.println(YELLOW + "[AutoSaver] Previous autosave still running, skipping this cycle." + RESET);
+                return;
+            }
+            isRunning = true;
+            try {
+                List<ChannelServer> channels = ChannelServer.getAllInstances();
+                int totalPlayers = channels.stream().mapToInt(ch -> ch.getPlayerStorage().getAllCharacters().size()).sum();
+                System.out.println(YELLOW + "[AutoSaver] Starting staggered autosave for " + totalPlayers + " characters across " + channels.size() + " channels." + RESET);
+                for (int i = 0; i < channels.size(); i++) {
+                    final int channelIndex = i;
+                    final int totalChannels = channels.size();
+                    maintenanceExecutor.schedule(() -> {
+                        try {
+                            ChannelServer ch = ChannelServer.getAllInstances().get(channelIndex);
+                            List<MapleCharacter> characters = ch.getPlayerStorage().getAllCharacters();
 
-            ChannelServer.getAllInstances().parallelStream().forEach((ch) -> {
-                ch.getPlayerStorage().getAllCharacters().parallelStream().forEach((chr) -> {
-                    if (chr != null) {
-                        chr.saveToDB(false, false);
-                    }
-                });
-            });
-
+                            for (MapleCharacter chr : characters) {
+                                SaveThrottler.submit(chr);
+                            }
+                            System.out.println(CYAN + "[AutoSaver] Channel " + (channelIndex + 1) + "/" + totalChannels + " queued for saving (" + characters.size() + " players)" + RESET);
+                            if (channelIndex == totalChannels - 1) {
+                                isRunning = false;
+                            }
+                        } catch (Exception e) {
+                            System.err.println("[AutoSaver] Error processing channel " + channelIndex + ": " + e.getMessage());
+                            if (channelIndex == totalChannels - 1) {
+                                isRunning = false;
+                            }
+                        }
+                    }, i * 10, TimeUnit.SECONDS);
+                }
+            } catch (Exception e) {
+                System.err.println("[AutoSaver] Failed to start autosave: " + e.getMessage());
+                isRunning = false;
+            }
         }
     }
 
