@@ -1,3 +1,3 @@
-Updated Lidium v111 Emulator
+Updated v111 Emulator
 
-Requires - jdk corretto-16.0.2
+Requires - jdk 16.0.2
