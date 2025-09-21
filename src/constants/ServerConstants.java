@@ -99,6 +99,7 @@ public class ServerConstants {
     public static final int PCRoomPercent = 30;
     public static final String Sbname = "";
     public static final String subVersion = "";
+    public static boolean ENABLE_WORLD_CHAT_AS_SPOUSE = true;
     
     public static void loadSetting() {
 

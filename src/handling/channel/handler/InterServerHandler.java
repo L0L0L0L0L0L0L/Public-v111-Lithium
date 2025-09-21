@@ -210,6 +210,30 @@ public class InterServerHandler {
             for (CharacterIdChannelPair onlineBuddy : onlineBuddies) {
                 player.getBuddylist().get(onlineBuddy.getCharacterId()).setChannel(onlineBuddy.getChannel());
             }
+
+            if (ServerConstants.ENABLE_WORLD_CHAT_AS_SPOUSE) {
+                player.setSpoofMarriageForChat(true); // Used server-side
+                player.setMarriageId(999999);
+
+                BuddylistEntry fakeSpouse = new BuddylistEntry(
+                        "WorldChat",
+                        999999,
+                        "WorldChat",
+                        c.getChannel(),
+                        true
+                );
+
+                if (player.getBuddylist().get(999999) == null) {
+                    player.getBuddylist().putSilent(fakeSpouse); // Don't persist to DB
+                }
+
+                BuddylistEntry updated = player.getBuddylist().get(999999);
+                if (updated != null) {
+                    updated.setChannel(c.getChannel()); // Show as online
+                    c.getSession().write(BuddylistPacket.updateBuddyChannel(updated.getCharacterId(), updated.getChannel()));
+                }
+            }
+
             c.getSession().write(BuddylistPacket.updateBuddylist(player.getBuddylist().getBuddies()));
 
             // Start of Messenger

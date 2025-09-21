@@ -99,6 +99,10 @@ public class BuddyListHandler {
 
         if (mode == 1) {
             final String addName = slea.readMapleAsciiString();
+            if (addName.equalsIgnoreCase("WorldChat")) {
+                c.getSession().write(BuddylistPacket.buddylistMessage((byte) 15)); // buddy not found
+                return;
+            }
             final String groupName = slea.readMapleAsciiString();
             final BuddylistEntry ble = buddylist.get(addName);
 
@@ -107,9 +111,9 @@ public class BuddyListHandler {
             }
             if (ble != null && (ble.getGroup().equals(groupName) || !ble.isVisible())) {
                 c.getSession().write(BuddylistPacket.buddylistMessage((byte) 11));
-	    } else if (ble != null && ble.isVisible()) {
-	    	ble.setGroup(groupName);
-		c.getSession().write(BuddylistPacket.updateBuddylist(buddylist.getBuddies(), 10));
+            } else if (ble != null && ble.isVisible()) {
+                ble.setGroup(groupName);
+                c.getSession().write(BuddylistPacket.updateBuddylist(buddylist.getBuddies(), 10));
             } else if (buddylist.isFull()) {
                 c.getSession().write(BuddylistPacket.buddylistMessage((byte) 11));
             } else {
@@ -118,9 +122,9 @@ public class BuddyListHandler {
                     int channel = World.Find.findChannel(addName);
                     MapleCharacter otherChar = null;
                     if (channel > 0) {
-			otherChar = ChannelServer.getInstance(channel).getPlayerStorage().getCharacterByName(addName);
-			if (otherChar == null) {
-			    charWithId = getCharacterIdAndNameFromDatabase(addName, groupName);
+                        otherChar = ChannelServer.getInstance(channel).getPlayerStorage().getCharacterByName(addName);
+                        if (otherChar == null) {
+                            charWithId = getCharacterIdAndNameFromDatabase(addName, groupName);
                         } else if (!otherChar.isIntern() || c.getPlayer().isIntern()) {
                             charWithId = new CharacterIdNameBuddyCapacity(otherChar.getId(), otherChar.getName(), groupName, otherChar.getBuddylist().getCapacity());
                         }
@@ -133,49 +137,49 @@ public class BuddyListHandler {
                         if (channel > 0) {
                             buddyAddResult = World.Buddy.requestBuddyAdd(addName, c.getChannel(), c.getPlayer().getId(), c.getPlayer().getName(), c.getPlayer().getLevel(), c.getPlayer().getJob());
                         } else {
-                        Connection con = null;
-                        PreparedStatement ps = null;
-                        ResultSet rs = null;
-                        try {
-                            con = DatabaseConnection.getConnection();
-                            ps = con.prepareStatement("SELECT COUNT(*) as buddyCount FROM buddies WHERE characterid = ? AND pending = 0");
-                            ps.setInt(1, charWithId.getId());
-                            rs = ps.executeQuery();
+                            Connection con = null;
+                            PreparedStatement ps = null;
+                            ResultSet rs = null;
+                            try {
+                                con = DatabaseConnection.getConnection();
+                                ps = con.prepareStatement("SELECT COUNT(*) as buddyCount FROM buddies WHERE characterid = ? AND pending = 0");
+                                ps.setInt(1, charWithId.getId());
+                                rs = ps.executeQuery();
 
-                            if (!rs.next()) {
-                                throw new RuntimeException("Result set expected");
-                            } else {
-                                int count = rs.getInt("buddyCount");
-                                if (count >= charWithId.getBuddyCapacity()) {
-                                    buddyAddResult = BuddyAddResult.BUDDYLIST_FULL;
+                                if (!rs.next()) {
+                                    throw new RuntimeException("Result set expected");
+                                } else {
+                                    int count = rs.getInt("buddyCount");
+                                    if (count >= charWithId.getBuddyCapacity()) {
+                                        buddyAddResult = BuddyAddResult.BUDDYLIST_FULL;
+                                    }
                                 }
-                            }
 
-                            ps = con.prepareStatement("SELECT pending FROM buddies WHERE characterid = ? AND buddyid = ?");
-                            ps.setInt(1, charWithId.getId());
-                            ps.setInt(2, c.getPlayer().getId());
-                            rs = ps.executeQuery();
-                            if (rs.next()) {
-                                buddyAddResult = BuddyAddResult.ALREADY_ON_LIST;
-                            }
-                        } catch (RuntimeException e) {
-                            throw e;
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        } finally {
-                            if (ps != null) {
-                                try {
-                                    ps.close();
-                                } catch (Exception e) {
+                                ps = con.prepareStatement("SELECT pending FROM buddies WHERE characterid = ? AND buddyid = ?");
+                                ps.setInt(1, charWithId.getId());
+                                ps.setInt(2, c.getPlayer().getId());
+                                rs = ps.executeQuery();
+                                if (rs.next()) {
+                                    buddyAddResult = BuddyAddResult.ALREADY_ON_LIST;
+                                }
+                            } catch (RuntimeException e) {
+                                throw e;
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            } finally {
+                                if (ps != null) {
+                                    try {
+                                        ps.close();
+                                    } catch (Exception e) {
+                                    }
+                                }
+                                if (rs != null) {
+                                    try {
+                                        rs.close();
+                                    } catch (Exception e) {
+                                    }
                                 }
                             }
-                            if (rs != null) {
-                                try {
-                                    rs.close();
-                                } catch (Exception e) {
-                                }
-                            }
-                        }
                         }
                         if (buddyAddResult == BuddyAddResult.BUDDYLIST_FULL) {
                             c.getSession().write(BuddylistPacket.buddylistMessage((byte) 12));
@@ -186,26 +190,26 @@ public class BuddyListHandler {
                                 displayChannel = channel;
                                 notifyRemoteChannel(c, channel, otherCid, groupName, ADDED);
                             } else if (buddyAddResult != BuddyAddResult.ALREADY_ON_LIST) {
-        Connection con = null;
-        PreparedStatement ps = null;
-        try {
-                                con = DatabaseConnection.getConnection();
-                                ps = con.prepareStatement("INSERT INTO buddies (`characterid`, `buddyid`, `groupname`, `pending`) VALUES (?, ?, ?, 1)");
-                                ps.setInt(1, charWithId.getId());
-                                ps.setInt(2, c.getPlayer().getId());
-                                ps.setString(3, groupName);
-                                ps.executeUpdate();
-                                ps.close();
-        } catch (Exception e) {
-            throw e;
-        } finally {
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (Exception e) {
-                }
-            }
-        }
+                                Connection con = null;
+                                PreparedStatement ps = null;
+                                try {
+                                    con = DatabaseConnection.getConnection();
+                                    ps = con.prepareStatement("INSERT INTO buddies (`characterid`, `buddyid`, `groupname`, `pending`) VALUES (?, ?, ?, 1)");
+                                    ps.setInt(1, charWithId.getId());
+                                    ps.setInt(2, c.getPlayer().getId());
+                                    ps.setString(3, groupName);
+                                    ps.executeUpdate();
+                                    ps.close();
+                                } catch (Exception e) {
+                                    throw e;
+                                } finally {
+                                    if (ps != null) {
+                                        try {
+                                            ps.close();
+                                        } catch (Exception e) {
+                                        }
+                                    }
+                                }
                             }
                             buddylist.put(new BuddylistEntry(charWithId.getName(), otherCid, groupName, displayChannel, true));
                             c.getSession().write(BuddylistPacket.updateBuddylist(buddylist.getBuddies(), 10));
@@ -230,13 +234,19 @@ public class BuddyListHandler {
             }
         } else if (mode == 3) { // delete
             final int otherCid = slea.readInt();
-	    final BuddylistEntry blz = buddylist.get(otherCid);
+            final BuddylistEntry blz = buddylist.get(otherCid);
+
+            // Prevent deletion of the fake spouse entry
+            if (otherCid == 999999) {
+                c.getPlayer().dropMessage(5, "You cannot remove the World Chat entry.");
+                return;
+            }
             if (blz != null && blz.isVisible()) {
                 notifyRemoteChannel(c, World.Find.findChannel(otherCid), otherCid, blz.getGroup(), DELETED);
             }
             buddylist.remove(otherCid);
             c.getSession().write(BuddylistPacket.updateBuddylist(buddylist.getBuddies(), 18));
-	}
+        }
     }
 
     private static final void notifyRemoteChannel(final MapleClient c, final int remoteChannel, final int otherCid, final String group, final BuddyOperation operation) {

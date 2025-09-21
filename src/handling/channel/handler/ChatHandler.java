@@ -30,44 +30,87 @@ import handling.world.MapleMessenger;
 import handling.world.MapleMessengerCharacter;
 import handling.world.MaplePartyCharacter;
 import handling.world.World;
+import server.ChatType;
+import server.LogManager;
 import server.Timer;
 import tools.packet.EtcPacket;
 import tools.data.LittleEndianAccessor;
 import tools.packet.MaplePacketCreator;
 import tools.packet.MTSCSPacket;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class ChatHandler {
+    private static final Map<Integer, Long> lastWorldChat = new ConcurrentHashMap<>();
+    private static final Map<Integer, Long> lastWorldWhisper = new ConcurrentHashMap<>();
 
     public static final void GeneralChat(final String text, final byte unk, final MapleClient c, final MapleCharacter chr) {
-        if (text.length() > 0 && chr != null && chr.getMap() != null && !CommandProcessor.processCommand(c, text, chr.getBattle() == null ? CommandType.NORMAL : CommandType.POKEMON)) {
+
+        if (text.startsWith("!") && !chr.isGM()) {
+            return;
+        }
+
+        int unk1 = 0;
+        String replaceFirst = text;
+        if (text.length() > 0 && chr != null && chr.getMap() != null && !CommandProcessor.processCommand(c, text, CommandType.NORMAL)) {
+
             if (!chr.isIntern() && text.length() >= 80) {
                 return;
             }
+
+            // fix for non-ASCII letters crashing shit
+            if (ChatHandler.containsNonAscii(text)) {
+                c.getSession().write(MaplePacketCreator.serverNotice(6, "Your message contains invalid characters."));
+                return;
+            }
+
+            LogManager.logChat(chr, chr.getMapId(), ChatType.ALL, text);
+
             if (chr.getCanTalk() || chr.isStaff()) {
                 //Note: This patch is needed to prevent chat packet from being broadcast to people who might be packet sniffing.
                 if (chr.isHidden()) {
-                    if (chr.isIntern() && !chr.isSuperGM() && unk == 0) {
+                    if ((chr.isIntern() && !chr.isSuperGM())) {
                         chr.getMap().broadcastGMMessage(chr, EtcPacket.getChatText(chr.getId(), text, false, (byte) 1), true);
-                        if (unk == 0) {
-                            chr.getMap().broadcastGMMessage(chr, MaplePacketCreator.serverNotice(2, chr.getName() + " : " + text), true);
-                        }
+                        chr.getMap().broadcastGMMessage(chr, MaplePacketCreator.serverNotice(2, chr.getName() + " : " + text), true);
                     } else {
-                        chr.getMap().broadcastGMMessage(chr, EtcPacket.getChatText(chr.getId(), text, c.getPlayer().isSuperGM(), unk), true);
+                        chr.getMap().broadcastGMMessage(chr, EtcPacket.getChatText(chr.getId(), text, c.getPlayer().isSuperGM(), 0), true);
                     }
                 } else {
                     chr.getCheatTracker().checkMsg();
-                    if (chr.isIntern() && !chr.isSuperGM() && unk == 0) {
+
+                    if ((chr.isIntern() && !chr.isSuperGM())) {
                         chr.getMap().broadcastMessage(EtcPacket.getChatText(chr.getId(), text, false, (byte) 1), c.getPlayer().getTruePosition());
-                        if (unk == 0) {
-                            chr.getMap().broadcastMessage(MaplePacketCreator.serverNotice(2, chr.getName() + " : " + text), c.getPlayer().getTruePosition());
-                        }
+                        chr.getMap().broadcastMessage(MaplePacketCreator.serverNotice(2, chr.getName() + " : " + text), c.getPlayer().getTruePosition());
                     } else {
-                        chr.getMap().broadcastMessage(EtcPacket.getChatText(chr.getId(), text, c.getPlayer().isSuperGM(), unk), c.getPlayer().getTruePosition());
+                        if (chr.getChatType() != -3 && chr.isGM()){
+                            if(text.startsWith("~")){
+                                replaceFirst = text.replaceFirst("~", "");
+                                if(chr.getChatType() == 2) //Apply only to Light blue (where formatting matters)
+                                    chr.customMessage(chr.getChatType(), "[NULL] : " +replaceFirst);
+                                else
+                                    chr.customMessage(chr.getChatType(),replaceFirst);
+                            }else{
+                                chr.customMessage(chr.getChatType(), c.getPlayer().getName() + " : " + text);
+                                chr.getMap().broadcastMessage(EtcPacket.getChatText(chr.getId(), replaceFirst, false, 1), c.getPlayer().getTruePosition());
+                            }
+                        }else if (chr.getChatType() == -3 && chr.isGM()){
+                            if(text.startsWith("~")){
+                                replaceFirst = text.replaceFirst("~", "");
+                                chr.getMap().broadcastMessage(EtcPacket.getChatText(chr.getId(), replaceFirst, false, 1), c.getPlayer().getTruePosition());
+                            } else{
+                                chr.getMap().broadcastMessage(EtcPacket.getChatText(chr.getId(), replaceFirst, false, 0), c.getPlayer().getTruePosition());
+                            }
+                        } else {
+                            chr.getMap().broadcastMessage(EtcPacket.getChatText(chr.getId(), replaceFirst, false, unk1), c.getPlayer().getTruePosition());
+                        }
                     }
                 }
-                //if (text.equalsIgnoreCase(c.getChannelServer().getServerName() + " rocks")) {
-                //    chr.finishAchievement(11);
-                //}
+                if (text.equalsIgnoreCase(c.getChannelServer().getServerName() + " rocks")) {
+                    chr.finishAchievement(11);
+                }
             } else {
                 c.getSession().write(MaplePacketCreator.serverNotice(6, "You have been muted and are therefore unable to talk."));
             }
@@ -87,7 +130,12 @@ public class ChatHandler {
         }
         final String chattext = (slea.readMapleAsciiString());
         if (chr == null || !chr.getCanTalk()) {
-                c.getSession().write(MaplePacketCreator.serverNotice(6, "You have been muted and are therefore unable to talk."));
+            c.getSession().write(MaplePacketCreator.serverNotice(6, "You have been muted and are therefore unable to talk."));
+            return;
+        }
+
+        if (ChatHandler.containsNonAscii(chattext)) {
+            c.getSession().write(MaplePacketCreator.serverNotice(6, "Your message contains invalid characters."));
             return;
         }
 
@@ -109,49 +157,105 @@ public class ChatHandler {
                 case 4:
                     chattype = "Expedition";
                     break;
+                case 5:
+                    chattype = "Spouse";
+                    break;
             }
             World.Broadcast.broadcastGMMessage(
                     MaplePacketCreator.serverNotice(6, "[GM Message] " + MapleCharacterUtil.makeMapleReadable(chr.getName())
-                    + " said (" + chattype + "): " + chattext));
+                            + " said (" + chattype + "): " + chattext));
         }
-        if (chattext.length() <= 0 || CommandProcessor.processCommand(c, chattext, chr.getBattle() == null ? CommandType.NORMAL : CommandType.POKEMON)) {
+        if (chattext.length() <= 0 || CommandProcessor.processCommand(c, chattext, CommandType.NORMAL)) {
             return;
         }
         chr.getCheatTracker().checkMsg();
+
+
         switch (type) {
-            case 0:
-                World.Buddy.buddyChat(recipients, chr.getId(), chr.getName(), chr.getName() + " : " +chattext);
+            case 0:  // Buddy Chat
+                List<Integer> cleanRecipients = new ArrayList<>();
+                List<String> recipientNames = new ArrayList<>();
+
+                for (int id : recipients) {
+                    if (id != 999999) { // Skip WorldChat pseudo-buddy
+                        cleanRecipients.add(id);
+                        String name = World.Find.findCharacterName(id);
+                        if (name != null) {
+                            recipientNames.add(name);
+                        }
+                    }
+                }
+
+                if (!cleanRecipients.isEmpty()) {
+                    // Enhanced log with all details
+                    LogManager.logBuddyChat(chr, recipientNames, chattext);
+
+                    // Send the buddy chat
+                    World.Buddy.buddyChat(
+                            cleanRecipients.stream().mapToInt(i -> i).toArray(),
+                            chr.getId(),
+                            chr.getName(),
+                            chr.getName() + " : " + chattext
+                    );
+                }
                 break;
             case 1:
                 if (chr.getParty() == null) {
                     break;
                 }
                 World.Party.partyChat(chr.getParty().getId(), chr.getName() + " : " + chattext, chr.getName());
+                LogManager.logChat(chr, chr.getMapId(), ChatType.fromInt(type), chattext);
                 break;
             case 2:
                 if (chr.getGuildId() <= 0) {
                     break;
                 }
-                World.Guild.guildChat(chr.getGuildId(), chr.getName(), chr.getId(), chr.getName() + " : " +chattext);
+                World.Guild.guildChat(chr.getGuildId(), chr.getName(), chr.getId(), chr.getName() + " : " + chattext);
+                LogManager.logChat(chr, chr.getMapId(), ChatType.fromInt(type), chattext, chr.getGuild().getName());
                 break;
             case 3:
                 if (chr.getGuildId() <= 0) {
                     break;
                 }
-                World.Alliance.allianceChat(chr.getGuildId(), chr.getName(), chr.getId(), chr.getName() + " : " +chattext);
+                int allianceId = chr.getGuild().getAllianceId();
+                String allianceName = World.Alliance.getAlliance(allianceId).getName();
+                World.Alliance.allianceChat(chr.getGuildId(), chr.getName(), chr.getId(), chr.getName() + " : " + chattext);
+                LogManager.logChat(chr, chr.getMapId(), ChatType.fromInt(type), chattext, allianceName);
+
                 break;
             case 4:
                 if (chr.getParty() == null || chr.getParty().getExpeditionId() <= 0) {
                     break;
                 }
-                World.Party.expedChat(chr.getParty().getExpeditionId(), chr.getName() + " : " +chattext, chr.getName());
+                World.Party.expedChat(chr.getParty().getExpeditionId(), chr.getName() + " : " + chattext, chr.getName());
                 break;
+            case 5: { // Repurposed spouse chat → global chat
+
+                // Spoof the marriage ID just long enough for client to allow the chat
+                chr.setSpoofMarriageForChat(true);
+
+                long lastUsed = lastWorldChat.getOrDefault(chr.getId(), 0L);
+                if (System.currentTimeMillis() - lastUsed < 5000) {
+                    chr.dropMessage(5, "Please wait a few seconds before using world chat again.");
+                    break;
+                }
+                lastWorldChat.put(chr.getId(), System.currentTimeMillis());
+
+                World.Broadcast.broadcastMessage(EtcPacket.multiChat(chr.getName(), chattext, 5));
+                chr.getClient().getSession().write(EtcPacket.multiChat(chr.getName(), chattext, 5));
+
+                LogManager.logChat(chr, chr.getMapId(), ChatType.SPOUSE, chattext);
+
+                chr.setSpoofMarriageForChat(false); // Reset after sending
+                break;
+            }
         }
     }
 
     public static final void Messenger(final LittleEndianAccessor slea, final MapleClient c) {
-		String input;
+        String input;
         MapleMessenger messenger = c.getPlayer().getMessenger();
+        MapleCharacter chatRecipient;
 
         switch (slea.readByte()) {
             case 0x00: // open
@@ -225,13 +329,17 @@ public class ChatHandler {
                 if (messenger != null) {
                     final String charname = slea.readMapleAsciiString();
                     final String text = (slea.readMapleAsciiString());
-					final String chattext = charname + "" + text;
+                    if (ChatHandler.containsNonAscii(text)) return;
+                    final String chattext = charname + "" + text;
+
+                    LogManager.logChat(c.getPlayer(), c.getPlayer().getMapId(), ChatType.MESSENGER, chattext);
+
                     World.Messenger.messengerChat(messenger.getId(), charname, text, c.getPlayer().getName());
                     if (messenger.isMonitored() && chattext.length() > c.getPlayer().getName().length() + 3) { //name : NOT name0 or name1
                         World.Broadcast.broadcastGMMessage(
                                 MaplePacketCreator.serverNotice(
-                                6, "[GM Message] " + MapleCharacterUtil.makeMapleReadable(c.getPlayer().getName()) + "(Messenger: "
-                                + messenger.getMemberNamesDEBUG() + ") said: " + chattext));
+                                        6, "[GM Message] " + MapleCharacterUtil.makeMapleReadable(c.getPlayer().getName()) + "(Messenger: "
+                                                + messenger.getMemberNamesDEBUG() + ") said: " + chattext));
                     }
                 }
                 break;
@@ -285,12 +393,61 @@ public class ChatHandler {
                     return;
                 }
                 if (!c.getPlayer().getCanTalk()) {
-                c.getSession().write(MaplePacketCreator.serverNotice(6, "You have been muted and are therefore unable to talk."));
+                    c.getSession().write(MaplePacketCreator.serverNotice(6, "You have been muted and are therefore unable to talk."));
                     return;
                 }
                 c.getPlayer().getCheatTracker().checkMsg();
                 final String recipient = slea.readMapleAsciiString();
-                final String text = (slea.readMapleAsciiString());
+                final String text = slea.readMapleAsciiString();
+
+                if (ChatHandler.containsNonAscii(text)) {
+                    return;
+                }
+
+                if (recipient.equalsIgnoreCase("WorldChat")) {
+                    final boolean isGM = c.getPlayer().isGM();
+
+                    // Cooldown only applies to non-GMs
+                    if (!isGM) {
+                        long lastUsed = lastWorldWhisper.getOrDefault(c.getPlayer().getId(), 0L);
+                        if (System.currentTimeMillis() - lastUsed < 15000) { // 15s cooldown
+                            c.getPlayer().dropMessage(5, "Please wait before using World Chat again.");
+                            return;
+                        }
+                        lastWorldWhisper.put(c.getPlayer().getId(), System.currentTimeMillis());
+                    }
+
+                    if (ChatHandler.containsNonAscii(text)) {
+                        c.getPlayer().dropMessage(5, "Your message contains invalid characters.");
+                        return;
+                    }
+
+                    if (text.length() > 100) {
+                        c.getPlayer().dropMessage(5, "Your message is too long.");
+                        return;
+                    }
+
+                    final StringBuilder sb = new StringBuilder();
+                    if (isGM) {
+                        sb.append("[GM] ").append(c.getPlayer().getName()).append(" : ");
+                    } else {
+                        sb.append("[World] ").append(c.getPlayer().getName()).append(" : ");
+                    }
+                    sb.append(text);
+
+                    // GMs use blue notice, players use yellow smega-style
+                    if (isGM) {
+                        World.Broadcast.broadcastMessage(MaplePacketCreator.serverNotice(2, sb.toString()));
+                    } else {
+                        World.Broadcast.broadcastMessage(MaplePacketCreator.serverNotice(2, sb.toString()));
+                    }
+
+                    LogManager.logChat(c.getPlayer(), c.getPlayer().getMapId(), ChatType.MEGAPHONE, text);
+                    return;
+                }
+
+                if (ChatHandler.containsNonAscii(text)) return;
+
                 final int ch = World.Find.findChannel(recipient);
                 if (ch > 0) {
                     MapleCharacter player = ChannelServer.getInstance(ch).getPlayerStorage().getCharacterByName(recipient);
@@ -298,6 +455,9 @@ public class ChatHandler {
                         break;
                     }
                     player.getClient().getSession().write(EtcPacket.getWhisper(c.getPlayer().getName(), c.getChannel(), text));
+
+                    LogManager.logChat(c.getPlayer(), player.getMapId(), ChatType.WHISPER, text, recipient);
+
                     if (!c.getPlayer().isIntern() && player.isIntern()) {
                         c.getSession().write(EtcPacket.getWhisperReply(recipient, (byte) 0));
                     } else {
@@ -314,5 +474,15 @@ public class ChatHandler {
             }
             break;
         }
+    }
+
+    public static boolean containsNonAscii(String text) {
+        for (char ch : text.toCharArray()) {
+            if (ch > 0x7F) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

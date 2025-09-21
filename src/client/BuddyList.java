@@ -158,6 +158,10 @@ public class BuddyList implements Serializable {
         c.getSession().write(BuddylistPacket.requestBuddylistAdd(cidFrom, nameFrom, levelFrom, jobFrom));
     }
 
+    public void putSilent(BuddylistEntry entry) {
+        buddies.put(entry.getCharacterId(), entry); // Do not set changed = true
+    }
+
     public void setChanged(boolean v) {
 	this.changed = v;
     }

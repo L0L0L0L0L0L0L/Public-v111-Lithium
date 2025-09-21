@@ -150,7 +150,7 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
     private int accountid, id, meso, exp, hair, face, demonMarking, mapid, fame, pvpExp, pvpPoints, totalWins, totalLosses,
             guildid = 0, fallcounter, maplepoints, acash, chair, itemEffect, points, bpoints, pqpoints, jqpoints, vpoints, lastvote, teachskill,
             rank = 1, rankMove = 0, jobRank = 1, jobRankMove = 0, marriageId, marriageItemId, dotHP,
-            currentrep, totalrep, coconutteam, followid, battleshipHP, gachexp, challenge, guildContribution = 0;
+            currentrep, totalrep, coconutteam, followid, battleshipHP, gachexp, challenge, guildContribution = 0, chatType = -3;
     private Point old;
     public int samemobid = 0, samemobid2 = 0, samecount = 0;
     public int acainaim = 0;
@@ -243,6 +243,7 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
     public final int Chair = 3011000;
     private boolean isChairing;
     private boolean autoloot;
+    private boolean spoofMarriageForChat = false;
 
     private int allgainnx = 0;
     /*End of Custom Feature*/
@@ -751,6 +752,7 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
             ret.fatigue = rs.getShort("fatigue");
             ret.pvpExp = rs.getInt("pvpExp");
             ret.pvpPoints = rs.getInt("pvpPoints");
+            ret.chatType = rs.getInt("chatType");
             /*Start of Custom Features*/
             ret.reborns = rs.getInt("reborns");
             ret.apstorage = rs.getInt("apstorage");
@@ -1249,7 +1251,7 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
             con.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
             con.setAutoCommit(false);
 
-            ps = con.prepareStatement("INSERT INTO characters (level, str, dex, luk, `int`, hp, mp, maxhp, maxmp, sp, ap, skincolor, gender, job, hair, face, demonMarking, map, meso, party, buddyCapacity, pets, subcategory, accountid, name, plusMeso, ChairPoint, world) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", DatabaseConnection.RETURN_GENERATED_KEYS);
+            ps = con.prepareStatement("INSERT INTO characters (level, str, dex, luk, `int`, hp, mp, maxhp, maxmp, sp, ap, skincolor, gender, job, hair, face, demonMarking, map, meso, party, buddyCapacity, pets, subcategory, accountid, name, plusMeso, ChairPoint, chatType, world) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", DatabaseConnection.RETURN_GENERATED_KEYS);
             ps.setInt(1, chr.level); // Level
             final PlayerStats stat = chr.stats;
             ps.setShort(2, stat.getStr()); // Str
@@ -1287,7 +1289,8 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
             ps.setString(25, chr.name);
             ps.setLong(26, chr.plusMeso);
             ps.setLong(27, chr.chairp);
-            ps.setByte(28, chr.world);
+            ps.setInt(28, -3);//chatType defaulting to Normal Chat
+            ps.setByte(29, chr.world);
             ps.executeUpdate();
 
             rs = ps.getGeneratedKeys();
@@ -1427,7 +1430,7 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
             con.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
             con.setAutoCommit(false);
 
-            ps = con.prepareStatement("UPDATE characters SET level = ?, fame = ?, str = ?, dex = ?, luk = ?, `int` = ?, exp = ?, hp = ?, mp = ?, maxhp = ?, maxmp = ?, sp = ?, ap = ?, gm = ?, skincolor = ?, gender = ?, job = ?, hair = ?, face = ?, demonMarking = ?, map = ?, meso = ?, hpApUsed = ?, spawnpoint = ?, party = ?, buddyCapacity = ?, pets = ?, subcategory = ?, marriageId = ?, currentrep = ?, totalrep = ?, gachexp = ?, fatigue = ?, charm = ?, charisma = ?, craft = ?, insight = ?, sense = ?, will = ?, totalwins = ?, totallosses = ?, pvpExp = ?, pvpPoints = ?, reborns = ?, apstorage = ?, name = ?, plusMeso = ?, ChairPoint = ?,  eventpoints = ?, eventach = ? WHERE id = ?", DatabaseConnection.RETURN_GENERATED_KEYS);
+            ps = con.prepareStatement("UPDATE characters SET level = ?, fame = ?, str = ?, dex = ?, luk = ?, `int` = ?, exp = ?, hp = ?, mp = ?, maxhp = ?, maxmp = ?, sp = ?, ap = ?, gm = ?, skincolor = ?, gender = ?, job = ?, hair = ?, face = ?, demonMarking = ?, map = ?, meso = ?, hpApUsed = ?, spawnpoint = ?, party = ?, buddyCapacity = ?, pets = ?, subcategory = ?, marriageId = ?, currentrep = ?, totalrep = ?, gachexp = ?, fatigue = ?, charm = ?, charisma = ?, craft = ?, insight = ?, sense = ?, will = ?, totalwins = ?, totallosses = ?, pvpExp = ?, pvpPoints = ?, reborns = ?, apstorage = ?, name = ?, plusMeso = ?, ChairPoint = ?, chatType = ?,  eventpoints = ?, eventach = ? WHERE id = ?", DatabaseConnection.RETURN_GENERATED_KEYS);
             ps.setInt(1, level);
             ps.setInt(2, fame);
             ps.setShort(3, stats.getStr());
@@ -1513,8 +1516,9 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
             ps.setLong(47, plusMeso);
             ps.setLong(48, chairp);
             ps.setInt(49, eventpoints);
-            ps.setInt(50, eventach);
-            ps.setInt(51, id);
+            ps.setInt(50, chatType);
+            ps.setInt(51, eventach);
+            ps.setInt(52, id);
             if (ps.executeUpdate() < 1) {
                 ps.close();
                 throw new DatabaseException("Character not in database (" + id + ")");
@@ -7194,8 +7198,12 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
         setFollowId(0);
     }
 
+    public void setSpoofMarriageForChat(boolean spoof) {
+        this.spoofMarriageForChat = spoof;
+    }
+
     public int getMarriageId() {
-        return marriageId;
+        return spoofMarriageForChat ? 999999 : this.marriageId;
     }
 
     public void setMarriageId(final int mi) {
@@ -8496,6 +8504,98 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
     }
 
     /*Start of Custom Feature*/
+
+    public void setChatType(int chatType) {
+        Connection con = DatabaseConnection.getConnection();
+
+        try {
+            PreparedStatement ps = con.prepareStatement("UPDATE characters SET chatType = ? WHERE id = ?");
+            ps.setInt(1, chatType);
+            ps.setInt(2, client.getPlayer().getId());
+            ps.execute();
+            ps.close();
+        } catch (SQLException e) {
+            System.err.println("ERROR changing ChatType Values for character [ " + client.getPlayer().getName() + " ] error: " + e);
+        }
+    }
+
+    public int getChatType() {
+
+        try {
+            Connection con = DatabaseConnection.getConnection();
+            PreparedStatement ps;
+            ps = con.prepareStatement("SELECT chatType FROM characters WHERE id = ?");
+            ps.setInt(1, client.getPlayer().getId());
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                chatType = rs.getInt("chatType");
+            }
+            rs.close();
+            ps.close();
+        } catch (SQLException e) {
+            System.err.println("Error getting chatType for character: " + client.getPlayer().getName() + ". error: " + e);
+        }
+
+        return chatType;
+    }
+
+    public void customMessage(int type, String message) {
+        switch (type) {
+            /*Global Dark Pink*/
+            case -10:
+                World.Broadcast.broadcastMessage(EtcPacket.getGameMessage(message, false));
+                break;
+            /*Mid Teal*/
+            case -7:
+                client.getPlayer().getMap().broadcastMessage(MaplePacketCreator.getMidMsg(message, false, 0));
+                break;
+            /*WhiteBG*/
+            case -6:
+                client.getPlayer().getMap().broadcastMessage(EtcPacket.getGameMessage(message, true));
+                break;
+            /*DarkPink*/
+            case -5:
+                client.getPlayer().getMap().broadcastMessage(EtcPacket.getGameMessage(message, false));
+                break;
+            /*Chat hide*/
+            case -4:
+                client.getPlayer().getMap().broadcastMessage(EtcPacket.getChatText(getId(), message, false, 1));
+                break;
+            /*Char Talk*/
+            case -3:
+                client.getPlayer().getMap().broadcastMessage(EtcPacket.getChatText(getId(), message, false, 0));
+                break;
+            /*Top Yellow*/
+            case -1:
+                client.getPlayer().getMap().broadcastMessage(MaplePacketCreator.getTopMsg(message));
+                break;
+            /*[Notice]*/
+            case 0:
+                World.Broadcast.broadcastMessage(MaplePacketCreator.serverNotice(type, message));
+                break;
+            /*Popup Box*/
+            case 1:
+                World.Broadcast.broadcastMessage(MaplePacketCreator.serverNotice(type, message));
+                break;
+            /*Light Blue*/
+            case 2:
+                client.getPlayer().getMap().broadcastMessage(MaplePacketCreator.serverNotice(type, message));
+                break;
+            /*Top Notice*/
+            case 4:
+                World.Broadcast.broadcastMessage(MaplePacketCreator.serverNotice(type, message));
+                break;
+            /*Light Pink*/
+            case 5:
+                World.Broadcast.broadcastMessage(MaplePacketCreator.serverNotice(type, message));
+                break;
+            /*[System]*/
+            case 6:
+                World.Broadcast.broadcastMessage(MaplePacketCreator.serverNotice(type, "[System] " + message));
+                break;
+        }
+    }
 
     public int getReborns() {
         return reborns;
