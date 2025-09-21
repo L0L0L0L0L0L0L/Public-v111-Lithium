@@ -55,7 +55,7 @@ public class ServerConstants {
 
     public static String TIMEZONE; //時區設定
     
-    public static String SQL_URL = "jdbc:mysql://localhost:3306/kerning?autoReconnect=true&characterEncoding=utf8";
+    public static String SQL_URL = "jdbc:mysql://localhost:3306/kerning111?autoReconnect=true&characterEncoding=utf8";
     public static String SQL_USER = "root";
     public static String SQL_PASSWORD = "";
    

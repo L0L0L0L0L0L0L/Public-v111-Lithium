@@ -16,10 +16,13 @@ import javax.management.ObjectName;
 import server.Timer.*;
 import server.shops.HiredMerchantSave;
 import tools.packet.MaplePacketCreator;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ShutdownServer implements ShutdownServerMBean {
 
-    public static ShutdownServer instance;
+    private static ShutdownServer instance;
+    private final AtomicBoolean shutdownInProgress = new AtomicBoolean(false);
+    private volatile int mode = 0;
 
     public static void registerMBean() {
         MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
@@ -33,85 +36,87 @@ public class ShutdownServer implements ShutdownServerMBean {
     }
 
     public static ShutdownServer getInstance() {
-	return instance;
+        return instance;
     }
 
-    public int mode = 0;
-
-    public void shutdown() {//can execute twice
-	run();
+    public void shutdown() {
+        if (!shutdownInProgress.compareAndSet(false, true)) {
+            return; // Already shutting down
+        }
+        run();
     }
 
     @Override
     public void run() {
-	if (mode == 0) {
-	    int ret = 0;
-	    World.Broadcast.broadcastMessage(MaplePacketCreator.serverNotice(0, "The world is going to shutdown soon. Please log off safely."));
+        if (mode == 0) {
+            int ret = 0;
+            World.Broadcast.broadcastMessage(MaplePacketCreator.serverNotice(0, "The world is going to shutdown soon. Please log off safely."));
             for (ChannelServer cs : ChannelServer.getAllInstances()) {
                 cs.setShutdown();
-				cs.setServerMessage("The world is going to shutdown soon. Please log off safely.");
+                cs.setServerMessage("The world is going to shutdown soon. Please log off safely.");
                 ret += cs.closeAllMerchant();
             }
-            AtomicInteger FinishedThreads = new AtomicInteger(0);
+            // Start merchant saving
             HiredMerchantSave.Execute(this);
-            synchronized (this) {
-                try {
-                    wait();
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(ShutdownServer.class.getName()).log(Level.SEVERE, null, ex);
-                }
+
+            // Just wait a few seconds for merchant saving, then continue
+            try {
+                Thread.sleep(3000); // Wait 3 seconds
+            } catch (InterruptedException ex) {
+                Logger.getLogger(ShutdownServer.class.getName()).log(Level.SEVERE, null, ex);
             }
-            while (FinishedThreads.incrementAndGet() != HiredMerchantSave.NumSavingThreads) {
-                synchronized (this) {
-                    try {
-                        wait();
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(ShutdownServer.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-            }
+
+            System.out.println("Merchant save wait completed.");
             World.Guild.save();
             World.Alliance.save();
-	    World.Family.save();
-	    System.out.println("Shutdown 1 has completed. Hired merchants saved: " + ret);
-	    mode++;
-	} else if (mode == 1) {
-	    mode++;
-			System.out.println("Shutdown 2 commencing...");
+            World.Family.save();
+            System.out.println("Shutdown 1 has completed. Hired merchants saved: " + ret);
+            mode = 1;
+        }
+
+        if (mode == 1) {
+            System.out.println("Shutdown 2 commencing...");
             try {
-	        World.Broadcast.broadcastMessage(MaplePacketCreator.serverNotice(0, "The world is going to shutdown now. Please log off safely."));
-                Integer[] chs =  ChannelServer.getAllInstance().toArray(new Integer[0]);
-        
+                World.Broadcast.broadcastMessage(MaplePacketCreator.serverNotice(0, "The world is going to shutdown now. Please log off safely."));
+                Integer[] chs = ChannelServer.getAllInstance().toArray(new Integer[0]);
+
                 for (int i : chs) {
                     try {
                         ChannelServer cs = ChannelServer.getInstance(i);
-                        synchronized (this) {
-                            cs.shutdown();
-                        }
+                        cs.shutdown();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
-	        LoginServer.shutdown();
+                LoginServer.shutdown();
                 CashShopServer.shutdown();
                 DatabaseConnection.closeAll();
             } catch (SQLException e) {
                 System.err.println("THROW" + e);
             }
+
+            // Stop all timers
             WorldTimer.getInstance().stop();
             MapTimer.getInstance().stop();
             BuffTimer.getInstance().stop();
             CloneTimer.getInstance().stop();
             EventTimer.getInstance().stop();
-	    EtcTimer.getInstance().stop();
-	    PingTimer.getInstance().stop();
-		System.out.println("Shutdown 2 has finished.");
-		try{
-                Thread.sleep(5000);
-            }catch(Exception e) {
-                //shutdown
+            EtcTimer.getInstance().stop();
+            PingTimer.getInstance().stop();
+
+            System.out.println("Shutdown 2 has finished.");
+            try {
+                Thread.sleep(2000); // Reduced sleep time
+            } catch (Exception e) {
+                // shutdown
             }
-            System.exit(0); //not sure if this is really needed for ChannelServer
-	}
+
+            // Add shutdown hook to ensure JVM exits
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                System.out.println("Force shutting down JVM...");
+            }));
+
+            System.exit(0);
+        }
     }
 }

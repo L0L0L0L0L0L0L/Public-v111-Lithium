@@ -1514,7 +1514,7 @@ public class MapleCharacter extends AnimatedMapleMapObject implements Serializab
             ps.setLong(48, chairp);
             ps.setInt(49, eventpoints);
             ps.setInt(50, eventach);
-            ps.setInt(52, id);
+            ps.setInt(51, id);
             if (ps.executeUpdate() < 1) {
                 ps.close();
                 throw new DatabaseException("Character not in database (" + id + ")");

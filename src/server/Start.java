@@ -31,6 +31,10 @@ import server.life.MapleMonsterInformationProvider;
 import server.life.MobSkillFactory;
 import server.life.PlayerNPC;
 import server.quest.MapleQuest;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 import tools.HairAndEye;
 
@@ -38,7 +42,20 @@ public class Start {
 
     public static long startTime = System.currentTimeMillis();
     public static final Start instance = new Start();
-    public static AtomicInteger CompletedLoadingThreads = new AtomicInteger(0);
+    private static final int LOADING_THREADS = Math.max(4, Runtime.getRuntime().availableProcessors());
+
+    private static final ExecutorService loadingExecutor = Executors.newFixedThreadPool(LOADING_THREADS, r -> {
+        Thread t = new Thread(r, "LoadingThread");
+        t.setDaemon(true);
+        return t;
+    });
+
+    private static final ScheduledExecutorService maintenanceExecutor =
+            Executors.newScheduledThreadPool(2, r -> {
+                Thread t = new Thread(r, "MaintenanceThread");
+                t.setDaemon(true);
+                return t;
+            });
 
     public void run() throws InterruptedException {
         System.setProperty("net.sf.odinms.wzpath", "wz");
@@ -103,7 +120,6 @@ public class Start {
         CashShopServer.run_startup_configurations();
         CheatTimer.getInstance().register(AutobanManager.getInstance(), 60000);
         Timer.WorldTimer.getInstance().register(new AutoSaver(), 1000 * 60 * 5);
-        Runtime.getRuntime().addShutdownHook(new Thread(new Shutdown()));
         World.registerRespawn();
         //ChannelServer.getInstance(1).getMapFactory().getMap(910000000).spawnRandDrop(); //start it off
         ShutdownServer.registerMBean();
@@ -113,18 +129,41 @@ public class Start {
         LoginServer.setOn(); //now or later
         QuickMove.QuickMoveLoad();
         TimeZone.setDefault(TimeZone.getTimeZone(TIMEZONE));
-        System.out.println("Kerning v111.1 Successfully Launched : < Spend Time " + ((System.currentTimeMillis() - startTime) / 1000) + " second >");
         RankingWorker.run();
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            playAsciiAnimation();
+            System.out.println(BRIGHT_BLACK + "======================" + RESET);
+            System.out.println(RED + "v111 is now offline." + RESET);
+            System.out.println(BRIGHT_BLACK + "======================" + RESET);
+            loadingExecutor.shutdown();
+            maintenanceExecutor.shutdown();
+        }));
+        System.out.println(BRIGHT_BLACK + "=====================================" + RESET);
+        System.out.println(BRIGHT_GREEN + "v111.1 is online!" + RESET);
+        System.out.printf(BRIGHT_CYAN + "[" + BRIGHT_PURPLE + "Source" + BRIGHT_CYAN + "] " + YELLOW + "Fully Initialized in " + BRIGHT_GREEN + "%.2f" + YELLOW + " seconds" + RESET + "%n", (System.currentTimeMillis() - startTime) / 1000.0);
+        System.out.println(BRIGHT_BLACK + "=====================================" + RESET);
+        System.out.println(getServerStats());
     }
 
-    public static class Shutdown implements Runnable {
-
-        @Override
-        public void run() {
-            ShutdownServer.getInstance().run();
-            ShutdownServer.getInstance().run();
+    private static String getServerStats() {
+        int accounts = 0, characters = 0, banned = 0;
+        try (java.sql.Connection con = database.DatabaseConnection.getConnection();
+             java.sql.PreparedStatement ps1 = con.prepareStatement("SELECT COUNT(*) FROM accounts");
+             java.sql.PreparedStatement ps2 = con.prepareStatement("SELECT COUNT(*) FROM characters");
+             java.sql.PreparedStatement ps3 = con.prepareStatement("SELECT COUNT(*) FROM accounts WHERE banned = 1")) {
+            try (java.sql.ResultSet rs1 = ps1.executeQuery()) {
+                if (rs1.next()) accounts = rs1.getInt(1);
+            }
+            try (java.sql.ResultSet rs2 = ps2.executeQuery()) {
+                if (rs2.next()) characters = rs2.getInt(1);
+            }
+            try (java.sql.ResultSet rs3 = ps3.executeQuery()) {
+                if (rs3.next()) banned = rs3.getInt(1);
+            }
+        } catch (java.sql.SQLException e) {
+            return PURPLE + "Error fetching server stats." + RESET;
         }
-    }
+        return String.format(CYAN + "Accounts: " + YELLOW + "%d" + BRIGHT_PURPLE + "   Characters: " + YELLOW + "%d" + BRIGHT_RED + "   Banned: " + YELLOW + "%d" + RESET, accounts, characters, banned);    }
     
     public void clean() {
         try {
@@ -164,6 +203,63 @@ public class Start {
 
         }
     }
+
+    private static void playAsciiAnimation() {
+        String[] colors = {RED, YELLOW, GREEN, CYAN, BLUE, PURPLE, BRIGHT_RED, BRIGHT_YELLOW, BRIGHT_GREEN};
+        String[] frames = new String[11];
+
+        // Generate frames with changing colors
+        for (int j = 0; j < frames.length; j++) {
+            String ball = colors[j % colors.length] + "●" + RESET;
+            frames[j] = BRIGHT_BLUE + "v111 is going offline" + CYAN + ".... " + " ".repeat(j) + ball + " ".repeat(10-j) + RESET;
+        }
+
+        try {
+            for (int i = 0; i < 3; i++) {
+                for (String frame : frames) {
+                    System.out.print("\r" + frame);
+                    Thread.sleep(150);
+                }
+                // Reverse direction
+                for (int k = frames.length - 2; k > 0; k--) {
+                    System.out.print("\r" + frames[k]);
+                    Thread.sleep(150);
+                }
+            }
+            System.out.println();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    // Basic colors
+    private static final String RESET = "\u001B[0m";
+    private static final String BLACK = "\u001B[30m";
+    private static final String RED = "\u001B[31m";
+    private static final String GREEN = "\u001B[32m";
+    private static final String YELLOW = "\u001B[33m";
+    private static final String BLUE = "\u001B[34m";
+    private static final String PURPLE = "\u001B[35m";
+    private static final String CYAN = "\u001B[36m";
+    private static final String WHITE = "\u001B[37m";
+    // Bright/Bold colors
+    private static final String BRIGHT_BLACK = "\u001B[90m";
+    private static final String BRIGHT_RED = "\u001B[91m";
+    private static final String BRIGHT_GREEN = "\u001B[92m";
+    private static final String BRIGHT_YELLOW = "\u001B[93m";
+    private static final String BRIGHT_BLUE = "\u001B[94m";
+    private static final String BRIGHT_PURPLE = "\u001B[95m";
+    private static final String BRIGHT_CYAN = "\u001B[96m";
+    private static final String BRIGHT_WHITE = "\u001B[97m";
+    // Text styles
+    private static final String BOLD = "\u001B[1m";
+    private static final String UNDERLINE = "\u001B[4m";
+    private static final String ITALIC = "\u001B[3m";
+    // Background colors
+    private static final String BG_RED = "\u001B[41m";
+    private static final String BG_GREEN = "\u001B[42m";
+    private static final String BG_YELLOW = "\u001B[43m";
+    private static final String BG_BLUE = "\u001B[44m";
 
     public static void main(final String args[]) throws InterruptedException {
         instance.run();
