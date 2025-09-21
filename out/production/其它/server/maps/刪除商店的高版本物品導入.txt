@@ -1,8 +1,0 @@
-搜索：
-
-rechargeableItems.add(2070019);// 마비표창
-
-
-替換：
-
-//rechargeableItems.add(2070019);// 마비표창

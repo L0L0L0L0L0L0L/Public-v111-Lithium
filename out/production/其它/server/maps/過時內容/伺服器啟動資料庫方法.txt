@@ -1,1 +1,0 @@
-在安裝目錄 輸入cmd       mysqld.exe --console

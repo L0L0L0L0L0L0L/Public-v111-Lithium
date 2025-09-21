@@ -1,7 +1,0 @@
-搜索：
-
-    private final static int[] bestItems = new int[]{10003055, 10003090, 10103464, 10002960, 10103363};
-
-替換：
-
-    private final static int[] bestItems = new int[]{10002885, 10100889, 10103362, 10001203, 10100826};//熱賣商品

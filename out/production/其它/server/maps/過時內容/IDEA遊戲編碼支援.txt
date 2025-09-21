@@ -1,7 +1,0 @@
-搜索：
-
-	s.getBytes().length
-
-替換：
-
-	s.getBytes(ASCII).length

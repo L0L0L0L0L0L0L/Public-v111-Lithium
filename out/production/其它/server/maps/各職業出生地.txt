@@ -1,7 +1,0 @@
-搜索：
-
-ps.setInt(18,
-
-替換：
-
-ps.setInt(18,db == 2 ? 3000600 : type.map);
