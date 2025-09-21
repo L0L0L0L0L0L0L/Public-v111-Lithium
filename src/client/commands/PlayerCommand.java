@@ -212,7 +212,6 @@ public class PlayerCommand {
             c.getPlayer().dropMessage(5, "@str,dex,int,luk: example (@str amount)");
             c.getPlayer().dropMessage(5, "@check: example (@check player name)");
             c.getPlayer().dropMessage(5, "@stats: shows you extra stats");
-            c.getPlayer().dropMessage(5, "@burning");
             return 1;
         }
     }
@@ -229,7 +228,6 @@ public class PlayerCommand {
             c.getPlayer().dropMessage(5, "@str,dex,int,luk: example (@str amount)");
             c.getPlayer().dropMessage(5, "@check: shows you extra info)");
             c.getPlayer().dropMessage(5, "@stats: shows you extra stats");
-            c.getPlayer().dropMessage(5, "@burning: opens burn npc");
             return 1;
         }
     }
@@ -513,15 +511,6 @@ public class PlayerCommand {
             return 1;
         }
     }
-
-//    public static class Burning extends CommandExecute {
-//
-//        @Override
-//        public int execute(MapleClient c, String[] splitted) {
-//            NPCScriptManager.getInstance().start(c, 2082015);
-//            return 1;
-//        }
-//    }
 
     public static class Check extends CommandExecute {
 

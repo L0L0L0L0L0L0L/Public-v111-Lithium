@@ -180,11 +180,6 @@ public class InterServerHandler {
         player.silentGiveBuffs(PlayerBuffStorage.getBuffsFromStorage(player.getId()));
         player.giveSilentDebuff(PlayerBuffStorage.getDiseaseFromStorage(player.getId()));
 
-        if (player.CheckBurning() == 0) {
-            player.dropMessage(5, "[Burning] No burning detected in the account,");
-            player.dropMessage(5, "Use @burning to obtain it! Reminder: It will only last until Lv120.");
-        }
-
         c.getSession().write(EtcPacket.getCharInfo(player));
         //c.getSession().write(MaplePacketCreator.getPCRoomCheck((byte)2, 74074032));
         c.getSession().write(MTSCSPacket.enableCSUse());
