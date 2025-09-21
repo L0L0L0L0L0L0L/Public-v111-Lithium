@@ -4275,6 +4275,15 @@ public static double maxViewRangeSq() {
     public static final int DOJO = 150100;
     public static final int DOJO_RECORD = 150101;
 
+    public static float getExpRateByLevel(final int level, final int channel) {
+        if (level < 10) {
+            return 1.0f;
+        }
+        int tier = Math.max(0, (level - 10) / 10); // 0 for 10–19, 1 for 20–29, etc.
+        float rate = 2.0f - (tier * 0.1f);
+        return Math.max(1.0f, rate);
+    }
+
     public static boolean isSpecialCSScroll(final int scrollId) {
         switch (scrollId) {
             case 5064000:

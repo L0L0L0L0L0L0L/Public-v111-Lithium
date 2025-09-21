@@ -2067,8 +2067,8 @@ public final class MapleMap {
             }
         }
         if ((mapid == 10000 && chr.getJob() == 0) || (mapid == 130030000 && chr.getJob() == 1000) || (mapid == 914000000 && chr.getJob() == 2000) || (mapid == 900010000 && chr.getJob() == 2001) || (mapid == 931000000 && chr.getJob() == 3000)) {
-            final MapleMap firstmap = chr.getClient().getChannelServer().getMapFactory().getMap(3);
-            chr.changeMap(firstmap, firstmap.getPortal(0));
+            chr.dropMessage(5, "Your EXP Rate will be set to " + GameConstants.getExpRateByLevel(chr.getLevel(), channel) + "x until you reach level 10. (Currently normal rates)");
+            chr.dropMessage(-1, "Your EXP Rate will be set to " + GameConstants.getExpRateByLevel(chr.getLevel(), channel) + "x until you reach level 10. (Currently normal rates)");
         }
         if (permanentWeather > 0) {
             chr.getClient().getSession().write(EtcPacket.startMapEffect("", permanentWeather, false)); //snow, no msg
